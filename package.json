@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
-    "preview": "vite preview --host 127.0.0.1"
+    "preview": "vite preview --host 127.0.0.1",
+    "sql:bridge": "node --env-file=server/.env server/local-sql-api.mjs"
   },
   "dependencies": {
     "react": "^19.1.0",
@@ -14,4 +15,3 @@
     "vite": "^7.1.0"
   }
 }
-

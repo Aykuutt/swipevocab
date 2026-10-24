@@ -6,6 +6,7 @@ import { shuffle } from "./utils/shuffle.js";
 import { buildLeague, TIERED_BADGES, tierInfo } from "./utils/progress.js";
 import { playSound } from "./utils/audio.js";
 import { usePersistentState } from "./utils/persistentState.js";
+import { useRemoteProgressSync } from "./utils/remoteProgressSync.js";
 import { OnboardingFlow } from "./components/OnboardingFlow.jsx";
 import { SwipeCard } from "./components/SwipeCard.jsx";
 import { ReinforceGame, GameHub } from "./components/Games.jsx";
@@ -55,6 +56,7 @@ export default function App() {
   const [userName, setUserName] = usePersistentState("userName", "Sen");
   const [learningGoal, setLearningGoal] = usePersistentState("learningGoal", "general");
   const [placementLevel, setPlacementLevel] = usePersistentState("placementLevel", "A1");
+  useRemoteProgressSync({ displayName: userName, learningGoal, placementLevel });
   const [dailyXpEarned, setDailyXpEarned] = usePersistentState("dailyXpEarned", 0);
   const [dailyCorrectAnswers, setDailyCorrectAnswers] = usePersistentState("dailyCorrectAnswers", 0);
   const [xpBoostActive, setXpBoostActive] = usePersistentState("xpBoostActive", false);

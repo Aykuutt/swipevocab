@@ -31,3 +31,10 @@ Kelime kayıtları `src/data/words.js` ve `src/data/words-extra.js` içinde tutu
 - Pro düğmeleri yalnızca özellik önizlemesini açar; ödeme veya abonelik oluşturmaz.
 - Günlük bildirimler henüz etkin değildir. Takvim günü değişimi ve can yenilenmesi uygulama açıkken gerçek zamana göre güncellenir.
 
+## SQL Server ilerleme eşitlemesi
+
+`database/schema.sql`, `SwipeVocab` veritabanında profil ve ilerleme tablolarını oluşturur. Uygulama mevcut tarayıcı ilerlemesini `UserProgress` tablosuna eşitleyebilir; bu prototipte e-posta/şifre ile hesap girişi bulunmadığı için profil kimliği tarayıcıda üretilen rastgele bir kimliktir.
+
+Yerel API, Windows kimlik doğrulamasıyla `localhost` üzerindeki SQL Server’a bağlanır. Yerelde çalıştırmak için `server/.env.example` dosyasını `server/.env` olarak kopyalayın ve `SWIPEVOCAB_API_SECRET` alanına en az 32 karakterlik rastgele bir değer yazın. Ardından iki terminalde `npm run sql:bridge` ve `npm run dev` çalıştırın. Vite, `/api/progress` isteklerini yerel SQL API’sine aktarır.
+
+Vercel dağıtımında yerel SQL API’ye erişmek için gizli anahtarlı HTTPS tüneli gerekir. SQL portu internete açılmamalıdır; bilgisayar kapalı veya tünel durmuşsa eşitleme bekler, tarayıcıdaki yerel kayıt çalışmaya devam eder. Geçici Cloudflare Quick Tunnel URL’si yeniden başlatıldığında değişebilir.
