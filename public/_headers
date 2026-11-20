@@ -1,0 +1,11 @@
+# Netlify yanıt başlıkları (Vercel bu dosyayı yok sayar).
+/manifest.webmanifest
+  Content-Type: application/manifest+json
+
+# Service worker her açılışta güncellik için kontrol edilsin.
+/sw.js
+  Cache-Control: no-cache
+
+# Derlenmiş dosyaların adı içeriğe göre değişir; uzun süre önbelleğe alınabilir.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

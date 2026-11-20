@@ -2,7 +2,9 @@
 
 Türkçe konuşanlar için oyunlaştırılmış İngilizce kelime ve konuşma pratiği uygulaması (React + Vite + Supabase + LiveKit).
 
-Canlı sürüm: https://swipevocab.vercel.app (GitHub'daki `main` dalına her gönderimde Vercel kendiliğinden yayınlar.)
+Canlı sürüm: https://swipevocab.netlify.app
+(Türkiye'de internet sağlayıcıları `*.vercel.app` adreslerini engellediği için asıl adres Netlify.
+Yüklemek için: `npm run deploy:netlify`. Vercel yayını https://swipevocab.vercel.app adresinde sürüyor.)
 
 ## Çalıştırma
 

@@ -10,7 +10,8 @@
     "preview": "vite preview --host 127.0.0.1",
     "test": "vitest run",
     "lint": "eslint . --max-warnings 0",
-    "check": "npm run lint && npm run test && npm run build"
+    "check": "npm run lint && npm run test && npm run build",
+    "deploy:netlify": "npm run build && netlify deploy --prod --dir=dist --site 02f7c152-aab0-471d-aa4b-3078cf9251bb --no-build"
   },
   "dependencies": {
     "@fontsource-variable/inter": "5.3.0",
