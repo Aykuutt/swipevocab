@@ -679,7 +679,7 @@ strong, b { font-weight: 650; }
 .step-center { align-items: center; justify-content: center; text-align: center; gap: 14px; }
 .step-title { font-family: var(--font-display); font-size: 24px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; margin-top: 8px; }
 .step-sub { color: var(--text-dim); margin-bottom: 14px; }
-.step-footer { margin-top: auto; padding-top: 22px; width: 100%; }
+.step-footer { margin-top: auto; padding-top: 22px; width: 100%; display: grid; gap: 10px; }
 .back-btn { align-self: flex-start; display: inline-flex; align-items: center; gap: 2px; padding: 6px 8px 6px 2px; border: 0; background: none; color: var(--text-dim); font-weight: 600; cursor: pointer; }
 .back-btn:hover { color: var(--text); }
 
@@ -724,6 +724,7 @@ strong, b { font-weight: 650; }
 /* hesap formu */
 .form { display: grid; gap: 14px; }
 .form-error { padding: 10px 12px; border-radius: var(--r-sm); background: var(--coral-soft); color: var(--coral); font-size: 13.5px; }
+.form-hint { padding: 10px 12px; border-radius: var(--r-sm); background: var(--mint-soft); color: var(--mint); font-size: 13.5px; }
 .divider { display: flex; align-items: center; gap: 12px; margin: 16px 0; color: var(--text-faint); font-size: 13px; }
 .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 .auth-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 18px; margin-top: 16px; }

@@ -1,14 +1,16 @@
 // Uygulama durumu, kelime listesi ve sekme gezgini için tek bağlam.
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
-import { useRemoteSync } from "../hooks/useRemoteSync";
+import { useAccount } from "../hooks/useAccount";
+import { useProgressSave } from "../hooks/useProgressSave";
+import { signOut as authSignOut } from "../lib/auth";
 import { buildDeck, topUpCards } from "../lib/deck";
+import { localCache } from "../lib/progress";
 import { playSfx } from "../lib/sfx";
 import { setPreferredVoice } from "../lib/speech";
-import { progressStore } from "../lib/storage";
 import { localDayIndex, msUntilMidnight } from "../lib/time";
 import { buildUnits } from "../lib/units";
 import { loadWords } from "../lib/words";
-import { hydrate, initialState, reducer } from "./reducer";
+import { initialState, reducer } from "./reducer";
 import { activeLevels, hasFullAccess, wordPool } from "./selectors";
 
 const AppContext = createContext(null);
@@ -19,18 +21,11 @@ export function useApp() {
   return ctx;
 }
 
-/** Açık oturum varsa kayıtlı ilerlemeyi yükler. */
-function loadInitialState() {
-  const email = progressStore.getSession();
-  const saved = email ? progressStore.load(email) : null;
-  return saved ? hydrate(saved) : initialState;
-}
-
 const HOUR_MS = 3_600_000;
 const DAY_MS = 86_400_000;
 
 export function AppProvider({ children }) {
-  const [state, dispatch] = useReducer(reducer, undefined, loadInitialState);
+  const [state, dispatch] = useReducer(reducer, initialState);
   const stateRef = useRef(state);
   stateRef.current = state;
 
@@ -57,7 +52,10 @@ export function AppProvider({ children }) {
 
   // Test araçlarıyla ileri sarılmış saat.
   const getNow = useCallback(() => Date.now() + stateRef.current.clockOffsetMs, []);
-  const active = wordsStatus === "ready" && !!state.user;
+
+  /* ---------- Oturum (Supabase) ---------- */
+  const account = useAccount({ dispatch, getNow });
+  const active = wordsStatus === "ready" && account.status === "signedIn" && !!state.user;
 
   /* ---------- Gün geçişi ---------- */
   useEffect(() => {
@@ -117,24 +115,8 @@ export function AppProvider({ children }) {
     dispatch({ type: "TOPUP_DECK", cards: topUpCards(stateRef.current, words) });
   }, [active, words, fullAccess, state.phase, state.deck.length]);
 
-  /* ---------- Kaydetme ---------- */
-  useEffect(() => {
-    if (!state.user) return;
-    const timer = setTimeout(() => progressStore.save(state.user.email, { ...state, savedAt: Date.now() }), 300);
-    return () => clearTimeout(timer);
-  }, [state]);
-
-  useEffect(() => {
-    const flush = () => {
-      const s = stateRef.current;
-      if (s.user) progressStore.save(s.user.email, { ...s, savedAt: Date.now() });
-    };
-    window.addEventListener("pagehide", flush);
-    return () => window.removeEventListener("pagehide", flush);
-  }, []);
-
-  // SQL Server eşitlemesi (sunucu yoksa sessizce kapanır).
-  useRemoteSync(state, dispatch);
+  /* ---------- Kaydetme (tarayıcı önbelleği + Supabase) ---------- */
+  const flushProgress = useProgressSave(state, account.status === "signedIn");
 
   /* ---------- Ses ---------- */
   useEffect(() => {
@@ -145,31 +127,25 @@ export function AppProvider({ children }) {
     if (stateRef.current.settings.sound) playSfx(kind);
   }, []);
 
-  // Gün tamamlanınca kutlama sesi.
-  const lastCompleted = useRef(state.lastCompletedDay);
+  // Gün tamamlanınca kutlama sesi (giriş yapınca kayıt yüklenirken çalmasın).
+  const lastCompleted = useRef({ userId: null, day: 0 });
   useEffect(() => {
-    if (state.lastCompletedDay !== lastCompleted.current) {
-      lastCompleted.current = state.lastCompletedDay;
-      sfx("levelup");
-    }
-  }, [state.lastCompletedDay, sfx]);
+    const userId = state.user?.id ?? null;
+    const prev = lastCompleted.current;
+    if (prev.userId === userId && state.lastCompletedDay > prev.day) sfx("levelup");
+    lastCompleted.current = { userId, day: state.lastCompletedDay };
+  }, [state.user?.id, state.lastCompletedDay, sfx]);
 
   /* ---------- Eylemler ---------- */
   const actions = useMemo(
     () => ({
-      startSession(user, isNew) {
-        const saved = isNew ? null : progressStore.load(user.email);
-        dispatch(
-          saved
-            ? { type: "HYDRATE", state: { ...saved, user } }
-            : { type: "START_ACCOUNT", user, dayIndex: localDayIndex(getNow()) }
-        );
-        progressStore.setSession(user.email);
-        setTab("learn");
-      },
-      signOut() {
-        progressStore.clearSession();
-        dispatch({ type: "SIGN_OUT" });
+      /** Bekleyen ilerlemeyi sunucuya yazar, sonra oturumu kapatır. */
+      async signOut() {
+        const userId = stateRef.current.user?.id;
+        const saved = await flushProgress();
+        // Ortak bilgisayarda başkası görmesin diye önbelleği sil (sunucuya yazıldıysa).
+        if (saved && userId) localCache.remove(userId);
+        await authSignOut();
         setTab("learn");
       },
       setOnboarding: (goal, level) => dispatch({ type: "SET_ONBOARDING", goal, level }),
@@ -198,7 +174,7 @@ export function AppProvider({ children }) {
           now: getNow(),
         }),
     }),
-    [words, getNow]
+    [words, getNow, flushProgress]
   );
 
   const value = useMemo(
@@ -211,6 +187,7 @@ export function AppProvider({ children }) {
       units,
       wordsStatus,
       reloadWords,
+      account,
       pool: wordPool(state, words),
       tab,
       setTab,
@@ -218,7 +195,7 @@ export function AppProvider({ children }) {
       getNow,
       sfx,
     }),
-    [state, actions, words, wordsById, units, wordsStatus, reloadWords, tab, getNow, sfx]
+    [state, actions, words, wordsById, units, wordsStatus, reloadWords, account, tab, getNow, sfx]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

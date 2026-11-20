@@ -89,15 +89,19 @@ export function TabBar() {
   );
 }
 
-export function Splash({ error, onRetry }) {
+export function Splash({
+  error,
+  message = "Kelime listesi yüklenemedi. İnternet bağlantını kontrol edip tekrar dene.",
+  onRetry,
+}) {
   return (
     <div className="splash">
       <Mascot mood={error ? "sad" : "wave"} size={96} />
       <Brand large />
       {error ? (
         <>
-          <p>Kelime listesi yüklenemedi. İnternet bağlantını kontrol edip tekrar dene.</p>
-          <Button onClick={onRetry}>Tekrar dene</Button>
+          <p>{message}</p>
+          {onRetry && <Button onClick={onRetry}>Tekrar dene</Button>}
         </>
       ) : (
         <span className="spinner spinner-lg" role="status" aria-label="Yükleniyor" />

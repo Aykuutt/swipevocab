@@ -1,10 +1,11 @@
-// Kayıt, giriş ve şifre sıfırlama formu.
+// Kayıt, giriş ve şifre sıfırlama formu (Supabase Auth).
+// Başarılı girişten sonra oturumu useAccount yakalar ve ilerlemeyi yükler.
 import { useState } from "react";
 import { FEATURES } from "../../config";
 import Icon from "../../components/Icon";
 import { Button, Field } from "../../components/ui";
-import { requestPasswordReset, signIn, signInWithGoogle, signUp, validate } from "../../lib/auth";
-import { useApp } from "../../state/AppContext";
+import { requestPasswordReset, resendConfirmation, signIn, signUp, validate } from "../../lib/auth";
+import { pendingOnboarding } from "../../lib/progress";
 
 const TITLES = {
   signup: "Hesabını oluştur",
@@ -24,12 +25,31 @@ const SUBMIT_LABELS = {
 
 const hasErrors = (errors) => Object.values(errors).some(Boolean);
 
-export default function AuthForm({ initialMode = "signup", levelNote, onBack }) {
-  const { actions } = useApp();
-  const [mode, setMode] = useState(initialMode); // signup | signin | forgot | sent
+function MailSent({ email, title, text, children }) {
+  return (
+    <div className="step step-center">
+      <div className="empty-icon tone-mint">
+        <Icon name="mail" size={30} />
+      </div>
+      <h1 className="step-title">{title}</h1>
+      <p className="step-sub">
+        <strong>{email}</strong> {text} Göremiyorsan spam klasörüne de bak.
+      </p>
+      <div className="step-footer">{children}</div>
+    </div>
+  );
+}
+
+/**
+ * goal / level: kurulumda seçilen amaç ve seviye. E-posta onayı sırasında sayfa yeniden
+ * açılacağı için tarayıcıya not edilir ve hesap ilk açıldığında kullanılır.
+ */
+export default function AuthForm({ initialMode = "signup", levelNote, goal, level, onBack }) {
+  const [mode, setMode] = useState(initialMode); // signup | signin | forgot | resetSent | confirm
   const [values, setValues] = useState({ name: "", email: "", password: "" });
   const [errors, setErrors] = useState({});
   const [formError, setFormError] = useState("");
+  const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
 
   const bind = (key) => (e) => {
@@ -42,14 +62,14 @@ export default function AuthForm({ initialMode = "signup", levelNote, onBack }) 
     setMode(next);
     setErrors({});
     setFormError("");
+    setNotice("");
   };
 
   const run = async (request) => {
     setBusy(true);
     setFormError("");
     try {
-      const { user, isNew } = await request();
-      actions.startSession(user, isNew);
+      await request();
     } catch (err) {
       setFormError(err.message || "Bir şeyler ters gitti, tekrar dene.");
     } finally {
@@ -57,7 +77,7 @@ export default function AuthForm({ initialMode = "signup", levelNote, onBack }) 
     }
   };
 
-  const submit = async (e) => {
+  const submit = (e) => {
     e.preventDefault();
     if (mode === "signup") {
       const er = {
@@ -66,7 +86,12 @@ export default function AuthForm({ initialMode = "signup", levelNote, onBack }) 
         password: validate.password(values.password),
       };
       setErrors(er);
-      if (!hasErrors(er)) run(() => signUp(values));
+      if (hasErrors(er)) return;
+      run(async () => {
+        pendingOnboarding.save({ goal, level });
+        const { needsConfirmation } = await signUp(values);
+        if (needsConfirmation) setMode("confirm");
+      });
     } else if (mode === "signin") {
       const er = { email: validate.email(values.email), password: values.password ? "" : "Şifreni gir." };
       setErrors(er);
@@ -74,36 +99,55 @@ export default function AuthForm({ initialMode = "signup", levelNote, onBack }) 
     } else if (mode === "forgot") {
       const er = { email: validate.email(values.email) };
       setErrors(er);
-      if (er.email) return;
-      setBusy(true);
-      try {
-        await requestPasswordReset(values.email);
-        setMode("sent");
-      } catch (err) {
-        setFormError(err.message);
-      } finally {
-        setBusy(false);
-      }
+      if (!er.email)
+        run(async () => {
+          await requestPasswordReset(values.email);
+          setMode("resetSent");
+        });
     }
   };
 
-  if (mode === "sent") {
+  if (mode === "confirm") {
     return (
-      <div className="step step-center">
-        <div className="empty-icon tone-mint">
-          <Icon name="mail" size={30} />
-        </div>
-        <h1 className="step-title">E-postanı kontrol et</h1>
-        <p className="step-sub">
-          <strong>{values.email}</strong> adresine şifre sıfırlama bağlantısı gönderdik. Göremiyorsan spam klasörüne de
-          bak.
-        </p>
-        <div className="step-footer">
-          <Button size="lg" block onClick={() => switchMode("signin")}>
-            Girişe dön
-          </Button>
-        </div>
-      </div>
+      <MailSent
+        email={values.email}
+        title="E-postanı onayla"
+        text="adresine bir onay bağlantısı gönderdik. Bağlantıya tıklayınca hesabın açılır ve buraya dönersin."
+      >
+        {notice && <p className="form-hint">{notice}</p>}
+        {formError && (
+          <p className="form-error" role="alert">
+            {formError}
+          </p>
+        )}
+        <Button
+          size="lg"
+          block
+          variant="secondary"
+          loading={busy}
+          onClick={() =>
+            run(async () => {
+              await resendConfirmation(values.email);
+              setNotice("Yeni bir onay e-postası gönderdik.");
+            })
+          }
+        >
+          E-postayı tekrar gönder
+        </Button>
+        <Button size="lg" block variant="ghost" onClick={() => switchMode("signin")}>
+          Onayladım, giriş yap
+        </Button>
+      </MailSent>
+    );
+  }
+
+  if (mode === "resetSent") {
+    return (
+      <MailSent email={values.email} title="E-postanı kontrol et" text="adresine şifre sıfırlama bağlantısı gönderdik.">
+        <Button size="lg" block onClick={() => switchMode("signin")}>
+          Girişe dön
+        </Button>
+      </MailSent>
     );
   }
 
@@ -115,20 +159,6 @@ export default function AuthForm({ initialMode = "signup", levelNote, onBack }) 
       </button>
       <h1 className="step-title">{TITLES[mode]}</h1>
       <p className="step-sub">{mode === "signup" && levelNote ? levelNote : SUBTITLES[mode]}</p>
-
-      {mode !== "forgot" && FEATURES.googleSignIn && (
-        <>
-          <Button variant="secondary" size="lg" block loading={busy} onClick={() => run(signInWithGoogle)}>
-            <span className="g-mark" aria-hidden="true">
-              G
-            </span>
-            Google ile devam et
-          </Button>
-          <div className="divider">
-            <span>ya da e-postayla</span>
-          </div>
-        </>
-      )}
 
       <form className="form" onSubmit={submit} noValidate>
         {mode === "signup" && (
@@ -182,7 +212,7 @@ export default function AuthForm({ initialMode = "signup", levelNote, onBack }) 
             Zaten hesabım var
           </button>
         )}
-        {mode === "signin" && (
+        {mode === "signin" && onBack && (
           <button type="button" className="link-btn" onClick={() => switchMode("signup")}>
             Hesabım yok, kayıt ol
           </button>

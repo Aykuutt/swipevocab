@@ -185,6 +185,8 @@ export default function Onboarding() {
       {step === "account" && (
         <AuthForm
           initialMode="signup"
+          goal={goal}
+          level={level}
           levelNote={`Başlangıç seviyen ${level}. İlerlemeni kaybetmemek için hesap oluştur.`}
           onBack={() => setStep("goal")}
         />

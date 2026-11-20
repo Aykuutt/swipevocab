@@ -1,14 +1,43 @@
 # SwipeVocab
 
-9-14 yaş öğrenciler için Türkçe-İngilizce kelime öğrenme uygulaması (React + Vite).
+9-14 yaş öğrenciler için Türkçe-İngilizce kelime öğrenme uygulaması (React + Vite + Supabase).
+
+Canlı sürüm: https://swipevocab.vercel.app (GitHub'daki `main` dalına her gönderimde Vercel kendiliğinden yayınlar.)
 
 ## Çalıştırma
 
 ```bash
 npm install
+cp .env.example .env.local   # sonra Supabase değerlerini yaz (aşağıya bak)
 npm run dev      # http://127.0.0.1:5173  (test araçları için: /?dev=1)
 npm run build    # dist/ klasörüne derler
 ```
+
+## Hesaplar ve ilerleme (Supabase)
+
+- **Hesaplar ve şifreler** Supabase Auth'ta tutulur. Kayıtta e-posta onayı istenir,
+  "Şifremi unuttum" ile sıfırlama bağlantısı gönderilir.
+- **İlerleme** Supabase'deki `progress` tablosunda, her kullanıcı için tek satır (JSON) olarak
+  durur. Satır düzeyi güvenlik (RLS) sayesinde herkes yalnızca kendi satırını okuyup yazabilir.
+- Tarayıcıda ayrıca bir önbellek tutulur: uygulama hızlı açılır, kısa bağlantı kopukluklarında
+  değişiklikler kaybolmaz ve internet gelince sunucuya yazılır. Çıkış yapınca önbellek silinir.
+- Supabase'den önce yalnızca tarayıcıda tutulan hesapların ilerlemesi, aynı e-postayla ilk
+  girişte otomatik olarak yeni hesaba taşınır.
+
+### Supabase kurulumu (bir kez)
+
+1. supabase.com'da bir proje oluştur.
+2. **SQL Editor**'da `supabase/schema.sql` dosyasının içeriğini çalıştır.
+3. **Authentication > URL Configuration**:
+   - Site URL: `https://swipevocab.vercel.app`
+   - Redirect URLs: `https://swipevocab.vercel.app/**` ve `http://127.0.0.1:5173/**`
+4. **Project Settings > API Keys**'ten proje adresini ve publishable (anon) anahtarı al;
+   `.env.local` dosyasına ve Vercel'deki ortam değişkenlerine yaz:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_PUBLISHABLE_KEY`
+
+Publishable anahtar tarayıcıda görünmek üzere tasarlanmıştır; veriyi koruyan RLS kurallarıdır.
+`service_role` / secret anahtarı bu projeye **asla** yazma.
 
 ## Klasör yapısı
 
@@ -19,23 +48,24 @@ src/
 ├── config.js                # sabitler, puanlar, özellik anahtarları (FEATURES)
 ├── data/                    # kelimeler, konular, amaçlar, sohbet senaryoları
 ├── lib/                     # saf yardımcılar (React'siz)
+│   ├── supabase.js          #   Supabase bağlantısı
+│   ├── auth.js              #   kayıt, giriş, şifre sıfırlama
+│   ├── progress.js          #   ilerlemenin Supabase'e ve önbelleğe kaydı
 │   ├── deck.js              #   kaydırma destesi + aralıklı tekrar
 │   ├── exercises.js         #   soru üretimi (çeviri, boşluk, dinleme, eşleştirme)
 │   ├── units.js             #   öğrenme yolu üniteleri
 │   ├── speech.js / sfx.js   #   sesli okuma ve ses efektleri
 │   ├── partner.js           #   yapay zeka konuşma partneri
-│   ├── auth.js / storage.js #   hesap ve kayıt (şimdilik tarayıcıda)
-│   ├── remoteSync.js        #   SQL Server ilerleme eşitlemesi
-│   └── league.js, time.js, random.js, words.js, speechRecognition.js
+│   └── league.js, storage.js, time.js, random.js, words.js, speechRecognition.js
 ├── state/
 │   ├── reducer.js           # tüm durum ve eylemler
 │   ├── selectors.js         # durumdan türetilen değerler
-│   └── AppContext.jsx       # useApp() bağlamı, zamanlayıcılar, kaydetme
-├── hooks/                   # useValueDelta, useVoiceInfo, useRemoteSync
+│   └── AppContext.jsx       # useApp() bağlamı, zamanlayıcılar
+├── hooks/                   # useAccount (oturum), useProgressSave (kayıt), useValueDelta, useVoiceInfo
 ├── components/              # ortak bileşenler (Icon, Mascot, ui, layout, ...)
 │   └── exercises/           #   alıştırmalar ve ExerciseRunner
 ├── screens/
-│   ├── onboarding/          # karşılama, amaç, seviye testi, giriş/kayıt
+│   ├── onboarding/          # karşılama, amaç, seviye testi, giriş/kayıt, yeni şifre
 │   ├── learn/               # Öğren: kart destesi, pekiştirme, gün sonu
 │   ├── path/                # Yol: ünite haritası
 │   ├── game/                # Oyun + partner/ (konuşma partneri)
@@ -44,9 +74,7 @@ src/
 
 public/audio/w/<id>.mp3      # kelime kayıtları (1-90)
 public/audio/s/<id>.mp3      # örnek cümle kayıtları (1-90)
-api/progress.js              # Vercel fonksiyonu: ilerleme isteğini SQL köprüsüne aktarır
-server/local-sql-api.mjs     # yerel SQL Server köprüsü
-database/schema.sql          # SQL Server tabloları
+supabase/schema.sql          # Supabase tablosu ve güvenlik kuralları
 ```
 
 ## Kelime havuzu
@@ -59,32 +87,13 @@ sorusu için). Seviye etiketleri öğrenme rehberidir; resmi bir CEFR listesi de
 Seviyeleri gözden geçirirken [Oxford Learner's Dictionaries kelime listeleri](https://www.oxfordlearnersdictionaries.com/about/wordlists/oxford3000-5000)
 yararlı bir başvuru kaynağıdır.
 
-## SQL Server ilerleme eşitlemesi
-
-`database/schema.sql`, `SwipeVocab` veritabanında profil ve ilerleme tablolarını oluşturur.
-Uygulama oturum açıkken ilerlemeyi `UserProgress` tablosuna eşitler. Kimlik, hesap açılınca
-tarayıcıda üretilen rastgele bir UUID'dir. Açılışta sunucudaki kayıt yereldekinden yeniyse o
-yüklenir. Sunucuya ulaşılamazsa eşitleme o oturum için kapanır, uygulama yerel kayıtla devam eder.
-
-Yerel API, Windows kimlik doğrulamasıyla `localhost` üzerindeki SQL Server'a bağlanır.
-`server/.env.example` dosyasını `server/.env` olarak kopyala ve `SWIPEVOCAB_API_SECRET` alanına
-en az 32 karakterlik rastgele bir değer yaz. Sonra iki terminalde şunları çalıştır:
-
-```bash
-npm run sql:bridge
-npm run dev
-```
-
-Vite, `/api/progress` isteklerini yerel SQL API'sine aktarır. Vercel dağıtımında yerel SQL
-API'ye erişmek için gizli anahtarlı bir HTTPS tüneli gerekir (`LOCAL_SQL_API_URL` ve
-`SWIPEVOCAB_API_SECRET` ortam değişkenleri). SQL portu internete açılmamalıdır.
-
 ## Notlar
 
-- Pro, lig, Google girişi, şifre sıfırlama ve hatırlatmalar `src/config.js` içindeki
-  `FEATURES` ile kapalı. Açınca ilgili arayüz kendiliğinden görünür.
+- Pro, lig, Google girişi ve hatırlatmalar `src/config.js` içindeki `FEATURES` ile kapalı.
+  Açınca ilgili arayüz kendiliğinden görünür (Google girişi için ayrıca Supabase'de
+  Google sağlayıcısını açmak gerekir).
 - Konuşma partneri, Claude artifact ortamındaki `window.claude` erişimiyle çalışır; normal
   bir tarayıcıda bu erişim olmadığı için Oyun sekmesinde görünmez.
-- Hesaplar `localStorage`'da tutulur ve şifre kaydedilmez; giriş henüz gerçek bir sunucuya
-  bağlı değildir. İlerleme ayrıca SQL Server'a eşitlenebilir (yukarıya bak).
 - Pro düğmeleri yalnızca özellik önizlemesini açar; ödeme veya abonelik oluşturmaz.
+- Hesap silme henüz yok; gerektiğinde Supabase panelinden (Authentication > Users) silinebilir,
+  ilerleme satırı da otomatik silinir.

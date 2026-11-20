@@ -3,6 +3,7 @@ import { AppShell, Header, Splash, TabBar, VoiceNotice } from "./components/layo
 import { AppProvider, useApp } from "./state/AppContext";
 import GameScreen from "./screens/game/GameScreen";
 import LearnScreen from "./screens/learn/LearnScreen";
+import NewPassword from "./screens/onboarding/NewPassword";
 import Onboarding from "./screens/onboarding/Onboarding";
 import PathScreen from "./screens/path/PathScreen";
 import ProgressScreen from "./screens/ProgressScreen";
@@ -33,10 +34,23 @@ function MainLayout() {
 }
 
 function Root() {
-  const { state, wordsStatus, reloadWords } = useApp();
-  if (wordsStatus === "loading") return <Splash />;
+  const { state, wordsStatus, reloadWords, account } = useApp();
+  if (account.status === "unconfigured") {
+    return <Splash error message="Supabase ayarları eksik. .env.example dosyasındaki adımları izle." />;
+  }
+  if (account.recovery) return <NewPassword onDone={account.finishRecovery} />;
+  if (wordsStatus === "loading" || account.status === "loading") return <Splash />;
   if (wordsStatus === "error") return <Splash error onRetry={reloadWords} />;
-  if (!state.user) return <Onboarding />;
+  if (account.status === "error") {
+    return (
+      <Splash
+        error
+        message="Hesabındaki ilerleme yüklenemedi. İnternet bağlantını kontrol edip tekrar dene."
+        onRetry={account.retry}
+      />
+    );
+  }
+  if (account.status !== "signedIn" || !state.user) return <Onboarding />;
   return (
     <>
       <MainLayout />

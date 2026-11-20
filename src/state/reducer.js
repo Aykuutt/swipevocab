@@ -19,9 +19,8 @@ import { hasFullAccess, hasStreakFreeze, hasUnlimitedLives } from "./selectors";
 
 export const initialState = {
   version: STATE_VERSION,
-  user: null,
-  profileId: null, // SQL eşitlemesindeki rastgele kimlik
-  savedAt: 0, // son yerel kayıt zamanı; sunucudaki kayıtla karşılaştırmak için
+  user: null, // { id, email, name } (Supabase kullanıcısı)
+  savedAt: 0, // son kayıt zamanı; sunucudaki ve yereldeki kopyayı karşılaştırmak için
   goal: null,
   placementLevel: null,
   isPro: false,
@@ -62,7 +61,9 @@ export const initialState = {
 
 /** Kayıttan gelen durumu eksik alanları tamamlayarak açar. */
 export function hydrate(saved) {
-  const s = { ...initialState, ...saved, settings: { ...initialState.settings, ...saved.settings } };
+  // eslint-disable-next-line no-unused-vars
+  const { profileId, ...rest } = saved; // eski SQL eşitlemesinden kalan alan
+  const s = { ...initialState, ...rest, settings: { ...initialState.settings, ...rest.settings } };
   return FEATURES.pro ? s : { ...s, isPro: false, freezes: 0 };
 }
 
@@ -138,17 +139,14 @@ export function reducer(state, action) {
     case "START_ACCOUNT":
       return {
         ...initialState,
-        goal: state.goal ?? DEFAULT_GOAL,
-        placementLevel: state.placementLevel,
+        goal: action.goal ?? state.goal ?? DEFAULT_GOAL,
+        placementLevel: action.level ?? state.placementLevel,
         user: action.user,
         startDayIndex: action.dayIndex,
       };
 
     case "SIGN_OUT":
       return { ...initialState };
-
-    case "SET_PROFILE_ID":
-      return state.profileId ? state : { ...state, profileId: action.profileId };
 
     case "SET_NAME":
       return state.user ? { ...state, user: { ...state.user, name: action.name } } : state;

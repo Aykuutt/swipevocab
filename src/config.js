@@ -8,7 +8,7 @@ export const FEATURES = {
   pro: false,
   leagueRivals: false,
   googleSignIn: false,
-  passwordReset: false,
+  passwordReset: true,
   reminders: false,
   aiPartner: true,
 };

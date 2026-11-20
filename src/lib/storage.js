@@ -1,7 +1,5 @@
 // localStorage sarmalayıcısı. Tarayıcı depolamaya izin vermezse
 // (gizli pencere vb.) veriler bellekte tutulur.
-import { STATE_VERSION, STORAGE_PREFIX } from "../config";
-
 const memory = new Map();
 let backend;
 
@@ -51,28 +49,5 @@ export const storage = {
       }
     }
     memory.delete(key);
-  },
-};
-
-const SESSION_KEY = `${STORAGE_PREFIX}:session`;
-const progressKey = (email) => `${STORAGE_PREFIX}:progress:${email}`;
-
-/** Açık oturum ve kullanıcı başına ilerleme kaydı. */
-export const progressStore = {
-  getSession() {
-    return storage.get(SESSION_KEY)?.email ?? null;
-  },
-  setSession(email) {
-    storage.set(SESSION_KEY, { email });
-  },
-  clearSession() {
-    storage.remove(SESSION_KEY);
-  },
-  load(email) {
-    const saved = storage.get(progressKey(email));
-    return saved && saved.version === STATE_VERSION ? saved : null;
-  },
-  save(email, state) {
-    storage.set(progressKey(email), state);
   },
 };

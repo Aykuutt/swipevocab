@@ -4,14 +4,12 @@ dist/
 *.log
 .DS_Store
 
-# Gizli anahtarlar
+# Gizli değerler (örnek dosya hariç)
 .env
 .env.*
 !.env.example
-!**/.env.example
-server/.env
-server/tunnel-url.txt
 
-# Yerel araç ayarları ve eski tek dosyalık sürüm
+# Vercel bağlantısı, yerel araç ayarları ve eski tek dosyalık sürüm
+.vercel
 .claude/
 legacy/

@@ -7,10 +7,10 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
-    "preview": "vite preview --host 127.0.0.1",
-    "sql:bridge": "node --env-file=server/.env server/local-sql-api.mjs"
+    "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {
+    "@supabase/supabase-js": "2.119.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
