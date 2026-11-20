@@ -8,6 +8,7 @@ import { buildDeck, topUpCards } from "../lib/deck";
 import { localCache } from "../lib/progress";
 import { playSfx } from "../lib/sfx";
 import { setPreferredVoice, setSpeechLanguage } from "../lib/speech";
+import { applyTheme } from "../lib/theme";
 import { localDayIndex, msUntilMidnight } from "../lib/time";
 import { buildUnits } from "../lib/units";
 import { loadWords } from "../lib/words";
@@ -36,6 +37,12 @@ export function AppProvider({ children }) {
   stateRef.current = state;
 
   const [tab, setTab] = useState("learn");
+  // Profil sekmesinde açık olan ayar sayfası (null: ana profil sayfası).
+  const [profileView, setProfileView] = useState(null);
+  const openProfile = useCallback((view = null) => {
+    setProfileView(view);
+    setTab("profile");
+  }, []);
 
   /* ---------- Kelime listesi (öğrenilen dile göre) ---------- */
   const language = state.language;
@@ -130,6 +137,12 @@ export function AppProvider({ children }) {
   /* ---------- Kaydetme (tarayıcı önbelleği + Supabase) ---------- */
   const flushProgress = useProgressSave(state, inApp, dispatch);
 
+  /* ---------- Tema ---------- */
+  const theme = state.settings.theme;
+  useEffect(() => {
+    applyTheme(theme);
+  }, [theme]);
+
   /* ---------- Ses ---------- */
   // Render sırasında ayarlanır: alt bileşenlerin efektleri (ses listesi vb.) yeni dili hemen görsün.
   // İkisi de değer değişmedikçe bir şey yapmaz.
@@ -160,6 +173,7 @@ export function AppProvider({ children }) {
         if (saved && userId) localCache.remove(userId);
         await authSignOut();
         setTab("learn");
+        setProfileView(null);
       },
       setOnboarding: (goal, level, language) => dispatch({ type: "SET_ONBOARDING", goal, level, language }),
       setLanguage: (language) => dispatch({ type: "SET_LANGUAGE", language }),
@@ -210,10 +224,13 @@ export function AppProvider({ children }) {
       tab,
       setTab,
       goTo: setTab,
+      profileView,
+      setProfileView,
+      openProfile,
       getNow,
       sfx,
     }),
-    [state, actions, words, wordsById, units, wordsStatus, reloadWords, account, tab, getNow, sfx]
+    [state, actions, words, wordsById, units, wordsStatus, reloadWords, account, tab, profileView, openProfile, getNow, sfx]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

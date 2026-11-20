@@ -8,8 +8,7 @@ import LearnScreen from "./screens/learn/LearnScreen";
 import NewPassword from "./screens/onboarding/NewPassword";
 import Onboarding from "./screens/onboarding/Onboarding";
 import PathScreen from "./screens/path/PathScreen";
-import ProgressScreen from "./screens/ProgressScreen";
-import SettingsScreen from "./screens/SettingsScreen";
+import ProfileScreen from "./screens/profile/ProfileScreen";
 import StoreScreen from "./screens/StoreScreen";
 
 const SCREENS = {
@@ -17,8 +16,7 @@ const SCREENS = {
   path: PathScreen,
   game: GameScreen,
   store: StoreScreen,
-  progress: ProgressScreen,
-  settings: SettingsScreen,
+  profile: ProfileScreen,
 };
 
 function MainLayout() {

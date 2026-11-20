@@ -189,6 +189,28 @@ export function Row({ icon, tone = "violet", title, desc, children, stacked = fa
   );
 }
 
+/** Alt sayfaya giden satır (Profil'deki ayar listesi): simge, başlık, kısa özet, ok. */
+export function NavRow({ icon, tone = "violet", title, summary, onClick }) {
+  return (
+    <li className="row-navwrap">
+      <button type="button" className="row-nav" onClick={onClick}>
+        <span className="row-main">
+          {icon && (
+            <span className={`row-icon tone-${tone}`}>
+              <Icon name={icon} size={20} />
+            </span>
+          )}
+          <span className="row-text">
+            <span className="row-title">{title}</span>
+            {summary && <span className="row-desc">{summary}</span>}
+          </span>
+        </span>
+        <Icon name="chevronRight" size={18} className="row-chevron" />
+      </button>
+    </li>
+  );
+}
+
 /* ---------- Disclosure (açılır bölüm) ---------- */
 export function Disclosure({ icon, title, summary, defaultOpen = false, children }) {
   const [open, setOpen] = useState(defaultOpen);

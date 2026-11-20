@@ -20,6 +20,11 @@ npm run check    # üçü birden; GitHub Actions her gönderimde bunları çalı
 
 ## Öne çıkanlar
 
+- **Profil sekmesi:** profil, istatistikler, başarımlar (düzeyli), günlük görevler ve ayar listesi
+  (Hesap, Dil, Öğrenme, Ses, Görünüm, Uygulama; her biri ayrı sayfa).
+- **Temalar:** Gece, Okyanus, Orman, Gün batımı, Açık (Profil > Görünüm). Renkler src/styles/themes.css'te;
+  yeni tema için oraya bir blok, src/data/themes.js'e bir kayıt eklemek yeterli.
+- **Yol:** üniteler konuya göre değişen bir manzara (ev, bulut, filiz, bina, yıldız...) içinde şeritli bir yolda.
 - **Dört dil:** kurulumda ve Ayarlar'da İngilizce, Almanca, İspanyolca ya da Fransızca seçilir. Bilinen
   kelimeler, üniteler ve günlük kartlar her dilde ayrı; XP, seri ve lig ortaktır. Okuma sesi, ses
   tanıma ve konuşma partneri seçilen dile geçer.

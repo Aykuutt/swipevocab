@@ -13,6 +13,7 @@ import {
 } from "../config";
 import { DEFAULT_GOAL } from "../data/goals";
 import { DEFAULT_LANGUAGE, LANGUAGES } from "../data/languages";
+import { DEFAULT_THEME, THEMES } from "../data/themes";
 import { leagueRank } from "../lib/league";
 import { unique } from "../lib/random";
 import { weekOfDay } from "../lib/time";
@@ -35,6 +36,7 @@ export const initialState = {
     voiceURI: null, // eski kayıtlar: İngilizce ses
     voices: {}, // dil kodu -> seçilen okuma sesi
     talkConsent: false, // canlı konuşma kuralları ve 18+ onayı
+    theme: DEFAULT_THEME, // görünüm (bkz. src/data/themes.js)
   },
   startDayIndex: null, // hesabın açıldığı günün takvim indeksi
   day: 1, // uygulamadaki gün numarası
@@ -69,6 +71,7 @@ export function hydrate(saved) {
   const { profileId, ...rest } = saved; // eski SQL eşitlemesinden kalan alan
   const settings = { ...initialState.settings, ...rest.settings };
   settings.voices = { ...settings.voices };
+  if (!THEMES.some((t) => t.id === settings.theme)) settings.theme = DEFAULT_THEME;
   // Dil seçimi gelmeden önce seçilen ses İngilizce sesiydi.
   if (settings.voiceURI && !settings.voices.en) settings.voices.en = settings.voiceURI;
   let s = { ...initialState, ...rest, settings, languages: rest.languages || {} };
@@ -118,6 +121,9 @@ function switchLanguage(s, language, level) {
   const fields = saved ? restoreLanguage(saved, s.day) : freshLanguage(level);
   return { ...s, ...fields, language, languages };
 }
+
+/** Çıkış yapınca ya da yeni hesap açılınca seçilen tema korunur. */
+const keepTheme = (next, prev) => ({ ...next, settings: { ...next.settings, theme: prev.settings.theme } });
 
 const scheduleAt = (day, stage) => ({ stage, due: day + REVIEW_INTERVALS[stage] });
 
@@ -204,10 +210,11 @@ export function reducer(state, action) {
         placementLevel: action.level ?? state.placementLevel,
         user: action.user,
         startDayIndex: action.dayIndex,
+        settings: { ...initialState.settings, theme: state.settings.theme },
       };
 
     case "SIGN_OUT":
-      return { ...initialState };
+      return keepTheme({ ...initialState }, state);
 
     case "SET_LANGUAGE":
       return switchLanguage(state, action.language, action.level);

@@ -65,12 +65,11 @@ const TABS = [
   { id: "path", label: "Yol", icon: "path" },
   { id: "game", label: "Oyun", icon: "game" },
   { id: "store", label: "Mağaza", icon: "store" },
-  { id: "progress", label: "İlerleme", icon: "chart" },
-  { id: "settings", label: "Ayarlar", icon: "sliders" },
+  { id: "profile", label: "Profil", icon: "user" },
 ];
 
 export function TabBar() {
-  const { tab, setTab } = useApp();
+  const { tab, setTab, setProfileView } = useApp();
   return (
     <nav className="tabbar" aria-label="Ana menü">
       {TABS.map((t) => (
@@ -79,7 +78,11 @@ export function TabBar() {
           type="button"
           className={`tab ${tab === t.id ? "is-active" : ""}`}
           aria-current={tab === t.id ? "page" : undefined}
-          onClick={() => setTab(t.id)}
+          onClick={() => {
+            // Profil sekmesine tekrar dokununca ana profil sayfasına dön.
+            if (t.id === "profile" && tab === "profile") setProfileView(null);
+            setTab(t.id);
+          }}
         >
           <Icon name={t.icon} size={22} />
           <span>{t.label}</span>
@@ -113,7 +116,7 @@ export function Splash({
 /** Cihazda öğrenilen dilde ses yoksa bir kez gösterilen uyarı. */
 export function VoiceNotice() {
   const [visible, setVisible] = useState(false);
-  const { goTo } = useApp();
+  const { openProfile } = useApp();
   const language = useLanguage();
 
   useEffect(() => {
@@ -133,16 +136,14 @@ export function VoiceNotice() {
       <Icon name="info" size={18} />
       <p>
         Bunu okumak için cihazında {language.name} ses gerekiyor, bulamadım. Türkçe sesle yanlış telaffuz öğrenmemen
-        için okumadım.{language.id === "en" ? " Kelimeler hazır kayıtla okunmaya devam ediyor." : ""} Ayrıntı Ayarlar'da,
-        Okuma sesi bölümünde.
+        için okumadım.{language.id === "en" ? " Kelimeler hazır kayıtla okunmaya devam ediyor." : ""} Ayrıntı Profil, Ses bölümünde.
       </p>
       <button
         type="button"
         className="link-btn"
         onClick={() => {
           setVisible(false);
-          goTo("settings");
-          setTimeout(() => document.getElementById("voice-settings")?.scrollIntoView({ block: "start" }), 80);
+          openProfile("sound");
         }}
       >
         Ayarlar

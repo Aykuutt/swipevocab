@@ -1,28 +1,33 @@
-// "İlerleme" sekmesi: profil, istatistikler, görevler, haftalık özet, seviyeler, başarılar.
+// "Profil" sekmesi: profil, istatistikler, başarımlar, görevler, haftalık özet, seviyeler ve ayarlar listesi.
 import { useMemo } from "react";
-import Icon from "../components/Icon";
-import Mascot from "../components/Mascot";
-import { Avatar, Disclosure, ProgressBar } from "../components/ui";
-import { FEATURES, LEVELS } from "../config";
-import { leagueTable } from "../lib/league";
-import { weekOfDay } from "../lib/time";
-import { useApp } from "../state/AppContext";
-import { currentStreak, dailyCardLimit } from "../state/selectors";
+import Icon from "../../components/Icon";
+import Mascot from "../../components/Mascot";
+import { Avatar, Disclosure, NavRow, ProgressBar } from "../../components/ui";
+import { APP_VERSION, FEATURES, LEVELS } from "../../config";
+import { getLanguage } from "../../data/languages";
+import { getTheme } from "../../data/themes";
+import { leagueTable } from "../../lib/league";
+import { weekOfDay } from "../../lib/time";
+import { useApp } from "../../state/AppContext";
+import { currentStreak, dailyCardLimit } from "../../state/selectors";
+import { BADGES, badgeProgress, badgeValues } from "./achievements";
+import { AccountPage, AppearancePage, AppPage, LanguagePage, LearningPage, SettingsPage, SoundPage } from "./SettingsPages";
 
-function Profile() {
+function ProfileHero() {
   const { state } = useApp();
+  const language = getLanguage(state.language);
   return (
-    <div className="profile">
-      <Avatar name={state.user?.name} size={56} />
-      <div className="profile-text">
-        <h1>{state.user?.name || "Sen"}</h1>
-        {FEATURES.pro ? (
+    <div className="profile-hero">
+      <Avatar name={state.user?.name} size={76} />
+      <h1>{state.user?.name || (state.user?.guest ? "Misafir" : "Sen")}</h1>
+      <div className="profile-pills">
+        <span className="pill pill-plain">{language.name}</span>
+        {state.placementLevel && <span className="pill pill-plain">Başlangıç {state.placementLevel}</span>}
+        {FEATURES.pro && (
           <span className={`pill ${state.isPro ? "pill-amber" : "pill-plain"}`}>
             {state.isPro && <Icon name="crown" size={13} filled />}
             {state.isPro ? "Pro üye" : "Ücretsiz plan"}
           </span>
-        ) : (
-          state.placementLevel && <span className="pill pill-plain">Başlangıç seviyesi {state.placementLevel}</span>
         )}
       </div>
     </div>
@@ -53,24 +58,31 @@ function Coach() {
   );
 }
 
-function StatStrip() {
+function StatGrid() {
   const { state } = useApp();
   const items = [
     { icon: "flame", tone: "coral", value: currentStreak(state), label: "gün serisi" },
     { icon: "star", tone: "amber", value: state.xp, label: "toplam puan" },
-    { icon: "check", tone: "mint", value: state.knownIds.length, label: "bildiğin" },
-    { icon: "book", tone: "violet", value: state.learningIds.length, label: "öğreniyorum" },
+    { icon: "check", tone: "mint", value: state.knownIds.length, label: "bildiğin kelime" },
+    { icon: "path", tone: "violet", value: state.completedUnits.length, label: "tamamlanan ünite" },
   ];
   return (
-    <dl className="stat-strip">
-      {items.map((s) => (
-        <div key={s.label} className="stat-strip-item">
-          <Icon name={s.icon} size={18} filled={s.icon !== "check" && s.icon !== "book"} className={`text-${s.tone}`} />
-          <dt>{s.value}</dt>
-          <dd>{s.label}</dd>
-        </div>
-      ))}
-    </dl>
+    <section className="group">
+      <h2 className="group-title">İstatistikler</h2>
+      <dl className="stat-grid">
+        {items.map((s) => (
+          <div key={s.label} className="stat-card">
+            <span className={`row-icon tone-${s.tone}`}>
+              <Icon name={s.icon} size={20} filled={s.icon === "flame" || s.icon === "star"} />
+            </span>
+            <div>
+              <dt>{s.value}</dt>
+              <dd>{s.label}</dd>
+            </div>
+          </div>
+        ))}
+      </dl>
+    </section>
   );
 }
 
@@ -195,66 +207,78 @@ function LevelProgress() {
   );
 }
 
-const BADGES = [
-  { key: "streak", icon: "flame", title: "İstikrarlı", tiers: [3, 7, 14, 30], desc: (n) => `${n} günlük bir seriye ulaş` },
-  { key: "xp", icon: "star", title: "Bilge", tiers: [50, 150, 400, 1000], desc: (n) => `${n} puan kazan` },
-  { key: "words", icon: "book", title: "Kelime ustası", tiers: [5, 15, 40, 90], desc: (n) => `${n} kelime öğren` },
-  { key: "top3", icon: "trophy", title: "Şampiyon", tiers: [1, 3, 6, 10], desc: (n) => `Ligde ilk 3'e ${n} kez gir` },
-];
-
-function badgeProgress(value, tiers) {
-  const level = tiers.filter((t) => value >= t).length;
-  const maxed = level >= tiers.length;
-  const next = maxed ? tiers[tiers.length - 1] : tiers[level];
-  const prev = level > 0 ? tiers[level - 1] : 0;
-  const progress = maxed ? 100 : Math.round(((value - prev) / (next - prev)) * 100);
-  return { level, maxed, next, progress };
-}
-
-function Badges() {
+function Achievements() {
   const { state } = useApp();
-  const values = {
-    streak: currentStreak(state),
-    xp: state.xp,
-    words: state.knownIds.length,
-    top3: state.top3Finishes,
-  };
+  const values = badgeValues(state);
+  const list = BADGES.filter((b) => b.key !== "top3" || FEATURES.leagueRivals);
+  const rows = list.map((b) => ({ b, p: badgeProgress(values[b.key], b.tiers) }));
+  const earned = rows.reduce((n, r) => n + r.p.level, 0);
+  const total = rows.reduce((n, r) => n + r.p.total, 0);
   return (
     <section className="group">
-      <h2 className="group-title">Başarılar</h2>
-      <ul className="badges">
-        {BADGES.filter((b) => b.key !== "top3" || FEATURES.leagueRivals).map((b) => {
-          const p = badgeProgress(values[b.key], b.tiers);
-          return (
-            <li key={b.key} className={`badge ${p.level > 0 ? "has-level" : ""}`}>
-              <span className="badge-icon">
-                <Icon name={b.icon} size={24} filled={b.icon !== "trophy" && b.icon !== "book"} />
-              </span>
-              <div className="badge-body">
-                <div className="badge-top">
-                  <strong>{b.title}</strong>
-                  <span className="badge-level">
-                    {p.maxed ? "Tamamlandı" : p.level > 0 ? `Düzey ${p.level}` : "Henüz yok"}
-                  </span>
-                </div>
-                <ProgressBar value={p.progress} tone="amber" label={b.title} />
-                <span className="badge-desc">{p.maxed ? "Tüm düzeyleri bitirdin." : b.desc(p.next)}</span>
-              </div>
-            </li>
-          );
-        })}
+      <h2 className="group-title">
+        Başarımlar{" "}
+        <span className="group-title-note">
+          {earned}/{total}
+        </span>
+      </h2>
+      <ul className="badge-grid">
+        {rows.map(({ b, p }) => (
+          <li key={b.key} className={`badge-card ${p.level > 0 ? "has-level" : ""}`}>
+            <span className="badge-icon">
+              <Icon name={b.icon} size={26} filled={b.icon === "flame" || b.icon === "star"} />
+            </span>
+            <strong>{b.title}</strong>
+            <span className="badge-pips" role="img" aria-label={`${p.level} / ${p.total} düzey`}>
+              {Array.from({ length: p.total }, (_, i) => (
+                <i key={i} className={i < p.level ? "on" : ""} />
+              ))}
+            </span>
+            <ProgressBar value={p.progress} tone="amber" label={b.title} />
+            <span className="badge-desc">{p.maxed ? "Tüm düzeyler tamam" : b.desc(p.next)}</span>
+          </li>
+        ))}
       </ul>
     </section>
   );
 }
 
-export default function ProgressScreen() {
+/* ---------- Ayarlar listesi ve alt sayfalar ---------- */
+const PAGES = {
+  account: { title: "Hesap", Page: AccountPage },
+  language: { title: "Öğrendiğin dil", Page: LanguagePage },
+  learning: { title: "Öğrenme", Page: LearningPage },
+  sound: { title: "Ses", Page: SoundPage },
+  appearance: { title: "Görünüm", Page: AppearancePage },
+  app: { title: "Uygulama", Page: AppPage },
+};
+
+function SettingsList() {
+  const { state, setProfileView } = useApp();
+  const { user, settings } = state;
+  const open = (id) => () => setProfileView(id);
+  return (
+    <section className="group">
+      <h2 className="group-title">Ayarlar</h2>
+      <ul className="group-list">
+        <NavRow icon="user" tone="violet" title="Hesap" summary={user?.guest ? "Misafir" : user?.email} onClick={open("account")} />
+        <NavRow icon="cap" tone="sky" title="Öğrendiğin dil" summary={getLanguage(state.language).name} onClick={open("language")} />
+        <NavRow icon="target" tone="amber" title="Öğrenme" summary={`Günde ${settings.dailyGoal} kart`} onClick={open("learning")} />
+        <NavRow icon="speaker" tone="mint" title="Ses" summary={settings.sound ? "Okuma sesi, efektler açık" : "Efektler kapalı"} onClick={open("sound")} />
+        <NavRow icon="moon" tone="rose" title="Görünüm" summary={`Tema: ${getTheme(settings.theme).name}`} onClick={open("appearance")} />
+        <NavRow icon="sliders" tone="coral" title="Uygulama" summary={`Sürüm ${APP_VERSION}`} onClick={open("app")} />
+      </ul>
+    </section>
+  );
+}
+
+function ProfileHome() {
   const { state, actions } = useApp();
   return (
     <div className="screen">
-      <Profile />
+      <ProfileHero />
       <Coach />
-      <StatStrip />
+      <StatGrid />
       {FEATURES.pro && state.freezeNotice && (
         <div className="notice notice-violet" role="status">
           <Icon name="snow" size={18} />
@@ -264,13 +288,26 @@ export default function ProgressScreen() {
           </button>
         </div>
       )}
+      <Achievements />
       <DailyQuests />
       <div className="stack">
         <WeeklyRecap />
         {FEATURES.leagueRivals && <League />}
       </div>
       <LevelProgress />
-      <Badges />
+      <SettingsList />
     </div>
+  );
+}
+
+export default function ProfileScreen() {
+  const { profileView, setProfileView } = useApp();
+  const page = PAGES[profileView];
+  if (!page) return <ProfileHome />;
+  const { Page, title } = page;
+  return (
+    <SettingsPage title={title} onBack={() => setProfileView(null)}>
+      <Page />
+    </SettingsPage>
   );
 }

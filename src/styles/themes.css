@@ -1,0 +1,118 @@
+/* Temalar. global.css'teki :root varsayılan temadır ("Gece"); burada yalnızca değişen renkler var.
+   Yeni tema eklemek için: buraya bir blok yaz, src/data/themes.js'e bir kayıt ekle. */
+
+/* ---------- Okyanus ---------- */
+:root[data-theme="ocean"] {
+  --night: #0a1426;
+  --plum-1: #101d34;
+  --plum-2: #172a49;
+  --plum-3: #213a63;
+  --violet: #5a9bff;
+  --violet-strong: #8dbaff;
+  --violet-fill: #2f6bff;
+  --violet-soft: rgba(90, 155, 255, 0.17);
+  --violet-shadow: #1f49b8;
+  --accent-ink: #2457c9;
+  --shadow-deep: #060d1b;
+  --ok-bg: #0e3a38;
+  --bad-bg: #3b1d27;
+  --page-glow: #163463;
+  --page-deep: #060c18;
+  --shell-glow: #12274a;
+  --bar-bg: rgba(10, 20, 38, 0.94);
+  --banner-bg: rgba(16, 29, 52, 0.96);
+  --road: #223e6b;
+  --road-edge: #132746;
+}
+
+/* ---------- Orman ---------- */
+:root[data-theme="forest"] {
+  --night: #0d1a13;
+  --plum-1: #13241b;
+  --plum-2: #1a3226;
+  --plum-3: #244633;
+  --violet: #7ccf4f;
+  --violet-strong: #a3e07b;
+  --violet-fill: #3d8f2a;
+  --violet-soft: rgba(124, 207, 79, 0.16);
+  --violet-shadow: #2a6a1c;
+  --accent-ink: #2f7a1f;
+  --shadow-deep: #07110b;
+  --ok-bg: #12402f;
+  --bad-bg: #3d1f1c;
+  --page-glow: #1d3f2a;
+  --page-deep: #08120c;
+  --shell-glow: #17321f;
+  --bar-bg: rgba(13, 26, 19, 0.94);
+  --banner-bg: rgba(19, 36, 27, 0.96);
+  --road: #2c4a37;
+  --road-edge: #172b1f;
+}
+
+/* ---------- Gün batımı ---------- */
+:root[data-theme="sunset"] {
+  --night: #1d1017;
+  --plum-1: #2a1621;
+  --plum-2: #3a1f2d;
+  --plum-3: #4d2a3b;
+  --violet: #f0629f;
+  --violet-strong: #ff8fbd;
+  --violet-fill: #d63f85;
+  --violet-soft: rgba(240, 98, 159, 0.17);
+  --violet-shadow: #a02a62;
+  --accent-ink: #b3306d;
+  --shadow-deep: #12080d;
+  --ok-bg: #123a33;
+  --bad-bg: #44181d;
+  --page-glow: #4a1f36;
+  --page-deep: #140a10;
+  --shell-glow: #36182a;
+  --bar-bg: rgba(29, 16, 23, 0.94);
+  --banner-bg: rgba(42, 22, 33, 0.96);
+  --road: #5a2e45;
+  --road-edge: #341a28;
+}
+
+/* ---------- Açık ---------- */
+:root[data-theme="light"] {
+  --night: #f3f0fa;
+  --plum-1: #ffffff;
+  --plum-2: #ebe6f6;
+  --plum-3: #ddd6ee;
+  --line: rgba(35, 26, 46, 0.1);
+  --line-strong: rgba(35, 26, 46, 0.2);
+  --track: rgba(35, 26, 46, 0.1);
+  --shadow-deep: #c6bddb;
+  --text: #231a2e;
+  --text-dim: #54486a;
+  --text-faint: #80759a;
+  --paper: #fffdf6;
+  --violet: #6a5bf5;
+  --violet-strong: #5646e0;
+  --violet-soft: rgba(106, 91, 245, 0.12);
+  --mint: #12a182;
+  --mint-soft: rgba(18, 161, 130, 0.14);
+  --coral: #e2483b;
+  --coral-soft: rgba(226, 72, 59, 0.12);
+  --amber: #d68a0c;
+  --amber-soft: rgba(214, 138, 12, 0.16);
+  --sky: #1c8fd6;
+  --rose: #e0508f;
+  --orange: #e8702f;
+  --heart: #e5405f;
+  --ok-bg: #d6f3ea;
+  --bad-bg: #fbdcd8;
+  --page-glow: #e4dcf8;
+  --page-deep: #cfc6e6;
+  --shell-glow: #e9e2fa;
+  --bar-bg: rgba(255, 255, 255, 0.94);
+  --banner-bg: rgba(255, 255, 255, 0.96);
+  --road: #d3cae8;
+  --road-edge: #b9aedb;
+  --road-dash: rgba(255, 255, 255, 0.9);
+}
+:root[data-theme="light"] .app-shell { box-shadow: 0 0 0 1px var(--line), 0 24px 60px rgba(60, 40, 110, 0.22); }
+:root[data-theme="light"] .card-face,
+:root[data-theme="light"] .talk-card { box-shadow: 0 14px 32px rgba(60, 40, 110, 0.22), 0 0 0 1px var(--line); }
+:root[data-theme="light"] .feedback-correct { color: #0b7a5f; }
+:root[data-theme="light"] .feedback-wrong { color: #c2362a; }

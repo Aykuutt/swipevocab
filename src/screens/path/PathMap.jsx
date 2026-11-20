@@ -1,9 +1,10 @@
-// Ünitelerin zikzak çizen bir yol üzerinde gösterimi.
+// Ünitelerin, konuya göre değişen bir manzara içinde zikzak çizen bir yol üzerinde gösterimi.
 import { useEffect, useRef } from "react";
 import Icon from "../../components/Icon";
 import { TOPICS } from "../../data/topics";
 import { prefersReducedMotion } from "../../lib/random";
 import { currentUnitIndex, unitStatus } from "../../state/selectors";
+import PathScenery from "./PathScenery";
 
 const MAP_WIDTH = 280;
 const NODE_SIZE = 64;
@@ -68,10 +69,19 @@ export default function PathMap({ units, completed, onStart, celebrate }) {
   });
 
   return (
-    <div className="pathmap" style={{ width: MAP_WIDTH, height }}>
+    <div className="pathwrap">
+      <PathScenery items={items} height={height} unitGap={UNIT_GAP} centerX={MAP_WIDTH / 2} />
+      <div className="pathmap" style={{ width: MAP_WIDTH, height }}>
       <svg className="pathmap-lines" width={MAP_WIDTH} height={height} aria-hidden="true">
+        {/* önce kenarlar, sonra zemin, en üstte çizgiler: kesişen parçalar birbirini bozmasın */}
         {segments.map((s, i) => (
-          <path key={i} d={s.d} className={s.done ? "seg-done" : "seg-todo"} />
+          <path key={`e${i}`} d={s.d} className="road-edge" />
+        ))}
+        {segments.map((s, i) => (
+          <path key={`b${i}`} d={s.d} className="road-base" />
+        ))}
+        {segments.map((s, i) => (
+          <path key={`d${i}`} d={s.d} className={s.done ? "road-done" : "road-dash"} />
         ))}
       </svg>
 
@@ -120,6 +130,7 @@ export default function PathMap({ units, completed, onStart, celebrate }) {
           </div>
         );
       })}
+      </div>
     </div>
   );
 }
