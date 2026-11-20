@@ -6,10 +6,10 @@ import { useMemo, useRef, useState } from "react";
 import ExerciseRunner from "../../components/exercises/ExerciseRunner";
 import Icon from "../../components/Icon";
 import { Button, EmptyState, Overlay } from "../../components/ui";
-import { FEATURES, FREE_DAILY_CARDS } from "../../config";
+import { DAILY_GOAL_OPTIONS, FEATURES } from "../../config";
 import { reinforceLesson } from "../../lib/exercises";
 import { useApp } from "../../state/AppContext";
-import { currentStreak, hasFullAccess, weekStrip } from "../../state/selectors";
+import { currentStreak, dailyCardLimit, weekStrip } from "../../state/selectors";
 import SwipeCard from "./SwipeCard";
 
 /* ---------- Bugünkü durum paneli ---------- */
@@ -18,7 +18,7 @@ const RING_LEN = 2 * Math.PI * RING_R;
 
 function TodayPanel() {
   const { state } = useApp();
-  const goal = hasFullAccess(state) ? state.settings.dailyGoal : FREE_DAILY_CARDS;
+  const goal = dailyCardLimit(state) ?? state.settings.dailyGoal;
   const ratio = Math.min(1, state.swipedToday / goal);
   const reviews = state.deck.filter((c) => c.isReview).length;
   const streak = currentStreak(state);
@@ -195,25 +195,37 @@ function ReinforcePhase() {
 }
 
 function DonePhase() {
-  const { state, actions } = useApp();
+  const { state, actions, goTo } = useApp();
   const streak = currentStreak(state);
-  const full = hasFullAccess(state);
+  const limit = dailyCardLimit(state);
+  const unlimited = limit === null;
+  const canRaiseGoal = !FEATURES.pro && limit < Math.max(...DAILY_GOAL_OPTIONS);
 
   return (
     <div className="screen screen-center">
       <EmptyState
-        celebrate={full}
-        mascot={full ? "cheer" : "happy"}
-        title={full ? "Bugünkü hedef tamam" : "Bugünlük bu kadar"}
+        celebrate
+        mascot="cheer"
+        title={unlimited ? "Bugünkü hedef tamam" : "Bugünlük bu kadar"}
         actions={
-          full ? (
+          unlimited ? (
             <Button size="lg" onClick={actions.continueSwiping}>
               Kaydırmaya devam et
             </Button>
           ) : (
-            <Button size="lg" variant="pro" icon="crown" onClick={() => actions.setPro(true)}>
-              Pro'ya geç, sınırsız kaydır
-            </Button>
+            <>
+              <Button size="lg" block icon="path" onClick={() => goTo("path")}>
+                Ünitelere devam et
+              </Button>
+              <Button size="lg" block variant="ghost" onClick={() => goTo("game")}>
+                Oyun oyna
+              </Button>
+              {FEATURES.pro && (
+                <Button size="lg" block variant="pro" icon="crown" onClick={() => actions.setPro(true)}>
+                  Pro'ya geç, sınırsız kaydır
+                </Button>
+              )}
+            </>
           )
         }
       >
@@ -231,10 +243,10 @@ function DonePhase() {
             <span>günlük seri</span>
           </li>
         </ul>
-        {!full && FEATURES.pro && (
+        {!unlimited && (
           <p>
-            Ücretsiz planda günde {FREE_DAILY_CARDS} kart var. Yarın yeni kartlar ve zamanı gelen tekrarlar seni
-            bekliyor.
+            Bugünün {limit} kartını bitirdin. Yarın yeni kartlar ve zamanı gelen tekrarlar seni bekliyor.
+            {canRaiseGoal && " Daha fazlasını istersen Ayarlar'dan günlük hedefini yükseltebilirsin."}
           </p>
         )}
       </EmptyState>

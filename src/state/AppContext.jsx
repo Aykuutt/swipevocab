@@ -11,7 +11,7 @@ import { localDayIndex, msUntilMidnight } from "../lib/time";
 import { buildUnits } from "../lib/units";
 import { loadWords } from "../lib/words";
 import { initialState, reducer } from "./reducer";
-import { activeLevels, hasFullAccess, wordPool } from "./selectors";
+import { activeLevels, dailyCardLimit, wordPool } from "./selectors";
 
 const AppContext = createContext(null);
 
@@ -93,11 +93,11 @@ export function AppProvider({ children }) {
   }, [state.regenAt, state.clockOffsetMs, getNow]);
 
   /* ---------- Deste ---------- */
-  const fullAccess = hasFullAccess(state);
-  const deckKey = `${fullAccess}|${activeLevels(state).join(",")}`;
+  const cardLimit = dailyCardLimit(state); // null = sınırsız (Pro)
+  const deckKey = `${cardLimit}|${activeLevels(state).join(",")}`;
   const lastDeckKey = useRef(null);
 
-  // Plan ya da seviye değişince desteyi yeniden kur; silinmiş kelimeleri ayıkla.
+  // Plan, günlük sınır ya da seviye değişince desteyi yeniden kur; silinmiş kelimeleri ayıkla.
   useEffect(() => {
     if (!active) return;
     const s = stateRef.current;
@@ -109,14 +109,15 @@ export function AppProvider({ children }) {
       dispatch({ type: "SET_DECK", deck: s.deck.filter((c) => wordsById.has(c.id)) });
   }, [active, words, wordsById, deckKey]);
 
-  // Tam erişimde deste bitmeden yeni kart ekle.
+  // Yalnızca sınırsız planda deste bitmeden yeni kart ekle; sınırlı planda deste günün kartlarıdır.
+  const unlimited = cardLimit === null;
   useEffect(() => {
-    if (!active || !fullAccess || state.phase !== "swipe" || state.deck.length > 5) return;
+    if (!active || !unlimited || state.phase !== "swipe" || state.deck.length > 5) return;
     dispatch({ type: "TOPUP_DECK", cards: topUpCards(stateRef.current, words) });
-  }, [active, words, fullAccess, state.phase, state.deck.length]);
+  }, [active, words, unlimited, state.phase, state.deck.length]);
 
   /* ---------- Kaydetme (tarayıcı önbelleği + Supabase) ---------- */
-  const flushProgress = useProgressSave(state, account.status === "signedIn");
+  const flushProgress = useProgressSave(state, account.status === "signedIn", dispatch);
 
   /* ---------- Ses ---------- */
   useEffect(() => {

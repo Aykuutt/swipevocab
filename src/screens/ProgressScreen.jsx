@@ -6,7 +6,7 @@ import { FEATURES, LEVELS } from "../config";
 import { leagueTable } from "../lib/league";
 import { weekOfDay } from "../lib/time";
 import { useApp } from "../state/AppContext";
-import { currentStreak } from "../state/selectors";
+import { currentStreak, dailyCardLimit } from "../state/selectors";
 
 function Profile() {
   const { state } = useApp();
@@ -51,10 +51,12 @@ function StatStrip() {
 
 function DailyQuests() {
   const { state } = useApp();
+  // Kart görevi günlük sınırı aşamaz; yoksa hedefi düşük olan kullanıcı görevi hiç bitiremez.
+  const cardTarget = Math.min(10, dailyCardLimit(state) ?? 10);
   const quests = [
     { icon: "bolt", label: "20 puan kazan", current: state.dailyXp, target: 20 },
     { icon: "check", label: "5 doğru cevap ver", current: state.dailyCorrect, target: 5 },
-    { icon: "learn", label: "10 kart kaydır", current: state.swipedToday, target: 10 },
+    { icon: "learn", label: `${cardTarget} kart kaydır`, current: state.swipedToday, target: cardTarget },
   ];
   return (
     <section className="group">

@@ -1,10 +1,18 @@
 // Durumdan türetilen değerler. Hepsi saf fonksiyondur.
-import { FEATURES, FREE_LEVELS } from "../config";
+import { FEATURES, FREE_DAILY_CARDS, FREE_LEVELS } from "../config";
 
 /** Pro özellikleri kapalıysa herkes tam erişime sahiptir. */
 export const hasFullAccess = (s) => !FEATURES.pro || s.isPro;
 export const hasUnlimitedLives = (s) => FEATURES.pro && s.isPro;
 export const hasStreakFreeze = (s) => FEATURES.pro && s.isPro;
+
+/**
+ * Bir günde kaydırılabilecek en fazla kart; null = sınırsız.
+ * Pro özellikleri kapalıyken herkes Ayarlar'daki günlük hedef kadar kart görür.
+ * Pro açıkken ücretsiz plan FREE_DAILY_CARDS ile sınırlı, Pro sınırsızdır.
+ */
+export const dailyCardLimit = (s) =>
+  FEATURES.pro ? (s.isPro ? null : FREE_DAILY_CARDS) : s.settings.dailyGoal;
 
 /** Kartlarda çıkacak seviyeler. */
 export const activeLevels = (s) => (hasFullAccess(s) ? s.settings.selectedLevels : FREE_LEVELS);

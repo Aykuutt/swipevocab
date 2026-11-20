@@ -15,7 +15,7 @@ import { DEFAULT_GOAL } from "../data/goals";
 import { leagueRank } from "../lib/league";
 import { unique } from "../lib/random";
 import { weekOfDay } from "../lib/time";
-import { hasFullAccess, hasStreakFreeze, hasUnlimitedLives } from "./selectors";
+import { dailyCardLimit, hasFullAccess, hasStreakFreeze, hasUnlimitedLives } from "./selectors";
 
 export const initialState = {
   version: STATE_VERSION,
@@ -103,18 +103,20 @@ function completeDay(s) {
   );
 }
 
-/** Kaydırma sonrası günlük hedefe ya da deste sonuna gelindi mi? */
+/**
+ * Kaydırma sonrası günün kartları bitti mi?
+ * Sınırlı planda (herkes, Pro hariç) günlük sınıra ya da deste sonuna gelince kaydırma durur:
+ * işaretlenen kelime varsa pekiştirme, yoksa günün özeti. Pro'da hedefe ulaşınca kutlanır,
+ * istenirse kaydırmaya devam edilir.
+ */
 function checkSwipePhase(s) {
   if (s.phase !== "swipe" || s.swipedToday === 0) return s;
-  const hasLearning = s.learningIds.length > 0;
-  if (hasFullAccess(s)) {
-    if (s.swipedToday >= s.settings.dailyGoal && s.lastCompletedDay !== s.day) {
-      return hasLearning ? { ...s, phase: "reinforce" } : completeDay({ ...s, phase: "done" });
-    }
-  } else if (s.deck.length === 0) {
-    return hasLearning ? { ...s, phase: "reinforce" } : completeDay({ ...s, phase: "limit" });
+  const finish = (phase) => (s.learningIds.length > 0 ? { ...s, phase: "reinforce" } : completeDay({ ...s, phase }));
+  const limit = dailyCardLimit(s);
+  if (limit === null) {
+    return s.swipedToday >= s.settings.dailyGoal && s.lastCompletedDay !== s.day ? finish("done") : s;
   }
-  return s;
+  return s.swipedToday >= limit || s.deck.length === 0 ? finish("limit") : s;
 }
 
 /** Geçen süreye göre canları yeniler. */
@@ -132,7 +134,8 @@ function regenLives(s, now) {
 export function reducer(state, action) {
   switch (action.type) {
     case "HYDRATE":
-      return hydrate(action.state);
+      // Kayıt, sınır uygulanmadan önce oluşmuş olabilir: yüklerken de denetle.
+      return checkSwipePhase(hydrate(action.state));
 
     case "SET_ONBOARDING":
       return { ...state, goal: action.goal ?? state.goal, placementLevel: action.level ?? state.placementLevel };
@@ -152,8 +155,15 @@ export function reducer(state, action) {
     case "SET_NAME":
       return state.user ? { ...state, user: { ...state.user, name: action.name } } : state;
 
-    case "SET_SETTING":
-      return { ...state, settings: { ...state.settings, [action.key]: action.value } };
+    case "SET_SETTING": {
+      const next = { ...state, settings: { ...state.settings, [action.key]: action.value } };
+      // Gün bittikten sonra hedef yükseltildiyse kalan kartlar için kaydırmaya dön.
+      const limit = dailyCardLimit(next);
+      if (action.key === "dailyGoal" && next.phase === "limit" && limit !== null && next.swipedToday < limit) {
+        return { ...next, phase: "swipe" };
+      }
+      return next;
+    }
 
     case "TOGGLE_LEVEL": {
       if (!hasFullAccess(state)) return state;
@@ -229,7 +239,8 @@ export function reducer(state, action) {
     }
 
     case "CONTINUE_SWIPING":
-      return state.phase === "done" ? { ...state, phase: "swipe" } : state;
+      // Yalnızca sınırsız planda (Pro) günün hedefinden sonra devam edilebilir.
+      return state.phase === "done" && dailyCardLimit(state) === null ? { ...state, phase: "swipe" } : state;
 
     case "RESTART_SESSION":
       return { ...state, deck: action.deck, swipedToday: 0, phase: "swipe" };

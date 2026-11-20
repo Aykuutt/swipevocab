@@ -148,7 +148,7 @@ export default function SettingsScreen() {
           />
         </Row>
         {full && (
-          <Row icon="target" tone="amber" title="Günlük hedef" desc="Günde kaç kart kaydıracaksın?" stacked>
+          <Row icon="target" tone="amber" title="Günlük hedef" desc="Öğren ekranında günde en fazla kaç kart çıksın?" stacked>
             <Chips
               label="Günlük hedef"
               options={DAILY_GOAL_OPTIONS.map((n) => ({ id: n, label: `${n} kart` }))}

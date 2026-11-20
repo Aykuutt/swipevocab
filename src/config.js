@@ -11,7 +11,7 @@ export const FEATURES = {
   passwordReset: true,
   reminders: false,
   aiPartner: true,
-  liveTalk: true, // canlı sesli konuşma (LiveKit + supabase/talk.sql)
+  liveTalk: false, // canlı sesli konuşma: kod hazır, şimdilik "Yakında" (LiveKit + supabase/talk.sql)
 };
 
 // Adresin sonunda ?dev ya da #dev varsa test araçları açılır.

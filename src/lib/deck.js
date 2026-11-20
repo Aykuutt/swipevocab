@@ -1,7 +1,7 @@
 // Kaydırma destesinin hazırlanması: zamanı gelen tekrarlar + yeni kelimeler.
-import { FREE_DAILY_CARDS, LEVELS, MAX_REVIEWS, PRO_DECK_SIZE } from "../config";
+import { LEVELS, MAX_REVIEWS, PRO_DECK_SIZE } from "../config";
 import { shuffle } from "./random";
-import { hasFullAccess, wordPool } from "../state/selectors";
+import { dailyCardLimit, wordPool } from "../state/selectors";
 
 /**
  * Kullanıcının çalışma seviyesi: başlangıç seviyesinden başlar, bir
@@ -49,11 +49,13 @@ export function buildDeck(state, words, day = state.day, swipedToday = day === s
   ).map((w) => ({ id: w.id }));
 
   const deck = [...reviews, ...fresh];
-  if (hasFullAccess(state)) return deck.slice(0, reviews.length + PRO_DECK_SIZE);
-  return deck.slice(0, Math.max(0, FREE_DAILY_CARDS - swipedToday));
+  const limit = dailyCardLimit(state);
+  if (limit === null) return deck.slice(0, reviews.length + PRO_DECK_SIZE);
+  // Günlük sınır: bugün kaydırılanlar düşülür; tekrarlar da sınıra dahildir.
+  return deck.slice(0, Math.max(0, limit - swipedToday));
 }
 
-/** Deste azaldığında eklenecek kartlar. Yeni kelime kalmadıysa eskileri döndürür. */
+/** Sınırsız planda (Pro) deste azaldığında eklenecek kartlar. Yeni kelime kalmadıysa eskileri döndürür. */
 export function topUpCards(state, words) {
   const pool = wordPool(state, words);
   const inDeck = new Set(state.deck.map((c) => c.id));

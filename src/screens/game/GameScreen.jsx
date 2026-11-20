@@ -90,22 +90,32 @@ export default function GameScreen() {
             </button>
           </li>
         ))}
-        {FEATURES.liveTalk && (
-          <li>
-            <button type="button" className="game-card" onClick={() => setTalkOpen(true)}>
-              <span className="row-icon tone-coral">
-                <Icon name="user" size={22} />
-              </span>
-              <span className="game-card-text">
-                <strong>
-                  Canlı konuşma <span className="pill pill-mint">Yeni</span>
-                </strong>
-                <span>Seviyene yakın biriyle sesli konuş. Sorular ve hedef kelimeler sohbeti yönlendirir.</span>
-              </span>
-              <Icon name="chevronRight" size={20} />
-            </button>
-          </li>
-        )}
+        <li>
+          {/* Canlı konuşma hazır ama kapalı: FEATURES.liveTalk true yapılınca açılır. */}
+          <button
+            type="button"
+            className="game-card"
+            disabled={!FEATURES.liveTalk}
+            aria-disabled={!FEATURES.liveTalk}
+            onClick={() => setTalkOpen(true)}
+          >
+            <span className="row-icon tone-coral">
+              <Icon name="user" size={22} />
+            </span>
+            <span className="game-card-text">
+              <strong>
+                Canlı konuşma{" "}
+                {FEATURES.liveTalk ? (
+                  <span className="pill pill-mint">Yeni</span>
+                ) : (
+                  <span className="pill pill-plain">Yakında</span>
+                )}
+              </strong>
+              <span>Seviyene yakın biriyle sesli konuş. Sorular ve hedef kelimeler sohbeti yönlendirir.</span>
+            </span>
+            {FEATURES.liveTalk && <Icon name="chevronRight" size={20} />}
+          </button>
+        </li>
         {partnerAvailable && (
           <li>
             <button type="button" className="game-card" onClick={() => setPartnerOpen(true)}>
@@ -124,7 +134,7 @@ export default function GameScreen() {
         )}
       </ul>
 
-      {talkOpen && (
+      {FEATURES.liveTalk && talkOpen && (
         <Overlay label="Canlı konuşma">
           <Suspense fallback={<Splash />}>
             <Talk onClose={() => setTalkOpen(false)} />
