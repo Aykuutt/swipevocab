@@ -62,7 +62,6 @@ export const initialState = {
 
 /** Kayıttan gelen durumu eksik alanları tamamlayarak açar. */
 export function hydrate(saved) {
-  // eslint-disable-next-line no-unused-vars
   const { profileId, ...rest } = saved; // eski SQL eşitlemesinden kalan alan
   const s = { ...initialState, ...rest, settings: { ...initialState.settings, ...rest.settings } };
   return FEATURES.pro ? s : { ...s, isPro: false, freezes: 0 };
