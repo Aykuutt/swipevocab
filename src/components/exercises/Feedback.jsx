@@ -8,7 +8,12 @@ export default function Feedback({ result, onNext }) {
     <div className={`feedback feedback-${kind}`} role="status" aria-live="polite">
       {kind !== "neutral" && (
         <div className="feedback-text">
-          <Mascot key={kind} mood={kind === "correct" ? "happy" : "sad"} size={60} className="feedback-mascot" />
+          <Mascot
+            key={`${kind}-${result.mood || ""}`}
+            mood={kind === "correct" ? result.mood || "happy" : "sad"}
+            size={60}
+            className="feedback-mascot"
+          />
           <div>
             <strong>{kind === "correct" ? result.message || "Doğru!" : "Yanlış"}</strong>
             {kind === "wrong" && result.answerText && (

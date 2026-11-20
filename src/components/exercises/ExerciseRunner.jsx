@@ -58,6 +58,9 @@ function OutOfHearts({ onExit }) {
   );
 }
 
+// Üst üste kaçıncı doğruda ne denir.
+const COMBO_CHEERS = { 3: "Üst üste 3 doğru! 🔥", 5: "5 doğru üst üste, durdurulamıyorsun!", 8: "8'de 8! Efsane 🏆" };
+
 const EXERCISES = {
   translate: TranslateExercise,
   fill_blank: FillBlankExercise,
@@ -71,6 +74,7 @@ export default function ExerciseRunner({ exercises, onComplete, onExit, costsHea
   const [doneCount, setDoneCount] = useState(0);
   const [result, setResult] = useState(null);
   const resultRef = useRef(null);
+  const combo = useRef(0);
   const completed = useRef(false);
 
   const current = queue[0];
@@ -82,16 +86,25 @@ export default function ExerciseRunner({ exercises, onComplete, onExit, costsHea
   const resolve = useCallback(
     (r) => {
       if (resultRef.current) return;
-      resultRef.current = r;
-      setResult(r);
-      if (r.neutral) return;
+      if (r.neutral) {
+        resultRef.current = r;
+        setResult(r);
+        return;
+      }
       if (r.correct) {
+        combo.current += 1;
+        // Üst üste doğrular: cevap şeridindeki maskot tezahürat eder.
+        const cheer = COMBO_CHEERS[combo.current];
+        if (cheer) r = { ...r, message: cheer, mood: "cheer" };
         sfx("correct");
         actions.correct();
       } else {
+        combo.current = 0;
         sfx("wrong");
         if (costsHearts) actions.loseLife();
       }
+      resultRef.current = r;
+      setResult(r);
     },
     [actions, sfx, costsHearts]
   );

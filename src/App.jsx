@@ -1,5 +1,7 @@
 // Uygulamanın kökü: yükleme -> kurulum (giriş yoksa) -> sekmeli ana ekran.
 import { AppShell, Header, Splash, TabBar, VoiceNotice } from "./components/layout";
+import MascotBuddy from "./components/MascotBuddy";
+import { useMascotMoments } from "./hooks/useMascotMoments";
 import { AppProvider, useApp } from "./state/AppContext";
 import GameScreen from "./screens/game/GameScreen";
 import LearnScreen from "./screens/learn/LearnScreen";
@@ -21,6 +23,7 @@ const SCREENS = {
 
 function MainLayout() {
   const { tab } = useApp();
+  useMascotMoments();
   const Screen = SCREENS[tab] || LearnScreen;
   return (
     <>
@@ -29,6 +32,7 @@ function MainLayout() {
         <Screen />
       </main>
       <TabBar />
+      <MascotBuddy />
     </>
   );
 }

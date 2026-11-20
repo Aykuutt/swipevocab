@@ -1,6 +1,7 @@
 // "İlerleme" sekmesi: profil, istatistikler, görevler, haftalık özet, seviyeler, başarılar.
 import { useMemo } from "react";
 import Icon from "../components/Icon";
+import Mascot from "../components/Mascot";
 import { Avatar, Disclosure, ProgressBar } from "../components/ui";
 import { FEATURES, LEVELS } from "../config";
 import { leagueTable } from "../lib/league";
@@ -24,6 +25,30 @@ function Profile() {
           state.placementLevel && <span className="pill pill-plain">Başlangıç seviyesi {state.placementLevel}</span>
         )}
       </div>
+    </div>
+  );
+}
+
+/** Kart'ın ilerlemeye göre kısa yorumu. */
+function coachLine(state) {
+  const streak = currentStreak(state);
+  const known = state.knownIds.length;
+  const learning = state.learningIds.length;
+  if (known === 0) return { text: "Henüz başındayız! Öğren sekmesinde ilk kartlarını kaydır, burada ilerlemeni birlikte izleyelim.", mood: "wave" };
+  if (streak >= 7) return { text: `${streak} gündür hiç aksatmadın, gurur duyuyorum! 🔥`, mood: "cheer" };
+  if (state.weekWords >= 10) return { text: `Bu hafta ${state.weekWords} yeni kelime öğrendin. Harika gidiyorsun!`, mood: "cheer" };
+  if (learning >= 5) return { text: `${learning} kelime hâlâ öğreniliyor. Yol sekmesindeki ünitelerle pekiştirebilirsin.`, mood: "think" };
+  if (streak === 0) return { text: "Seri sıfırlanmış ama dert değil. Bugün birkaç kart kaydır, yeniden başlayalım!", mood: "happy" };
+  return { text: `Toplam ${known} kelime biliyorsun. Her gün biraz, en iyi yöntem bu!`, mood: "happy" };
+}
+
+function Coach() {
+  const { state } = useApp();
+  const { text, mood } = coachLine(state);
+  return (
+    <div className="coach">
+      <Mascot mood={mood} size={58} />
+      <p className="coach-bubble">{text}</p>
     </div>
   );
 }
@@ -228,6 +253,7 @@ export default function ProgressScreen() {
   return (
     <div className="screen">
       <Profile />
+      <Coach />
       <StatStrip />
       {FEATURES.pro && state.freezeNotice && (
         <div className="notice notice-violet" role="status">
