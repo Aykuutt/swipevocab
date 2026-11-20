@@ -13,6 +13,7 @@ import {
   MAX_LIVES,
   isDevMode,
 } from "../config";
+import { useInstallPrompt } from "../hooks/useInstallPrompt";
 import { useVoiceInfo } from "../hooks/useVoiceInfo";
 import { speak } from "../lib/speech";
 import { useApp } from "../state/AppContext";
@@ -22,6 +23,31 @@ const VOICE_HINT =
   "Cihazında İngilizce ses varsa kelimeleri ve yapay zekanın cümlelerini o okur, yoksa kelimeler hazır kayıtla okunur. " +
   "Cihaza İngilizce ses eklemek için: Windows'ta Ayarlar, Zaman ve dil, Konuşma, Ses ekle yolundan İngilizce bir ses " +
   "kurabilirsin. Edge tarayıcısında genelde daha doğal sesler hazır gelir.";
+
+function InstallApp() {
+  const { status, install } = useInstallPrompt();
+  if (status === "installed" || status === "unsupported") return null;
+  return (
+    <Group title="Uygulama">
+      <Row
+        icon="learn"
+        tone="violet"
+        title="Telefona yükle"
+        desc={
+          status === "ios"
+            ? "Safari'de alttaki Paylaş düğmesine, sonra \"Ana Ekrana Ekle\"ye dokun."
+            : "Ana ekranından tek dokunuşla aç, internet yokken de çalışsın."
+        }
+      >
+        {status === "available" && (
+          <Button size="sm" onClick={install}>
+            Yükle
+          </Button>
+        )}
+      </Row>
+    </Group>
+  );
+}
 
 function VoiceSettings() {
   const { state, actions } = useApp();
@@ -179,6 +205,8 @@ export default function SettingsScreen() {
           </Row>
         )}
       </Group>
+
+      <InstallApp />
 
       <VoiceSettings />
 

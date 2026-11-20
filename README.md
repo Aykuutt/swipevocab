@@ -11,7 +11,21 @@ npm install
 cp .env.example .env.local   # sonra Supabase değerlerini yaz (aşağıya bak)
 npm run dev      # http://127.0.0.1:5173  (test araçları için: /?dev=1)
 npm run build    # dist/ klasörüne derler
+npm run test     # testler (Vitest)
+npm run lint     # kod denetimi (ESLint)
+npm run check    # üçü birden; GitHub Actions her gönderimde bunları çalıştırır
 ```
+
+## Öne çıkanlar
+
+- **Misafir modu:** seviye testinden sonra hesap açmadan başlanabilir; ilerleme o cihazda tutulur,
+  sonradan hesap açılınca hesaba taşınır.
+- **PWA:** telefona uygulama gibi yüklenir (Ayarlar > Telefona yükle), internetsizken de açılır.
+  İkonlar `node scripts/generate-icons.mjs` ile üretilir.
+- **Maskot Kart:** önemli anlarda sağ üstten konuşma balonuyla belirir (src/hooks/useMascotMoments.js);
+  uygulamanın her yerinden `mascotSay("...")` ile konuşturulabilir.
+- **Günlük sınır:** Öğren ekranında günde en fazla Ayarlar'daki günlük hedef kadar kart çıkar.
+- **Yazı tipleri** uygulamayla birlikte sunulur (@fontsource), dışarıya istek gitmez.
 
 ## Hesaplar ve ilerleme (Supabase)
 

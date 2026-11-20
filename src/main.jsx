@@ -1,6 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
+// Yazı tipleri uygulamayla birlikte sunulur (Google'a istek gitmez, internetsiz de çalışır).
+import "@fontsource-variable/inter";
+import "@fontsource-variable/jetbrains-mono";
+import "@fontsource-variable/unbounded";
 import "./styles/global.css";
 
 // "standalone": uygulamanın tam ekran (bir çerçeve içinde olmadan) çalıştığını
