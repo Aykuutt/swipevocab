@@ -319,8 +319,10 @@ strong, b { font-weight: 650; }
 /* ---------- Öğren sekmesi: kart destesi ---------- */
 .screen-learn { display: flex; flex-direction: column; padding-bottom: 14px; }
 
-.deck { flex: 1; display: flex; flex-direction: column; min-height: 0; }
-.deck-stage { flex: 1; min-height: 290px; padding-top: 24px; display: grid; place-items: center; outline-offset: -4px; border-radius: var(--r-lg); }
+/* Deste alanı kartın boyundan küçük olamaz: yer yetmezse ekran kayar, kart butonların üstüne binmez.
+   Üst boşluk kartın konu sekmesine, alt boşluk arkadaki kartın kaymasına yer bırakır. */
+.deck { flex: 1 0 auto; display: flex; flex-direction: column; }
+.deck-stage { flex: 1 0 auto; padding: 30px 0 22px; display: grid; place-items: center; outline-offset: -4px; border-radius: var(--r-lg); }
 
 /* indeks kartı: iki yüzlü, dokununca çevrilir. Kâğıt görünümü (mavi çizgiler, kırmızı başlık çizgisi, delikler) her yüzde */
 .swipe-card {
@@ -420,6 +422,43 @@ strong, b { font-weight: 650; }
 .week-day.is-missed .week-dot { border-style: dashed; border-color: rgba(255, 255, 255, 0.18); }
 .week-day.is-future .week-dot, .week-day.is-before .week-dot { border-color: rgba(255, 255, 255, 0.07); }
 .week-day.is-before { opacity: 0.45; }
+
+/* Kısa ekranlar (küçük telefonlar, alçak pencereler): Öğren ekranını sıkılaştır ki kart ve
+   butonlar kaydırmadan sığsın. */
+@media (max-height: 760px) {
+  .today { padding: 10px 12px 9px; gap: 9px; }
+  .today-top { gap: 12px; }
+  .ring { width: 50px; height: 50px; }
+  .ring svg { width: 100%; height: 100%; }
+  .ring-value { font-size: 16px; }
+  .today-text strong { font-size: 15.5px; }
+  .week-day { gap: 4px; }
+  .week-label { font-size: 10.5px; }
+  .week-dot { width: 22px; height: 22px; }
+  .week-dot .icon { width: 12px; height: 12px; }
+
+  .deck-stage { padding: 30px 0 18px; }
+  .card-face { min-height: 236px; padding: 22px 20px 24px; }
+  .card-word { padding-top: 16px; }
+
+  .deck-actions { padding: 8px 0 2px; gap: 22px; }
+  .deck-action { gap: 5px; }
+  .round-btn { width: 54px; height: 54px; }
+  .round-btn.is-small { width: 44px; height: 44px; }
+}
+@media (max-height: 640px) {
+  .screen-learn { padding-bottom: 6px; }
+  .today { padding: 8px 12px; }
+  .today .week { display: none; }
+  .ring { width: 42px; height: 42px; }
+  .ring-value { font-size: 14px; }
+  .deck-stage { padding: 28px 0 8px; }
+  .card-face { min-height: 220px; padding: 18px 18px 16px; }
+  .card-top { margin-top: 8px; }
+  .deck-actions { padding: 4px 0 0; align-items: center; }
+  .deck-action > span { display: none; } /* düğmelerin ikonu ve erişilebilir adı var */
+  .deck-action:nth-child(2) .round-btn { margin-top: 0; }
+}
 
 /* kartın arka yüzü */
 .tag-tr { background: rgba(34, 195, 158, 0.2); color: #0f6b56; }
