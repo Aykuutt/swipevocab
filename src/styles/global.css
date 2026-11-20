@@ -994,3 +994,14 @@ strong, b { font-weight: 650; }
 .guest-nudge { margin: 6px 0 4px; text-align: left; }
 .guest-nudge p { font-size: 13px; }
 .badge-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.badge-icon-sm { width: 42px; height: 42px; border-radius: 14px; }
+.badge-chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.badge-chip { display: grid; justify-items: center; gap: 6px; padding: 12px 6px 10px; text-align: center; border: 1px solid color-mix(in srgb, var(--amber) 38%, transparent); border-radius: var(--r-lg); background: var(--plum-1); }
+.badge-chip strong { font-size: 12.5px; line-height: 1.2; }
+.badge-chip .badge-icon { background: var(--amber-soft); color: var(--amber); box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--amber) 45%, transparent); }
+.badge-empty { padding: 12px 14px; border: 1px dashed var(--line-strong); border-radius: var(--r-lg); font-size: 13px; color: var(--text-dim); }
+.badge-next { display: flex; align-items: center; gap: 12px; margin-top: 10px; padding: 12px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--plum-1); }
+.badge-next-body { flex: 1; display: grid; gap: 6px; min-width: 0; }
+.badge-next-title { font-size: 13.5px; font-weight: 650; }
+.badge-next .bar { height: 6px; }
+.badge-all { margin-top: 10px; }

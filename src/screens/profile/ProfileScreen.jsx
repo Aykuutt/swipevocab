@@ -207,38 +207,91 @@ function LevelProgress() {
   );
 }
 
+/** Başarım kartı: simge, ad, düzey noktaları, ilerleme ve açıklama. */
+function BadgeCard({ b, p }) {
+  return (
+    <li className={`badge-card ${p.level > 0 ? "has-level" : ""}`}>
+      <span className="badge-icon">
+        <Icon name={b.icon} size={26} filled={b.icon === "flame" || b.icon === "star"} />
+      </span>
+      <strong>{b.title}</strong>
+      <span className="badge-pips" role="img" aria-label={`${p.level} / ${p.total} düzey`}>
+        {Array.from({ length: p.total }, (_, i) => (
+          <i key={i} className={i < p.level ? "on" : ""} />
+        ))}
+      </span>
+      <ProgressBar value={p.progress} tone="amber" label={b.title} />
+      <span className="badge-desc">{p.maxed ? "Tüm düzeyler tamam" : b.desc(p.next)}</span>
+    </li>
+  );
+}
+
+/**
+ * Başarımlar: yalnızca kazanılanlar küçük kutucuklarla gösterilir, böylece ekran dolmaz.
+ * Altta en yakın hedef görünür; kilitli olanlar dahil tüm liste açılır bölümde durur.
+ */
 function Achievements() {
   const { state } = useApp();
   const values = badgeValues(state);
   const list = BADGES.filter((b) => b.key !== "top3" || FEATURES.leagueRivals);
   const rows = list.map((b) => ({ b, p: badgeProgress(values[b.key], b.tiers) }));
-  const earned = rows.reduce((n, r) => n + r.p.level, 0);
+  const earned = rows.filter((r) => r.p.level > 0);
   const total = rows.reduce((n, r) => n + r.p.total, 0);
+  const levels = rows.reduce((n, r) => n + r.p.level, 0);
+  // En yakın hedef: tamamlanmamış başarımlardan, sıradaki düzeye en çok yaklaşılan.
+  const next = rows.filter((r) => !r.p.maxed).sort((x, y) => y.p.progress - x.p.progress)[0];
+
   return (
     <section className="group">
       <h2 className="group-title">
         Başarımlar{" "}
         <span className="group-title-note">
-          {earned}/{total}
+          {levels}/{total}
         </span>
       </h2>
-      <ul className="badge-grid">
-        {rows.map(({ b, p }) => (
-          <li key={b.key} className={`badge-card ${p.level > 0 ? "has-level" : ""}`}>
-            <span className="badge-icon">
-              <Icon name={b.icon} size={26} filled={b.icon === "flame" || b.icon === "star"} />
-            </span>
-            <strong>{b.title}</strong>
-            <span className="badge-pips" role="img" aria-label={`${p.level} / ${p.total} düzey`}>
-              {Array.from({ length: p.total }, (_, i) => (
-                <i key={i} className={i < p.level ? "on" : ""} />
-              ))}
-            </span>
-            <ProgressBar value={p.progress} tone="amber" label={b.title} />
-            <span className="badge-desc">{p.maxed ? "Tüm düzeyler tamam" : b.desc(p.next)}</span>
-          </li>
-        ))}
-      </ul>
+
+      {earned.length > 0 ? (
+        <ul className="badge-chips">
+          {earned.map(({ b, p }) => (
+            <li key={b.key} className="badge-chip">
+              <span className="badge-icon badge-icon-sm">
+                <Icon name={b.icon} size={22} filled={b.icon === "flame" || b.icon === "star"} />
+              </span>
+              <strong>{b.title}</strong>
+              <span className="badge-pips" role="img" aria-label={`${p.level} / ${p.total} düzey`}>
+                {Array.from({ length: p.total }, (_, i) => (
+                  <i key={i} className={i < p.level ? "on" : ""} />
+                ))}
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="badge-empty">Henüz başarımın yok. İlk kartlarını kaydırdıkça burada açılacaklar.</p>
+      )}
+
+      {next && (
+        <div className="badge-next">
+          <span className="badge-icon badge-icon-sm">
+            <Icon name={next.b.icon} size={20} filled={next.b.icon === "flame" || next.b.icon === "star"} />
+          </span>
+          <div className="badge-next-body">
+            <span className="badge-next-title">Sıradaki hedef: {next.b.title}</span>
+            <ProgressBar value={next.p.progress} tone="amber" label={next.b.title} />
+            <span className="badge-desc">{next.b.desc(next.p.next)}</span>
+          </div>
+        </div>
+      )}
+
+      <div className="badge-all">
+        <Disclosure icon="trophy" title="Tüm başarımlar" summary={`${list.length} başarım`}>
+          <ul className="badge-grid">
+            {rows.map(({ b, p }) => (
+              <BadgeCard key={b.key} b={b} p={p} />
+            ))}
+          </ul>
+        </Disclosure>
+      </div>
     </section>
   );
 }
