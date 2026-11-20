@@ -1,12 +1,13 @@
 // Uygulama durumu, kelime listesi ve sekme gezgini için tek bağlam.
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import { getLanguage } from "../data/languages";
 import { useAccount } from "../hooks/useAccount";
 import { useProgressSave } from "../hooks/useProgressSave";
 import { signOut as authSignOut } from "../lib/auth";
 import { buildDeck, topUpCards } from "../lib/deck";
 import { localCache } from "../lib/progress";
 import { playSfx } from "../lib/sfx";
-import { setPreferredVoice } from "../lib/speech";
+import { setPreferredVoice, setSpeechLanguage } from "../lib/speech";
 import { localDayIndex, msUntilMidnight } from "../lib/time";
 import { buildUnits } from "../lib/units";
 import { loadWords } from "../lib/words";
@@ -21,6 +22,11 @@ export function useApp() {
   return ctx;
 }
 
+/** Öğrenilen dilin bilgileri (ad, ses kodu...). */
+export function useLanguage() {
+  return getLanguage(useApp().state.language);
+}
+
 const HOUR_MS = 3_600_000;
 const DAY_MS = 86_400_000;
 
@@ -31,21 +37,24 @@ export function AppProvider({ children }) {
 
   const [tab, setTab] = useState("learn");
 
-  /* ---------- Kelime listesi ---------- */
-  const [words, setWords] = useState([]);
-  const [wordsStatus, setWordsStatus] = useState("loading");
+  /* ---------- Kelime listesi (öğrenilen dile göre) ---------- */
+  const language = state.language;
+  const [wordList, setWordList] = useState({ language: null, words: [], status: "loading" });
   const reloadWords = useCallback(async () => {
-    setWordsStatus("loading");
+    setWordList((w) => ({ ...w, status: "loading" }));
     try {
-      setWords(await loadWords());
-      setWordsStatus("ready");
+      const list = await loadWords(language);
+      setWordList({ language, words: list, status: "ready" });
     } catch {
-      setWordsStatus("error");
+      setWordList((w) => ({ ...w, status: "error" }));
     }
-  }, []);
+  }, [language]);
   useEffect(() => {
     reloadWords();
   }, [reloadWords]);
+  // Dil değişirken eski dilin kelimeleriyle deste kurulmasın.
+  const wordsStatus = wordList.status === "ready" && wordList.language !== language ? "loading" : wordList.status;
+  const words = wordList.words;
 
   const wordsById = useMemo(() => new Map(words.map((w) => [w.id, w])), [words]);
   const units = useMemo(() => buildUnits(words), [words]);
@@ -122,9 +131,10 @@ export function AppProvider({ children }) {
   const flushProgress = useProgressSave(state, inApp, dispatch);
 
   /* ---------- Ses ---------- */
-  useEffect(() => {
-    setPreferredVoice(state.settings.voiceURI);
-  }, [state.settings.voiceURI]);
+  // Render sırasında ayarlanır: alt bileşenlerin efektleri (ses listesi vb.) yeni dili hemen görsün.
+  // İkisi de değer değişmedikçe bir şey yapmaz.
+  setSpeechLanguage(language);
+  setPreferredVoice(state.settings.voices?.[language] ?? null);
 
   const sfx = useCallback((kind) => {
     if (stateRef.current.settings.sound) playSfx(kind);
@@ -151,7 +161,12 @@ export function AppProvider({ children }) {
         await authSignOut();
         setTab("learn");
       },
-      setOnboarding: (goal, level) => dispatch({ type: "SET_ONBOARDING", goal, level }),
+      setOnboarding: (goal, level, language) => dispatch({ type: "SET_ONBOARDING", goal, level, language }),
+      setLanguage: (language) => dispatch({ type: "SET_LANGUAGE", language }),
+      setVoice: (uri) => {
+        const s = stateRef.current;
+        dispatch({ type: "SET_SETTING", key: "voices", value: { ...s.settings.voices, [s.language]: uri || null } });
+      },
       setName: (name) => dispatch({ type: "SET_NAME", name }),
       swipe: (dir) => dispatch({ type: "SWIPE", dir }),
       continueSwiping: () => dispatch({ type: "CONTINUE_SWIPING" }),

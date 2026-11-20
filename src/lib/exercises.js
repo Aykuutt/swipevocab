@@ -1,7 +1,8 @@
 // Alıştırma soruları üretir: çeviri, boşluk doldurma, dinleme, eşleştirme.
 import { GOALS } from "../data/goals";
 import { LEVELS } from "../config";
-import { escapeRegExp, sample, shuffle } from "./random";
+import { sample, shuffle } from "./random";
+import { replaceWord } from "./wordMatch";
 
 let keyCounter = 0;
 const nextKey = (prefix) => `${prefix}-${++keyCounter}`;
@@ -34,7 +35,7 @@ function pickDistractors(target, words, count = 3, textOf = (w) => w.word) {
 }
 
 // Kelimeyi ekleriyle birlikte boşaltır ("leaves" -> "____"); yoksa boşluktan sonra "s" gibi bir ek kalırdı.
-const blankOut = (word) => word.example.replace(new RegExp(`\\b${escapeRegExp(word.word)}\\w*`, "i"), "____");
+const blankOut = (word) => replaceWord(word.example, word.word, "____");
 
 export function translateExercise(word, words) {
   const options = shuffle([word, ...pickDistractors(word, words, 3, (w) => w.tr)]);

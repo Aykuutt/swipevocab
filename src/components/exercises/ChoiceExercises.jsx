@@ -1,5 +1,6 @@
 // Çoktan seçmeli alıştırmalar: çeviri ve boşluk doldurma.
 import { useState } from "react";
+import { displayWord } from "../../data/languages";
 import SpeakButton from "../SpeakButton";
 
 function Options({ options, picked, correct, onPick }) {
@@ -36,8 +37,8 @@ export function TranslateExercise({ ex, onResolve }) {
     <div className="exercise">
       <h2 className="exercise-prompt">Türkçe karşılığı nedir?</h2>
       <div className="ask-word">
-        <SpeakButton text={ex.word.word} />
-        <span className="ask-word-text">{ex.word.word}</span>
+        <SpeakButton text={displayWord(ex.word)} />
+        <span className="ask-word-text">{displayWord(ex.word)}</span>
         <span className="ask-word-ipa">{ex.word.phonetic}</span>
       </div>
       <Options options={ex.options} picked={picked} correct={ex.correct} onPick={pick} />

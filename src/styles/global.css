@@ -713,6 +713,7 @@ strong, b { font-weight: 650; }
 .goal.is-selected { border-color: var(--violet); background: var(--violet-soft); }
 .goal-icon { width: 44px; height: 44px; border-radius: var(--r-md); display: grid; place-items: center; background: var(--plum-3); color: var(--violet-strong); flex-shrink: 0; }
 .goal.is-selected .goal-icon { background: var(--violet-fill); color: #fff; }
+.lang-code { font-weight: 800; font-size: 15px; letter-spacing: 0.04em; }
 .goal-text { display: grid; gap: 2px; }
 .goal-text strong { font-size: 16px; }
 .goal-text span { font-size: 13px; color: var(--text-dim); }

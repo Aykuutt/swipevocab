@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { WORDS } from "../data/words";
+import { WORDS } from "../data/langs/en";
 import { fillBlankExercise, placementLevel, placementTest, translateExercise, unitLesson } from "./exercises";
 import { cardsForCall } from "./talk";
 import { buildUnits } from "./units";

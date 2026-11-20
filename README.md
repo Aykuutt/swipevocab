@@ -1,6 +1,6 @@
 # SwipeVocab
 
-Türkçe konuşanlar için oyunlaştırılmış İngilizce kelime ve konuşma pratiği uygulaması (React + Vite + Supabase + LiveKit).
+Türkçe konuşanlar için oyunlaştırılmış kelime ve konuşma pratiği uygulaması: İngilizce, Almanca, İspanyolca ve Fransızca (React + Vite + Supabase + LiveKit).
 
 Canlı sürüm: https://swipevocab.netlify.app
 (Türkiye'de internet sağlayıcıları `*.vercel.app` adreslerini engellediği için asıl adres Netlify.
@@ -20,6 +20,9 @@ npm run check    # üçü birden; GitHub Actions her gönderimde bunları çalı
 
 ## Öne çıkanlar
 
+- **Dört dil:** kurulumda ve Ayarlar'da İngilizce, Almanca, İspanyolca ya da Fransızca seçilir. Bilinen
+  kelimeler, üniteler ve günlük kartlar her dilde ayrı; XP, seri ve lig ortaktır. Okuma sesi, ses
+  tanıma ve konuşma partneri seçilen dile geçer.
 - **Misafir modu:** seviye testinden sonra hesap açmadan başlanabilir; ilerleme o cihazda tutulur,
   sonradan hesap açılınca hesaba taşınır.
 - **PWA:** telefona uygulama gibi yüklenir (Ayarlar > Telefona yükle), internetsizken de açılır.
@@ -62,7 +65,7 @@ src/
 ├── main.jsx                 # giriş noktası
 ├── App.jsx                  # yükleme -> kurulum -> sekmeli ana ekran
 ├── config.js                # sabitler, puanlar, özellik anahtarları (FEATURES)
-├── data/                    # kelimeler, konular, amaçlar, sohbet senaryoları
+├── data/                    # diller, kelimeler (langs/<dil>.js), konular, amaçlar, sohbet senaryoları
 ├── lib/                     # saf yardımcılar (React'siz)
 │   ├── supabase.js          #   Supabase bağlantısı
 │   ├── auth.js              #   kayıt, giriş, şifre sıfırlama
@@ -115,11 +118,15 @@ kelimeler ve konuşulan dakikalar puan kazandırır.
 
 ## Kelime havuzu
 
-190 kelime `src/data/words.js` içinde. Her kayıt `id`, `word`, `phonetic`, `pos`, `level`,
+Her dilin kelimeleri `src/data/langs/<dil>.js` içinde: İngilizce 190, Almanca, İspanyolca ve Fransızca
+120'şer kelime. Her kayıt `id`, `word`, `phonetic`, `pos`, `level`,
 `topic`, `tr`, `definition` ve `example` alanlarını içerir. Yeni kayıt eklerken benzersiz bir
 id ver ve `topic` olarak `daily`, `travel`, `growth`, `work` ya da `academic` seç; üniteler
 havuzdan otomatik oluşur. Örnek cümle kelimenin kendisini aynen içermeli (boşluk doldurma
-sorusu için). Seviye etiketleri öğrenme rehberidir; resmi bir CEFR listesi değildir.
+sorusu için; çekimli biçimler de bulunur, "schön" kelimesi "schönes" içinde eşleşir).
+Almanca, İspanyolca ve Fransızca isimlerde ayrıca `article` alanı (der/die/das, el/la, le/la/l') vardır.
+Yeni dil eklemek için `src/data/languages.js` ve `src/lib/words.js` dosyalarına bir satır eklemek yeterli.
+Seviye etiketleri öğrenme rehberidir; resmi bir CEFR listesi değildir.
 Seviyeleri gözden geçirirken [Oxford Learner's Dictionaries kelime listeleri](https://www.oxfordlearnersdictionaries.com/about/wordlists/oxford3000-5000)
 yararlı bir başvuru kaynağıdır.
 

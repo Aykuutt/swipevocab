@@ -12,6 +12,7 @@ import {
   XP,
 } from "../config";
 import { DEFAULT_GOAL } from "../data/goals";
+import { DEFAULT_LANGUAGE, LANGUAGES } from "../data/languages";
 import { leagueRank } from "../lib/league";
 import { unique } from "../lib/random";
 import { weekOfDay } from "../lib/time";
@@ -22,6 +23,8 @@ export const initialState = {
   user: null, // { id, email, name } (Supabase kullanıcısı)
   savedAt: 0, // son kayıt zamanı; sunucudaki ve yereldeki kopyayı karşılaştırmak için
   goal: null,
+  language: DEFAULT_LANGUAGE, // öğrenilen dil
+  languages: {}, // dil kodu -> o dilin bekleyen ilerlemesi (bkz. LANGUAGE_FIELDS)
   placementLevel: null,
   isPro: false,
   settings: {
@@ -29,7 +32,8 @@ export const initialState = {
     selectedLevels: [...LEVELS],
     notifications: true,
     sound: true,
-    voiceURI: null,
+    voiceURI: null, // eski kayıtlar: İngilizce ses
+    voices: {}, // dil kodu -> seçilen okuma sesi
     talkConsent: false, // canlı konuşma kuralları ve 18+ onayı
   },
   startDayIndex: null, // hesabın açıldığı günün takvim indeksi
@@ -63,8 +67,56 @@ export const initialState = {
 /** Kayıttan gelen durumu eksik alanları tamamlayarak açar. */
 export function hydrate(saved) {
   const { profileId, ...rest } = saved; // eski SQL eşitlemesinden kalan alan
-  const s = { ...initialState, ...rest, settings: { ...initialState.settings, ...rest.settings } };
+  const settings = { ...initialState.settings, ...rest.settings };
+  settings.voices = { ...settings.voices };
+  // Dil seçimi gelmeden önce seçilen ses İngilizce sesiydi.
+  if (settings.voiceURI && !settings.voices.en) settings.voices.en = settings.voiceURI;
+  let s = { ...initialState, ...rest, settings, languages: rest.languages || {} };
+  if (!LANGUAGES[s.language]) s = { ...s, language: DEFAULT_LANGUAGE };
   return FEATURES.pro ? s : { ...s, isPro: false, freezes: 0 };
+}
+
+/**
+ * Her dilde ayrı tutulan alanlar. XP, seri, lig, canlar ve ayarlar bütün dillerde ortaktır;
+ * hangi dil çalışılırsa çalışılsın seri sürer.
+ */
+export const LANGUAGE_FIELDS = [
+  "placementLevel",
+  "knownIds",
+  "learningIds",
+  "schedule",
+  "completedUnits",
+  "deck",
+  "swipedToday",
+  "phase",
+];
+
+const languageSnapshot = (s) => ({
+  ...Object.fromEntries(LANGUAGE_FIELDS.map((f) => [f, s[f]])),
+  day: s.day,
+});
+
+/** Bir dilin kaydedilmiş ilerlemesini açar; başka bir günden kaldıysa günün destesi yenilenir. */
+function restoreLanguage(saved, day) {
+  const fields = Object.fromEntries(LANGUAGE_FIELDS.map((f) => [f, saved[f] ?? initialState[f]]));
+  if (saved.day === day) return fields;
+  return { ...fields, deck: [], swipedToday: 0, phase: "swipe" };
+}
+
+/** İlk kez seçilen dil: baştan başlar, seviye kartlarda bildiklerine göre kendiliğinden yükselir. */
+const freshLanguage = (level) => ({
+  ...Object.fromEntries(LANGUAGE_FIELDS.map((f) => [f, initialState[f]])),
+  placementLevel: level ?? "A1",
+});
+
+/** Öğrenilen dili değiştirir: şimdiki dilin ilerlemesini saklar, yenisininkini açar. */
+function switchLanguage(s, language, level) {
+  if (!LANGUAGES[language] || language === s.language) return s;
+  const languages = { ...s.languages, [s.language]: languageSnapshot(s) };
+  const saved = languages[language];
+  delete languages[language];
+  const fields = saved ? restoreLanguage(saved, s.day) : freshLanguage(level);
+  return { ...s, ...fields, language, languages };
 }
 
 const scheduleAt = (day, stage) => ({ stage, due: day + REVIEW_INTERVALS[stage] });
@@ -137,12 +189,18 @@ export function reducer(state, action) {
       return checkSwipePhase(hydrate(action.state));
 
     case "SET_ONBOARDING":
-      return { ...state, goal: action.goal ?? state.goal, placementLevel: action.level ?? state.placementLevel };
+      return {
+        ...state,
+        goal: action.goal ?? state.goal,
+        placementLevel: action.level ?? state.placementLevel,
+        language: LANGUAGES[action.language] ? action.language : state.language,
+      };
 
     case "START_ACCOUNT":
       return {
         ...initialState,
         goal: action.goal ?? state.goal ?? DEFAULT_GOAL,
+        language: LANGUAGES[action.language] ? action.language : state.language,
         placementLevel: action.level ?? state.placementLevel,
         user: action.user,
         startDayIndex: action.dayIndex,
@@ -150,6 +208,9 @@ export function reducer(state, action) {
 
     case "SIGN_OUT":
       return { ...initialState };
+
+    case "SET_LANGUAGE":
+      return switchLanguage(state, action.language, action.level);
 
     case "SET_NAME":
       return state.user ? { ...state, user: { ...state.user, name: action.name } } : state;

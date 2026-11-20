@@ -7,6 +7,7 @@ import { PARTNER } from "../../../config";
 import { askPartner, buildTurns, describePartnerError, getSampler, usedPracticeWords } from "../../../lib/partner";
 import { getVoiceStatus, speak, speakAlong, stopSpeaking } from "../../../lib/speech";
 import { createListener, hasSpeechRecognition } from "../../../lib/speechRecognition";
+import { useLanguage } from "../../../state/AppContext";
 
 let messageId = 0;
 const nextMessageId = () => ++messageId;
@@ -35,6 +36,7 @@ function AiBubble({ m }) {
 
 export default function PartnerChat({ session, onFinish, onClose }) {
   const { scenario, level, practiceWords } = session;
+  const language = useLanguage();
   const [messages, setMessages] = useState([]);
   const [thinking, setThinking] = useState(false);
   const [error, setError] = useState(null);
@@ -93,7 +95,7 @@ export default function PartnerChat({ session, onFinish, onClose }) {
       const sampler = await getSampler();
       if (id !== requestId.current) return;
       if (!sampler) throw { code: "capability_disabled" };
-      const turns = buildTurns({ scenario, level, practiceWords, history });
+      const turns = buildTurns({ scenario, level, practiceWords, history, language: language.id });
       const reply = await askPartner(sampler, turns, controller.signal);
       if (id !== requestId.current) return;
 
@@ -160,6 +162,7 @@ export default function PartnerChat({ session, onFinish, onClose }) {
     stopTalking();
     try {
       const listener = createListener({
+        lang: language.speech,
         onInterim: setDraft,
         onEnd: (text) => {
           setListening(false);
@@ -314,7 +317,7 @@ export default function PartnerChat({ session, onFinish, onClose }) {
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send(draft)}
-            placeholder={listening ? "Dinliyorum…" : "İngilizce yaz ya da konuş"}
+            placeholder={listening ? "Dinliyorum…" : `${language.name} yaz ya da konuş`}
             aria-label="Mesajın"
             disabled={thinking}
             autoComplete="off"

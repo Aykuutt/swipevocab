@@ -13,10 +13,10 @@ export const GUEST_ID = "guest";
 const guestUser = () => ({ id: GUEST_ID, email: "", name: "", guest: true });
 
 /** Misafirin kayıtlı ilerlemesi varsa onu, yoksa yeni bir başlangıç. */
-function guestAction(now, goal, level) {
+function guestAction(now, goal, level, language) {
   const cached = localCache.load(GUEST_ID);
   if (cached) return { type: "HYDRATE", state: { ...cached, user: guestUser() } };
-  return { type: "START_ACCOUNT", user: guestUser(), dayIndex: localDayIndex(now), goal, level };
+  return { type: "START_ACCOUNT", user: guestUser(), dayIndex: localDayIndex(now), goal, level, language };
 }
 
 function forgetGuest() {
@@ -56,6 +56,7 @@ async function loadAccount(authUser, now) {
     dayIndex: localDayIndex(now),
     goal: pending?.goal,
     level: pending?.level,
+    language: pending?.language,
   };
 }
 
@@ -116,10 +117,10 @@ export function useAccount({ dispatch, getNow }) {
 
   /** Hesap açmadan başla. İlerleme yalnızca bu cihazda tutulur. */
   const startGuest = useCallback(
-    (goal, level) => {
+    (goal, level, language) => {
       storage.set(GUEST_FLAG, true);
       loadedFor.current = GUEST_ID;
-      dispatch(guestAction(getNow(), goal, level));
+      dispatch(guestAction(getNow(), goal, level, language));
       setStatus("guest");
     },
     [dispatch, getNow]

@@ -6,6 +6,7 @@ import Icon from "../../components/Icon";
 import { Splash } from "../../components/layout";
 import { Button, EmptyState, Overlay } from "../../components/ui";
 import { FEATURES } from "../../config";
+import { getLanguage } from "../../data/languages";
 import { fillBlankGame, matchGame } from "../../lib/exercises";
 import { getSampler } from "../../lib/partner";
 import { useApp } from "../../state/AppContext";
@@ -126,7 +127,7 @@ export default function GameScreen() {
                 <strong>
                   Konuşma partneri <span className="pill pill-mint">Yeni</span>
                 </strong>
-                <span>Yapay zekayla İngilizce sohbet et, yazarak ya da konuşarak. Hata yaparsan ipucu verir.</span>
+                <span>Yapay zekayla {getLanguage(state.language).name} sohbet et, yazarak ya da konuşarak. Hata yaparsan ipucu verir.</span>
               </span>
               <Icon name="chevronRight" size={20} />
             </button>

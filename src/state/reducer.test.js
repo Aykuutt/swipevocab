@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { WORDS } from "../data/words";
+import { WORDS } from "../data/langs/en";
+import { WORDS as DE_WORDS } from "../data/langs/de";
 import { buildDeck, topUpCards } from "../lib/deck";
-import { initialState, reducer } from "./reducer";
+import { hydrate, initialState, reducer } from "./reducer";
 import { dailyCardLimit } from "./selectors";
 
 function newUser(goal = 10) {
@@ -125,5 +126,57 @@ describe("canlar", () => {
     const before = s.lives;
     s = reducer({ ...s, xp: 0 }, { type: "BUY_HEARTS" });
     expect(s.lives).toBe(before);
+  });
+});
+
+describe("dil değiştirme", () => {
+  it("her dilin ilerlemesi ayrı, XP ve seri ortak", () => {
+    let s = newUser(5);
+    [s] = swipeAll(s, "keep");
+    const enKnown = s.knownIds.length;
+    const xp = s.xp;
+    expect(s.phase).toBe("limit");
+
+    s = reducer(s, { type: "SET_LANGUAGE", language: "de" });
+    expect(s.language).toBe("de");
+    expect(s.knownIds).toEqual([]);
+    expect(s.swipedToday).toBe(0);
+    expect(s.phase).toBe("swipe");
+    expect(s.placementLevel).toBe("A1");
+    expect(s.xp).toBe(xp);
+    expect(s.streak).toBe(1);
+
+    s = reducer(s, { type: "SET_DECK", deck: buildDeck(s, DE_WORDS) });
+    expect(s.deck).toHaveLength(5);
+    [s] = swipeAll(s, "keep");
+    expect(s.phase).toBe("limit");
+    expect(s.streak).toBe(1); // aynı gün ikinci dil seriyi iki kez artırmaz
+
+    s = reducer(s, { type: "SET_LANGUAGE", language: "en" });
+    expect(s.knownIds).toHaveLength(enKnown);
+    expect(s.phase).toBe("limit"); // aynı gün geri dönünce sınır korunur
+    expect(s.languages.de.knownIds).toHaveLength(5);
+  });
+
+  it("başka bir günde geri dönülen dilin günlük kartları yenilenir", () => {
+    let s = newUser(5);
+    [s] = swipeAll(s, "keep");
+    s = reducer(s, { type: "SET_LANGUAGE", language: "fr" });
+    s = reducer(s, { type: "SYNC_DAY", day: 2, deck: [] });
+    s = reducer(s, { type: "SET_LANGUAGE", language: "en" });
+    expect(s.swipedToday).toBe(0);
+    expect(s.phase).toBe("swipe");
+    expect(s.deck).toEqual([]);
+    expect(s.knownIds).toHaveLength(5);
+  });
+
+  it("bilinmeyen dil yok sayılır, eski kayıtlar İngilizce açılır", () => {
+    const s = newUser(5);
+    expect(reducer(s, { type: "SET_LANGUAGE", language: "xx" })).toBe(s);
+    const { language, languages, ...old } = s;
+    const h = hydrate({ ...old, settings: { ...old.settings, voiceURI: "v1", voices: undefined } });
+    expect(h.language).toBe("en");
+    expect(h.languages).toEqual({});
+    expect(h.settings.voices).toEqual({ en: "v1" });
   });
 });

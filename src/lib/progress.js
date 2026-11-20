@@ -24,7 +24,7 @@ export function loadLegacyProgress(email) {
   return isCurrent(s) ? s : null;
 }
 
-/** Kayıt sırasında seçilen amaç ve seviye; e-posta onayından dönünce kullanılır. */
+/** Kayıt sırasında seçilen amaç, seviye ve dil; e-posta onayından dönünce kullanılır. */
 export const pendingOnboarding = {
   save: (value) => storage.set(PENDING_KEY, value),
   load: () => storage.get(PENDING_KEY),

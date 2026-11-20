@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
-import { getVoiceStatus, listEnglishVoices } from "../lib/speech";
+import { getVoiceStatus, listLanguageVoices } from "../lib/speech";
+import { useLanguage } from "../state/AppContext";
 
-/** Cihazdaki İngilizce ses durumunu izler; sesler geç yüklenirse güncellenir. */
+/** Cihazdaki, öğrenilen dildeki ses durumunu izler; sesler geç yüklenirse güncellenir. */
 export function useVoiceInfo() {
-  const read = () => ({ ...getVoiceStatus(), voices: listEnglishVoices() });
+  const language = useLanguage().id;
+  const read = () => ({ ...getVoiceStatus(), voices: listLanguageVoices() });
   const [info, setInfo] = useState(read);
   useEffect(() => {
     const update = () => setInfo(read());
@@ -15,6 +17,6 @@ export function useVoiceInfo() {
       clearTimeout(timer);
       synth?.removeEventListener?.("voiceschanged", update);
     };
-  }, []);
+  }, [language]);
   return info;
 }

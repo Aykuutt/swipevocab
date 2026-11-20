@@ -2,8 +2,8 @@
 import { useEffect, useState } from "react";
 import { MAX_LIVES } from "../config";
 import { useValueDelta } from "../hooks/useValueDelta";
-import { NO_ENGLISH_VOICE_EVENT } from "../lib/speech";
-import { useApp } from "../state/AppContext";
+import { NO_VOICE_EVENT } from "../lib/speech";
+import { useApp, useLanguage } from "../state/AppContext";
 import { currentStreak, hasUnlimitedLives } from "../state/selectors";
 import HeartTimer from "./HeartTimer";
 import Icon from "./Icon";
@@ -110,10 +110,11 @@ export function Splash({
   );
 }
 
-/** Cihazda İngilizce ses yoksa bir kez gösterilen uyarı. */
+/** Cihazda öğrenilen dilde ses yoksa bir kez gösterilen uyarı. */
 export function VoiceNotice() {
   const [visible, setVisible] = useState(false);
   const { goTo } = useApp();
+  const language = useLanguage();
 
   useEffect(() => {
     let shown = false;
@@ -122,8 +123,8 @@ export function VoiceNotice() {
       shown = true;
       setVisible(true);
     };
-    window.addEventListener(NO_ENGLISH_VOICE_EVENT, show);
-    return () => window.removeEventListener(NO_ENGLISH_VOICE_EVENT, show);
+    window.addEventListener(NO_VOICE_EVENT, show);
+    return () => window.removeEventListener(NO_VOICE_EVENT, show);
   }, []);
 
   if (!visible) return null;
@@ -131,8 +132,9 @@ export function VoiceNotice() {
     <div className="voice-notice" role="status">
       <Icon name="info" size={18} />
       <p>
-        Bu cümleyi okumak için cihazında İngilizce ses gerekiyor, bulamadım. Türkçe sesle yanlış telaffuz öğrenmemen
-        için okumadım. Kelimeler hazır kayıtla okunmaya devam ediyor. Ayrıntı Ayarlar'da, Okuma sesi bölümünde.
+        Bunu okumak için cihazında {language.name} ses gerekiyor, bulamadım. Türkçe sesle yanlış telaffuz öğrenmemen
+        için okumadım.{language.id === "en" ? " Kelimeler hazır kayıtla okunmaya devam ediyor." : ""} Ayrıntı Ayarlar'da,
+        Okuma sesi bölümünde.
       </p>
       <button
         type="button"

@@ -4,12 +4,14 @@ import Mascot from "../../../components/Mascot";
 import { Button } from "../../../components/ui";
 import { SCENARIOS } from "../../../data/scenarios";
 import { useVoiceInfo } from "../../../hooks/useVoiceInfo";
+import { useLanguage } from "../../../state/AppContext";
 
 /** Senaryo seçimi ve gizlilik bilgilendirmesi. */
 export default function PartnerSetup({ level, onStart, onClose }) {
   const [selectedId, setSelectedId] = useState(SCENARIOS[0].id);
   const scenario = SCENARIOS.find((s) => s.id === selectedId);
   const noVoice = useVoiceInfo().status === "missing";
+  const language = useLanguage();
 
   return (
     <div className="partner">
@@ -23,7 +25,7 @@ export default function PartnerSetup({ level, onStart, onClose }) {
       <div className="partner-scroll">
         <div className="partner-hero">
           <Mascot mood="wave" size={84} />
-          <p>Kart'la İngilizce sohbet et. Yazarak ya da konuşarak cevap ver, hata yaparsan kısa bir ipucu alırsın.</p>
+          <p>Kart'la {language.name} sohbet et. Yazarak ya da konuşarak cevap ver, hata yaparsan kısa bir ipucu alırsın.</p>
         </div>
 
         <p className="partner-notice">
@@ -38,7 +40,7 @@ export default function PartnerSetup({ level, onStart, onClose }) {
           <p className="partner-notice partner-notice-warn">
             <Icon name="info" size={16} />
             <span>
-              Cihazında İngilizce ses yok, bu yüzden yapay zekanın cümleleri sesli okunamaz (Türkçe sesle okumak
+              Cihazında {language.name} ses yok, bu yüzden yapay zekanın cümleleri sesli okunamaz (Türkçe sesle okumak
               telaffuzunu bozar). Yazarak konuşabilirsin. Ses eklemek için Ayarlar, Okuma sesi bölümüne bak.
             </span>
           </p>

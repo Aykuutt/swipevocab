@@ -38,12 +38,14 @@ function MainLayout() {
 }
 
 function Root() {
-  const { state, wordsStatus, reloadWords, account } = useApp();
+  const { state, words, wordsStatus, reloadWords, account } = useApp();
+  const inApp = (account.status === "signedIn" || account.status === "guest") && !!state.user;
   if (account.status === "unconfigured") {
     return <Splash error message="Supabase ayarları eksik. .env.example dosyasındaki adımları izle." />;
   }
   if (account.recovery) return <NewPassword onDone={account.finishRecovery} />;
-  if (wordsStatus === "loading" || account.status === "loading") return <Splash />;
+  // Kurulumda dil değişirken ekran sıfırlanmasın; seviye testi kendi yüklenmesini bekler.
+  if (account.status === "loading" || (wordsStatus === "loading" && (inApp || words.length === 0))) return <Splash />;
   if (wordsStatus === "error") return <Splash error onRetry={reloadWords} />;
   if (account.status === "error") {
     return (
@@ -54,7 +56,7 @@ function Root() {
       />
     );
   }
-  if ((account.status !== "signedIn" && account.status !== "guest") || !state.user) return <Onboarding />;
+  if (!inApp) return <Onboarding />;
   return (
     <>
       <MainLayout />

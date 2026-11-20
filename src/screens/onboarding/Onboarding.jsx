@@ -1,11 +1,14 @@
-// İlk açılış akışı: karşılama -> amaç -> seviye testi -> hesap.
+// İlk açılış akışı: karşılama -> dil -> amaç -> seviye testi -> hesap.
 import { useMemo, useState } from "react";
 import Feedback from "../../components/exercises/Feedback";
 import { FillBlankExercise, TranslateExercise } from "../../components/exercises/ChoiceExercises";
 import Icon from "../../components/Icon";
+import LanguagePicker from "../../components/LanguagePicker";
+import { Splash } from "../../components/layout";
 import Mascot from "../../components/Mascot";
 import { Brand, Button, ProgressBar } from "../../components/ui";
 import { GOALS } from "../../data/goals";
+import { getLanguage } from "../../data/languages";
 import { placementLevel, placementTest } from "../../lib/exercises";
 import { useApp } from "../../state/AppContext";
 import AuthForm from "./AuthForm";
@@ -32,7 +35,8 @@ function Welcome({ onStart, onHaveAccount }) {
         <Brand as="h1" className="welcome-brand" />
         <p className="welcome-title">Kelimeleri kaydır, öğren.</p>
         <p className="welcome-sub">
-          Her gün birkaç dakikada İngilizce kelime hazneni büyüt. Bildiğini sağa, bilmediğini sola at.
+          Her gün birkaç dakikada İngilizce, Almanca, İspanyolca ya da Fransızca kelime hazneni büyüt. Bildiğini
+          sağa, bilmediğini sola at.
         </p>
       </div>
       <div className="welcome-actions">
@@ -41,6 +45,21 @@ function Welcome({ onStart, onHaveAccount }) {
         </Button>
         <Button size="lg" block variant="ghost" onClick={onHaveAccount}>
           Zaten hesabım var
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function LanguageStep({ language, onChange, onNext }) {
+  return (
+    <div className="step">
+      <h1 className="step-title">Hangi dili öğrenmek istiyorsun?</h1>
+      <p className="step-sub">Sonra Ayarlar'dan istediğin zaman değiştirebilirsin, her dilin ilerlemesi ayrı saklanır.</p>
+      <LanguagePicker value={language} onChange={onChange} />
+      <div className="step-footer">
+        <Button size="lg" block onClick={onNext}>
+          Devam
         </Button>
       </div>
     </div>
@@ -82,7 +101,14 @@ function GoalStep({ goal, onChange, onNext }) {
 }
 
 /** Beş soruluk seviye testi. Cevaplar doğru/yanlış diye gösterilmez. */
-function PlacementTest({ goal, onFinish }) {
+function PlacementTest(props) {
+  const { wordsStatus } = useApp();
+  // Seçilen dilin kelimeleri gelmeden soru üretme.
+  if (wordsStatus !== "ready") return <Splash />;
+  return <PlacementQuestions {...props} />;
+}
+
+function PlacementQuestions({ goal, onFinish }) {
   const { words, sfx } = useApp();
   const questions = useMemo(() => placementTest(goal, words), [goal, words]);
   const [index, setIndex] = useState(0);
@@ -122,18 +148,19 @@ function PlacementTest({ goal, onFinish }) {
   );
 }
 
-const STEPS = ["goal", "test", "account"];
+const STEPS = ["language", "goal", "test", "account"];
 
 export default function Onboarding() {
-  const { actions, account } = useApp();
-  const [step, setStep] = useState("welcome"); // welcome | signin | goal | test | account
+  const { state, actions, account } = useApp();
+  const [step, setStep] = useState("welcome"); // welcome | signin | language | goal | test | account
+  const language = state.language;
   const [goal, setGoal] = useState(null);
   const [level, setLevel] = useState(null);
 
   if (step === "welcome") {
     return (
       <div className="onboarding">
-        <Welcome onStart={() => setStep("goal")} onHaveAccount={() => setStep("signin")} />
+        <Welcome onStart={() => setStep("language")} onHaveAccount={() => setStep("signin")} />
       </div>
     );
   }
@@ -149,8 +176,13 @@ export default function Onboarding() {
   return (
     <div className="onboarding">
       <div className="onboarding-top">
-        {step === "goal" ? (
-          <button type="button" className="icon-btn" aria-label="Geri" onClick={() => setStep("welcome")}>
+        {step === "language" || step === "goal" ? (
+          <button
+            type="button"
+            className="icon-btn"
+            aria-label="Geri"
+            onClick={() => setStep(step === "goal" ? "language" : "welcome")}
+          >
             <Icon name="chevronLeft" size={22} />
           </button>
         ) : (
@@ -158,6 +190,14 @@ export default function Onboarding() {
         )}
         <ProgressBar value={((STEPS.indexOf(step) + 1) / STEPS.length) * 100} label="Kurulum adımları" />
       </div>
+
+      {step === "language" && (
+        <LanguageStep
+          language={language}
+          onChange={(id) => actions.setOnboarding(undefined, undefined, id)}
+          onNext={() => setStep("goal")}
+        />
+      )}
 
       {step === "goal" && (
         <GoalStep
@@ -187,8 +227,9 @@ export default function Onboarding() {
           initialMode="signup"
           goal={goal}
           level={level}
-          onGuest={() => account.startGuest(goal, level)}
-          levelNote={`Başlangıç seviyen ${level}. İlerlemeni kaybetmemek için hesap oluştur.`}
+          language={language}
+          onGuest={() => account.startGuest(goal, level, language)}
+          levelNote={`${getLanguage(language).name} başlangıç seviyen ${level}. İlerlemeni kaybetmemek için hesap oluştur.`}
           onBack={() => setStep("goal")}
         />
       )}

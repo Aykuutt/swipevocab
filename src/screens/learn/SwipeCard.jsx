@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import Icon from "../../components/Icon";
 import SpeakButton from "../../components/SpeakButton";
 import { TOPICS } from "../../data/topics";
-import { escapeRegExp } from "../../lib/random";
+import { displayWord } from "../../data/languages";
+import { splitAtWord } from "../../lib/wordMatch";
 
 const SWIPE_THRESHOLD = 100; // px: bu kadar sürüklenirse karar verilir
 const TAP_TOLERANCE = 6; // px: bundan az hareket dokunma sayılır
@@ -20,9 +21,15 @@ const translationFontSize = (tr) => (tr.length <= 10 ? 30 : tr.length <= 16 ? 25
 
 /** Örnek cümlede kelimeyi kalın yazar. */
 function HighlightedExample({ text, word }) {
-  return text
-    .split(new RegExp(`(\\b${escapeRegExp(word)}\\w*)`, "i"))
-    .map((part, i) => (i % 2 === 1 ? <b key={i}>{part}</b> : <span key={i}>{part}</span>));
+  const parts = splitAtWord(text, word);
+  if (!parts) return text;
+  return (
+    <>
+      {parts[0]}
+      <b>{parts[1]}</b>
+      {parts[2]}
+    </>
+  );
 }
 
 function CardDecor({ topic }) {
@@ -129,10 +136,10 @@ export default function SwipeCard({ word, isReview, isTop, exitDir, flipToken = 
             {isReview && <span className="tag tag-review">Tekrar</span>}
             <span className="tag tag-pos">{word.pos}</span>
             <span className="tag tag-level">{word.level}</span>
-            <SpeakButton text={word.word} className="card-speak" />
+            <SpeakButton text={displayWord(word)} className="card-speak" />
           </div>
-          <h2 className="card-word" style={{ fontSize: wordFontSize(word.word) }}>
-            {word.word}
+          <h2 className="card-word" style={{ fontSize: wordFontSize(displayWord(word)) }}>
+            {displayWord(word)}
           </h2>
           <p className="card-ipa">{word.phonetic}</p>
           <p className="card-hint">Anlamı için dokun</p>

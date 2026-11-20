@@ -44,7 +44,7 @@ function MailSent({ email, title, text, children }) {
  * goal / level: kurulumda seçilen amaç ve seviye. E-posta onayı sırasında sayfa yeniden
  * açılacağı için tarayıcıya not edilir ve hesap ilk açıldığında kullanılır.
  */
-export default function AuthForm({ initialMode = "signup", levelNote, goal, level, onBack, onGuest }) {
+export default function AuthForm({ initialMode = "signup", levelNote, goal, level, language, onBack, onGuest }) {
   const [mode, setMode] = useState(initialMode); // signup | signin | forgot | resetSent | confirm
   const [values, setValues] = useState({ name: "", email: "", password: "" });
   const [errors, setErrors] = useState({});
@@ -88,7 +88,7 @@ export default function AuthForm({ initialMode = "signup", levelNote, goal, leve
       setErrors(er);
       if (hasErrors(er)) return;
       run(async () => {
-        pendingOnboarding.save({ goal, level });
+        pendingOnboarding.save({ goal, level, language });
         const { needsConfirmation } = await signUp(values);
         if (needsConfirmation) setMode("confirm");
       });

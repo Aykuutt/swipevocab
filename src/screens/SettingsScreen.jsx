@@ -1,6 +1,7 @@
-// "Ayarlar" sekmesi: hesap, öğrenme, okuma sesi, ses efektleri, abonelik, test araçları.
+// "Ayarlar" sekmesi: hesap, dil, öğrenme, okuma sesi, ses efektleri, abonelik, test araçları.
 import AccountPrompt from "../components/AccountPrompt";
 import HeartTimer from "../components/HeartTimer";
+import LanguagePicker from "../components/LanguagePicker";
 import { Button, Chips, Field, Group, Row, Switch } from "../components/ui";
 import {
   APP_NAME,
@@ -16,13 +17,32 @@ import {
 import { useInstallPrompt } from "../hooks/useInstallPrompt";
 import { useVoiceInfo } from "../hooks/useVoiceInfo";
 import { speak } from "../lib/speech";
-import { useApp } from "../state/AppContext";
+import { useApp, useLanguage } from "../state/AppContext";
 import { activeLevels, hasFullAccess, hasUnlimitedLives } from "../state/selectors";
 
-const VOICE_HINT =
-  "Cihazında İngilizce ses varsa kelimeleri ve yapay zekanın cümlelerini o okur, yoksa kelimeler hazır kayıtla okunur. " +
-  "Cihaza İngilizce ses eklemek için: Windows'ta Ayarlar, Zaman ve dil, Konuşma, Ses ekle yolundan İngilizce bir ses " +
-  "kurabilirsin. Edge tarayıcısında genelde daha doğal sesler hazır gelir.";
+const voiceHint = (name, hasClips) =>
+  `Cihazında ${name} ses varsa kelimeleri ve yapay zekanın cümlelerini o okur${hasClips ? ", yoksa kelimeler hazır kayıtla okunur" : ""}. ` +
+  `Cihaza ${name} ses eklemek için: Windows'ta Ayarlar, Zaman ve dil, Konuşma, Ses ekle; Android'de Ayarlar, Metin okuma; ` +
+  `iPhone'da Ayarlar, Erişilebilirlik, Seslendirilen İçerik, Sesler yolundan ${name} bir ses kurabilirsin. ` +
+  "Edge tarayıcısında genelde daha doğal sesler hazır gelir.";
+
+/** Öğrenilen dil. Her dilin bilinen kelimeleri, üniteleri ve günlük kartları ayrı tutulur. */
+function LanguageSettings() {
+  const { state, actions } = useApp();
+  const describe = (id) => {
+    if (id === state.language) return `Şu an bu dili çalışıyorsun, ${state.knownIds.length} kelime biliyorsun.`;
+    const saved = state.languages[id];
+    return saved ? `${saved.knownIds?.length ?? 0} kelime biliyorsun.` : "Henüz başlamadın.";
+  };
+  return (
+    <Group
+      title="Öğrendiğin dil"
+      hint="Dil değiştirince o dilin kelimeleri ve üniteleri açılır. XP, seri ve lig bütün dillerde ortak; diğer dildeki ilerlemen kaybolmaz."
+    >
+      <LanguagePicker value={state.language} onChange={actions.setLanguage} describe={describe} />
+    </Group>
+  );
+}
 
 function InstallApp() {
   const { status, install } = useInstallPrompt();
@@ -51,35 +71,36 @@ function InstallApp() {
 
 function VoiceSettings() {
   const { state, actions } = useApp();
+  const language = useLanguage();
   const voice = useVoiceInfo();
   const ready = voice.status === "ready";
   const loading = voice.status === "unknown";
+  const hasClips = language.id === "en"; // hazır ses kayıtları yalnızca İngilizcede var
+  const name = language.name;
 
-  const title = ready ? "İngilizce ses bulundu" : loading ? "Sesler yükleniyor…" : "Cihazda İngilizce ses yok";
+  const title = ready ? `${name} ses bulundu` : loading ? "Sesler yükleniyor…" : `Cihazda ${name} ses yok`;
   const desc = ready
-    ? `Kullanılan: ${voice.name} (${voice.lang}). Cihazda ${voice.english} İngilizce ses var.`
+    ? `Kullanılan: ${voice.name} (${voice.lang}). Cihazda ${voice.matching} ${name} ses var.`
     : loading
       ? "Birkaç saniye bekle."
-      : `Cihazında ${voice.total} ses var ama hiçbiri İngilizce değil. Kelimeler ve örnek cümleler hazır ses kaydıyla okunur (makine sesi, doğal değil). Yapay zekanın cümlelerini okumak için cihaz sesi gerekir.`;
+      : hasClips
+        ? `Cihazında ${voice.total} ses var ama hiçbiri ${name} değil. Kelimeler ve örnek cümleler hazır ses kaydıyla okunur (makine sesi, doğal değil). Yapay zekanın cümlelerini okumak için cihaz sesi gerekir.`
+        : `Cihazında ${voice.total} ses var ama hiçbiri ${name} değil. Kelimeleri sesli dinlemek için cihazına ${name} bir ses eklemelisin (aşağıdaki açıklamaya bak).`;
 
   return (
-    <Group id="voice-settings" title="Okuma sesi" hint={VOICE_HINT}>
+    <Group id="voice-settings" title="Okuma sesi" hint={voiceHint(name, hasClips)}>
       <Row icon="speaker" tone={ready ? "mint" : "coral"} title={title} desc={desc}>
-        <Button
-          size="sm"
-          variant="secondary"
-          onClick={() => speak(ready ? "Hello! This is how I will read English words." : "negotiate")}
-        >
+        <Button size="sm" variant="secondary" onClick={() => speak(ready || !hasClips ? language.sample : "negotiate")}>
           Dene
         </Button>
       </Row>
       {voice.voices.length > 1 && (
-        <Row icon="sliders" tone="violet" title="Ses seç" desc="Beğenmediysen başka bir İngilizce ses seç." stacked>
+        <Row icon="sliders" tone="violet" title="Ses seç" desc={`Beğenmediysen başka bir ${name} ses seç.`} stacked>
           <select
             className="select"
             aria-label="Okuma sesi"
-            value={state.settings.voiceURI || ""}
-            onChange={(e) => actions.setSetting("voiceURI", e.target.value || null)}
+            value={state.settings.voices?.[language.id] || ""}
+            onChange={(e) => actions.setVoice(e.target.value)}
           >
             <option value="">Otomatik (önerilen)</option>
             {voice.voices.map((v) => (
@@ -184,6 +205,8 @@ export default function SettingsScreen() {
           </>
         )}
       </Group>
+
+      <LanguageSettings />
 
       <Group title="Öğrenme" hint={full ? undefined : "B1-C1 seviyeleri ve günlük hedef seçimi Pro planla açılır."}>
         <Row icon="book" tone="mint" title="Seviyeler" desc="Kartlarda hangi seviyeler çıksın?" stacked>
