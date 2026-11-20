@@ -912,23 +912,24 @@ strong, b { font-weight: 650; }
 .goal-compact { padding: 10px 14px; }
 .goal-compact .goal-text strong { font-size: 14.5px; }
 
-/* ---------- Maskot Kart: köşeden beliren konuşma balonu ---------- */
+/* ---------- Maskot Kart: sağ üstten (başlığın altından) beliren konuşma balonu ----------
+   Balon tıklamaları geçirir (alttaki düğmeler çalışmaya devam eder); maskota dokununca kapanır. */
 .buddy {
-  position: absolute; right: 8px; bottom: calc(76px + env(safe-area-inset-bottom, 0px)); z-index: 20;
-  display: flex; align-items: flex-end; gap: 4px; padding: 0; border: 0; background: none; cursor: pointer;
-  opacity: 0; transform: translateX(110%) rotate(8deg); pointer-events: none;
-  transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.25), opacity 0.25s ease;
+  position: absolute; top: 60px; right: 6px; z-index: 20;
+  display: flex; flex-direction: row; align-items: flex-start; gap: 2px; padding: 0; border: 0; background: none;
+  pointer-events: none; opacity: 0; transform: translateY(-24px) scale(0.9);
+  transition: transform 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.25), opacity 0.25s ease;
 }
-.buddy.is-visible { opacity: 1; transform: none; pointer-events: auto; }
+.buddy.is-visible { opacity: 1; transform: none; }
+.buddy.is-visible .buddy-mascot { pointer-events: auto; cursor: pointer; animation: buddy-hop 0.6s ease-out; }
 .buddy-bubble {
-  max-width: 220px; margin-bottom: 44px; padding: 10px 13px;
-  border-radius: 16px 16px 4px 16px; background: var(--paper); color: var(--ink);
+  max-width: 220px; margin-top: 16px; padding: 10px 13px;
+  border-radius: 16px 4px 16px 16px; background: var(--paper); color: var(--ink);
   font-size: 13.5px; font-weight: 600; line-height: 1.4; text-align: left;
   box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45);
 }
 .buddy-mascot { flex-shrink: 0; filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.45)); }
-.buddy.is-visible .buddy-mascot { animation: buddy-hop 0.6s ease-out; }
-@keyframes buddy-hop { 0% { transform: translateY(14px); } 55% { transform: translateY(-6px); } 100% { transform: none; } }
+@keyframes buddy-hop { 0% { transform: translateY(-10px) rotate(-6deg); } 60% { transform: translateY(3px); } 100% { transform: none; } }
 
 /* İlerleme ekranında Kart'ın yorumu */
 .coach { display: flex; align-items: flex-end; gap: 10px; margin: 2px 0 16px; }
@@ -936,3 +937,8 @@ strong, b { font-weight: 650; }
   flex: 1; margin-bottom: 26px; padding: 11px 14px; border-radius: 16px 16px 16px 4px;
   background: var(--plum-1); border: 1px solid var(--line); font-size: 14px; line-height: 1.45; color: var(--text);
 }
+
+/* Misafir modu */
+.link-btn-muted { color: var(--text-dim); font-weight: 550; }
+.guest-nudge { margin: 6px 0 4px; text-align: left; }
+.guest-nudge p { font-size: 13px; }

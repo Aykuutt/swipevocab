@@ -1,4 +1,5 @@
 // "Ayarlar" sekmesi: hesap, öğrenme, okuma sesi, ses efektleri, abonelik, test araçları.
+import AccountPrompt from "../components/AccountPrompt";
 import HeartTimer from "../components/HeartTimer";
 import { Button, Chips, Field, Group, Row, Switch } from "../components/ui";
 import {
@@ -130,12 +131,32 @@ export default function SettingsScreen() {
             autoComplete="name"
           />
         </Row>
-        <Row icon="mail" tone="sky" title="E-posta" desc={user?.email || "Google hesabı"} />
-        <Row icon="logout" tone="coral" title="Oturum" desc="İlerlemen bu hesapta saklı kalır.">
-          <Button size="sm" variant="secondary" onClick={actions.signOut}>
-            Çıkış yap
-          </Button>
-        </Row>
+        {user?.guest ? (
+          <>
+            <Row
+              icon="info"
+              tone="amber"
+              title="Misafir olarak kullanıyorsun"
+              desc="İlerlemen yalnızca bu cihazda. Hesap açarsan tüm cihazlarında saklanır ve kaybolmaz."
+            >
+              <AccountPrompt size="sm">Hesap oluştur</AccountPrompt>
+            </Row>
+            <Row icon="mail" tone="sky" title="Zaten hesabın var mı?" desc="Hesabındaki ilerleme yüklenir.">
+              <AccountPrompt size="sm" variant="secondary" mode="signin">
+                Giriş yap
+              </AccountPrompt>
+            </Row>
+          </>
+        ) : (
+          <>
+            <Row icon="mail" tone="sky" title="E-posta" desc={user?.email} />
+            <Row icon="logout" tone="coral" title="Oturum" desc="İlerlemen bu hesapta saklı kalır.">
+              <Button size="sm" variant="secondary" onClick={actions.signOut}>
+                Çıkış yap
+              </Button>
+            </Row>
+          </>
+        )}
       </Group>
 
       <Group title="Öğrenme" hint={full ? undefined : "B1-C1 seviyeleri ve günlük hedef seçimi Pro planla açılır."}>

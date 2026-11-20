@@ -54,7 +54,7 @@ function Root() {
       />
     );
   }
-  if (account.status !== "signedIn" || !state.user) return <Onboarding />;
+  if ((account.status !== "signedIn" && account.status !== "guest") || !state.user) return <Onboarding />;
   return (
     <>
       <MainLayout />

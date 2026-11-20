@@ -125,7 +125,7 @@ function PlacementTest({ goal, onFinish }) {
 const STEPS = ["goal", "test", "account"];
 
 export default function Onboarding() {
-  const { actions } = useApp();
+  const { actions, account } = useApp();
   const [step, setStep] = useState("welcome"); // welcome | signin | goal | test | account
   const [goal, setGoal] = useState(null);
   const [level, setLevel] = useState(null);
@@ -187,6 +187,7 @@ export default function Onboarding() {
           initialMode="signup"
           goal={goal}
           level={level}
+          onGuest={() => account.startGuest(goal, level)}
           levelNote={`Başlangıç seviyen ${level}. İlerlemeni kaybetmemek için hesap oluştur.`}
           onBack={() => setStep("goal")}
         />

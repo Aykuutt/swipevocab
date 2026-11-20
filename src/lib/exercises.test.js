@@ -24,6 +24,12 @@ describe("sorular", () => {
     }
   });
 
+  it("ek almış kelimede boşluktan sonra harf kalmaz", () => {
+    const leave = WORDS.find((w) => w.word === "leave");
+    const ex = fillBlankExercise(leave, WORDS);
+    expect(ex.blanked).toBe("The train ____ at half past six.");
+  });
+
   it("kelime cümlede geçmiyorsa çeviri sorusuna döner", () => {
     const odd = { ...WORDS[0], example: "Nothing to see here." };
     expect(fillBlankExercise(odd, WORDS).type).toBe("translate");

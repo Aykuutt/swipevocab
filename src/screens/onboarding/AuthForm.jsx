@@ -44,7 +44,7 @@ function MailSent({ email, title, text, children }) {
  * goal / level: kurulumda seçilen amaç ve seviye. E-posta onayı sırasında sayfa yeniden
  * açılacağı için tarayıcıya not edilir ve hesap ilk açıldığında kullanılır.
  */
-export default function AuthForm({ initialMode = "signup", levelNote, goal, level, onBack }) {
+export default function AuthForm({ initialMode = "signup", levelNote, goal, level, onBack, onGuest }) {
   const [mode, setMode] = useState(initialMode); // signup | signin | forgot | resetSent | confirm
   const [values, setValues] = useState({ name: "", email: "", password: "" });
   const [errors, setErrors] = useState({});
@@ -210,6 +210,11 @@ export default function AuthForm({ initialMode = "signup", levelNote, goal, leve
         {mode === "signup" && (
           <button type="button" className="link-btn" onClick={() => switchMode("signin")}>
             Zaten hesabım var
+          </button>
+        )}
+        {mode === "signup" && onGuest && (
+          <button type="button" className="link-btn link-btn-muted" onClick={onGuest}>
+            Şimdilik hesapsız devam et
           </button>
         )}
         {mode === "signin" && onBack && (

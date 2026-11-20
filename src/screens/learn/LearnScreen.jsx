@@ -3,6 +3,7 @@
 //   reinforce -> işaretlenen kelimeler için pekiştirme soruları
 //   done/limit-> günün özeti
 import { useMemo, useRef, useState } from "react";
+import AccountPrompt from "../../components/AccountPrompt";
 import ExerciseRunner from "../../components/exercises/ExerciseRunner";
 import Icon from "../../components/Icon";
 import { Button, EmptyState, Overlay } from "../../components/ui";
@@ -243,6 +244,15 @@ function DonePhase() {
             <span>günlük seri</span>
           </li>
         </ul>
+        {state.user?.guest && (
+          <div className="notice notice-violet guest-nudge">
+            <Icon name="info" size={18} />
+            <p>İlerlemen sadece bu cihazda. Kaybetmemek için ücretsiz hesap aç.</p>
+            <AccountPrompt size="sm" variant="secondary">
+              Hesap aç
+            </AccountPrompt>
+          </div>
+        )}
         {!unlimited && (
           <p>
             Bugünün {limit} kartını bitirdin. Yarın yeni kartlar ve zamanı gelen tekrarlar seni bekliyor.

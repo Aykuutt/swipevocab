@@ -30,6 +30,11 @@ export function useProgressSave(state, active, dispatch) {
     const s = latest.current;
     if (!s.user || !dirty.current) return true;
     dirty.current = false;
+    if (s.user.guest) {
+      // Misafir: ilerleme yalnızca bu cihazda.
+      localCache.save(s.user.id, stamp());
+      return true;
+    }
     try {
       const stamped = stamp();
       localCache.save(s.user.id, stamped);
@@ -62,7 +67,7 @@ export function useProgressSave(state, active, dispatch) {
   /** Sunucuda bu cihazdakinden yeni bir kayıt varsa yükler. */
   const refresh = useCallback(async () => {
     const s = latest.current;
-    if (!active || !s.user) return;
+    if (!active || !s.user || s.user.guest) return;
     if (dirty.current) {
       await flush(); // önce bu cihazdaki değişiklikleri yaz
       return;

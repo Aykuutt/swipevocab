@@ -55,7 +55,9 @@ export function AppProvider({ children }) {
 
   /* ---------- Oturum (Supabase) ---------- */
   const account = useAccount({ dispatch, getNow });
-  const active = wordsStatus === "ready" && account.status === "signedIn" && !!state.user;
+  // Hesaplı ya da misafir: uygulama kullanımda.
+  const inApp = account.status === "signedIn" || account.status === "guest";
+  const active = wordsStatus === "ready" && inApp && !!state.user;
 
   /* ---------- Gün geçişi ---------- */
   useEffect(() => {
@@ -117,7 +119,7 @@ export function AppProvider({ children }) {
   }, [active, words, unlimited, state.phase, state.deck.length]);
 
   /* ---------- Kaydetme (tarayıcı önbelleği + Supabase) ---------- */
-  const flushProgress = useProgressSave(state, account.status === "signedIn", dispatch);
+  const flushProgress = useProgressSave(state, inApp, dispatch);
 
   /* ---------- Ses ---------- */
   useEffect(() => {
