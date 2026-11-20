@@ -1,8 +1,9 @@
 {
-  "name": "swipevocab-preview",
+  "name": "swipevocab",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.2.0",
   "type": "module",
+  "description": "SwipeVocab - Turkish English vocabulary learning app",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
@@ -11,7 +12,10 @@
   },
   "dependencies": {
     "react": "^19.1.0",
-    "react-dom": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.0.0",
     "vite": "^7.1.0"
   }
 }

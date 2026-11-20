@@ -1,9 +1,17 @@
 node_modules/
 dist/
 .vite/
+*.log
+.DS_Store
+
+# Gizli anahtarlar
 .env
 .env.*
 !.env.example
 !**/.env.example
 server/.env
 server/tunnel-url.txt
+
+# Yerel araç ayarları ve eski tek dosyalık sürüm
+.claude/
+legacy/

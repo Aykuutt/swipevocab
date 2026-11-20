@@ -1,40 +1,90 @@
 # SwipeVocab
 
-React prototipi, Vite ile çalışır.
+9-14 yaş öğrenciler için Türkçe-İngilizce kelime öğrenme uygulaması (React + Vite).
 
 ## Çalıştırma
 
-```powershell
+```bash
 npm install
-npm run dev
+npm run dev      # http://127.0.0.1:5173  (test araçları için: /?dev=1)
+npm run build    # dist/ klasörüne derler
 ```
 
-Vite terminalde yerel adresi gösterir. Üretim çıktısı için `npm run build`, bu çıktıyı yerelde önizlemek için `npm run preview` kullanılır.
+## Klasör yapısı
 
-## Kaynak yapısı
+```
+src/
+├── main.jsx                 # giriş noktası
+├── App.jsx                  # yükleme -> kurulum -> sekmeli ana ekran
+├── config.js                # sabitler, puanlar, özellik anahtarları (FEATURES)
+├── data/                    # kelimeler, konular, amaçlar, sohbet senaryoları
+├── lib/                     # saf yardımcılar (React'siz)
+│   ├── deck.js              #   kaydırma destesi + aralıklı tekrar
+│   ├── exercises.js         #   soru üretimi (çeviri, boşluk, dinleme, eşleştirme)
+│   ├── units.js             #   öğrenme yolu üniteleri
+│   ├── speech.js / sfx.js   #   sesli okuma ve ses efektleri
+│   ├── partner.js           #   yapay zeka konuşma partneri
+│   ├── auth.js / storage.js #   hesap ve kayıt (şimdilik tarayıcıda)
+│   ├── remoteSync.js        #   SQL Server ilerleme eşitlemesi
+│   └── league.js, time.js, random.js, words.js, speechRecognition.js
+├── state/
+│   ├── reducer.js           # tüm durum ve eylemler
+│   ├── selectors.js         # durumdan türetilen değerler
+│   └── AppContext.jsx       # useApp() bağlamı, zamanlayıcılar, kaydetme
+├── hooks/                   # useValueDelta, useVoiceInfo, useRemoteSync
+├── components/              # ortak bileşenler (Icon, Mascot, ui, layout, ...)
+│   └── exercises/           #   alıştırmalar ve ExerciseRunner
+├── screens/
+│   ├── onboarding/          # karşılama, amaç, seviye testi, giriş/kayıt
+│   ├── learn/               # Öğren: kart destesi, pekiştirme, gün sonu
+│   ├── path/                # Yol: ünite haritası
+│   ├── game/                # Oyun + partner/ (konuşma partneri)
+│   └── StoreScreen, ProgressScreen, SettingsScreen
+└── styles/global.css        # tasarım değerleri ve tüm stiller
 
-- `src/App.jsx` — ekranlar arası akış ve uygulama durumu
-- `src/components/` — onboarding, kart, ders ve oyun arayüzleri
-- `src/data/` — kelime ve onboarding amacı verileri
-- `src/utils/` — alıştırma üretimi, ilerleme, ses ve karıştırma yardımcıları
-- `src/styles.css` — uygulama stilleri
-- `main.jsx` — React başlangıç noktası
+public/audio/w/<id>.mp3      # kelime kayıtları (1-90)
+public/audio/s/<id>.mp3      # örnek cümle kayıtları (1-90)
+api/progress.js              # Vercel fonksiyonu: ilerleme isteğini SQL köprüsüne aktarır
+server/local-sql-api.mjs     # yerel SQL Server köprüsü
+database/schema.sql          # SQL Server tabloları
+```
 
 ## Kelime havuzu
 
-Kelime kayıtları `src/data/words.js` ve `src/data/words-extra.js` içinde tutulur. Her kayıt `id`, `word`, `phonetic`, `pos`, `level`, `tr`, `definition` ve `example` alanlarını içerir. Yeni kayıt eklerken benzersiz bir ID verin; üniteler havuzdan otomatik oluşturulur. Seviye etiketleri öğrenme rehberidir; CEFR'in kendisi belirli kelimelere resmi seviye atamaz. Seviyeleri gözden geçirirken [Oxford Learner's Dictionaries kelime listeleri](https://www.oxfordlearnersdictionaries.com/about/wordlists/oxford3000-5000) yararlı bir başvuru kaynağıdır.
-
-## Prototip sınırları
-
-- Profil, ayarlar ve öğrenme ilerlemesi aynı tarayıcıdaki `localStorage` alanında saklanır; cihazlar arasında eşitlenmez.
-- Kayıt/giriş, Google oturumu ve şifre sıfırlama için sunucu bağlantısı henüz yoktur. Başlangıç akışı yerel profille devam eder.
-- Pro düğmeleri yalnızca özellik önizlemesini açar; ödeme veya abonelik oluşturmaz.
-- Günlük bildirimler henüz etkin değildir. Takvim günü değişimi ve can yenilenmesi uygulama açıkken gerçek zamana göre güncellenir.
+190 kelime `src/data/words.js` içinde. Her kayıt `id`, `word`, `phonetic`, `pos`, `level`,
+`topic`, `tr`, `definition` ve `example` alanlarını içerir. Yeni kayıt eklerken benzersiz bir
+id ver ve `topic` olarak `daily`, `travel`, `growth`, `work` ya da `academic` seç; üniteler
+havuzdan otomatik oluşur. Örnek cümle kelimenin kendisini aynen içermeli (boşluk doldurma
+sorusu için). Seviye etiketleri öğrenme rehberidir; resmi bir CEFR listesi değildir.
+Seviyeleri gözden geçirirken [Oxford Learner's Dictionaries kelime listeleri](https://www.oxfordlearnersdictionaries.com/about/wordlists/oxford3000-5000)
+yararlı bir başvuru kaynağıdır.
 
 ## SQL Server ilerleme eşitlemesi
 
-`database/schema.sql`, `SwipeVocab` veritabanında profil ve ilerleme tablolarını oluşturur. Uygulama mevcut tarayıcı ilerlemesini `UserProgress` tablosuna eşitleyebilir; bu prototipte e-posta/şifre ile hesap girişi bulunmadığı için profil kimliği tarayıcıda üretilen rastgele bir kimliktir.
+`database/schema.sql`, `SwipeVocab` veritabanında profil ve ilerleme tablolarını oluşturur.
+Uygulama oturum açıkken ilerlemeyi `UserProgress` tablosuna eşitler. Kimlik, hesap açılınca
+tarayıcıda üretilen rastgele bir UUID'dir. Açılışta sunucudaki kayıt yereldekinden yeniyse o
+yüklenir. Sunucuya ulaşılamazsa eşitleme o oturum için kapanır, uygulama yerel kayıtla devam eder.
 
-Yerel API, Windows kimlik doğrulamasıyla `localhost` üzerindeki SQL Server’a bağlanır. Yerelde çalıştırmak için `server/.env.example` dosyasını `server/.env` olarak kopyalayın ve `SWIPEVOCAB_API_SECRET` alanına en az 32 karakterlik rastgele bir değer yazın. Ardından iki terminalde `npm run sql:bridge` ve `npm run dev` çalıştırın. Vite, `/api/progress` isteklerini yerel SQL API’sine aktarır.
+Yerel API, Windows kimlik doğrulamasıyla `localhost` üzerindeki SQL Server'a bağlanır.
+`server/.env.example` dosyasını `server/.env` olarak kopyala ve `SWIPEVOCAB_API_SECRET` alanına
+en az 32 karakterlik rastgele bir değer yaz. Sonra iki terminalde şunları çalıştır:
 
-Vercel dağıtımında yerel SQL API’ye erişmek için gizli anahtarlı HTTPS tüneli gerekir. SQL portu internete açılmamalıdır; bilgisayar kapalı veya tünel durmuşsa eşitleme bekler, tarayıcıdaki yerel kayıt çalışmaya devam eder. Geçici Cloudflare Quick Tunnel URL’si yeniden başlatıldığında değişebilir.
+```bash
+npm run sql:bridge
+npm run dev
+```
+
+Vite, `/api/progress` isteklerini yerel SQL API'sine aktarır. Vercel dağıtımında yerel SQL
+API'ye erişmek için gizli anahtarlı bir HTTPS tüneli gerekir (`LOCAL_SQL_API_URL` ve
+`SWIPEVOCAB_API_SECRET` ortam değişkenleri). SQL portu internete açılmamalıdır.
+
+## Notlar
+
+- Pro, lig, Google girişi, şifre sıfırlama ve hatırlatmalar `src/config.js` içindeki
+  `FEATURES` ile kapalı. Açınca ilgili arayüz kendiliğinden görünür.
+- Konuşma partneri, Claude artifact ortamındaki `window.claude` erişimiyle çalışır; normal
+  bir tarayıcıda bu erişim olmadığı için Oyun sekmesinde görünmez.
+- Hesaplar `localStorage`'da tutulur ve şifre kaydedilmez; giriş henüz gerçek bir sunucuya
+  bağlı değildir. İlerleme ayrıca SQL Server'a eşitlenebilir (yukarıya bak).
+- Pro düğmeleri yalnızca özellik önizlemesini açar; ödeme veya abonelik oluşturmaz.
