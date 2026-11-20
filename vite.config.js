@@ -8,12 +8,12 @@ export default defineConfig({
     // PWA: telefona uygulama gibi kurulur, internetsizken de açılır.
     VitePWA({
       registerType: "autoUpdate", // yeni sürüm yayınlanınca kendiliğinden güncellenir
-      injectRegister: "auto",
+      injectRegister: false, // kayıt src/lib/pwa.js içinde: yeni sürüm gelince sayfa yenilenir
       includeAssets: ["favicon.svg", "icons/apple-touch-icon.png"],
       manifest: {
         name: "SwipeVocab",
         short_name: "SwipeVocab",
-        description: "Kelimeleri kaydır, öğren: oyunlaştırılmış İngilizce kelime pratiği.",
+        description: "Kelimeleri kaydır, öğren: İngilizce, Almanca, İspanyolca ve Fransızca kelime pratiği.",
         lang: "tr",
         start_url: "/",
         scope: "/",
