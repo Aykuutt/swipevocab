@@ -1,8 +1,9 @@
-// "Oyun" sekmesi: boşluk doldurma, eşleştirme ve (varsa) konuşma partneri.
-import { useEffect, useState } from "react";
+// "Oyun" sekmesi: boşluk doldurma, eşleştirme, canlı konuşma ve (varsa) yapay zeka partneri.
+import { Suspense, lazy, useEffect, useState } from "react";
 import ExerciseRunner from "../../components/exercises/ExerciseRunner";
 import HeartTimer from "../../components/HeartTimer";
 import Icon from "../../components/Icon";
+import { Splash } from "../../components/layout";
 import { Button, EmptyState, Overlay } from "../../components/ui";
 import { FEATURES } from "../../config";
 import { fillBlankGame, matchGame } from "../../lib/exercises";
@@ -10,6 +11,9 @@ import { getSampler } from "../../lib/partner";
 import { useApp } from "../../state/AppContext";
 import { hasUnlimitedLives } from "../../state/selectors";
 import Partner from "./partner/Partner";
+
+// Canlı konuşma (LiveKit kütüphanesiyle birlikte) yalnızca açılınca indirilir.
+const Talk = lazy(() => import("./talk/Talk"));
 
 const GAMES = [
   {
@@ -36,6 +40,7 @@ export default function GameScreen() {
   const [finished, setFinished] = useState(null); // biten oyunun tanımı
   const [partnerAvailable, setPartnerAvailable] = useState(false);
   const [partnerOpen, setPartnerOpen] = useState(false);
+  const [talkOpen, setTalkOpen] = useState(false);
 
   useEffect(() => {
     if (!FEATURES.aiPartner) return;
@@ -85,6 +90,22 @@ export default function GameScreen() {
             </button>
           </li>
         ))}
+        {FEATURES.liveTalk && (
+          <li>
+            <button type="button" className="game-card" onClick={() => setTalkOpen(true)}>
+              <span className="row-icon tone-coral">
+                <Icon name="user" size={22} />
+              </span>
+              <span className="game-card-text">
+                <strong>
+                  Canlı konuşma <span className="pill pill-mint">Yeni</span>
+                </strong>
+                <span>Seviyene yakın biriyle sesli konuş. Sorular ve hedef kelimeler sohbeti yönlendirir.</span>
+              </span>
+              <Icon name="chevronRight" size={20} />
+            </button>
+          </li>
+        )}
         {partnerAvailable && (
           <li>
             <button type="button" className="game-card" onClick={() => setPartnerOpen(true)}>
@@ -102,6 +123,14 @@ export default function GameScreen() {
           </li>
         )}
       </ul>
+
+      {talkOpen && (
+        <Overlay label="Canlı konuşma">
+          <Suspense fallback={<Splash />}>
+            <Talk onClose={() => setTalkOpen(false)} />
+          </Suspense>
+        </Overlay>
+      )}
 
       {partnerOpen && (
         <Overlay label="Konuşma partneri">

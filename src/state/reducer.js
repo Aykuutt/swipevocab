@@ -30,6 +30,7 @@ export const initialState = {
     notifications: true,
     sound: true,
     voiceURI: null,
+    talkConsent: false, // canlı konuşma kuralları ve 18+ onayı
   },
   startDayIndex: null, // hesabın açıldığı günün takvim indeksi
   day: 1, // uygulamadaki gün numarası

@@ -11,6 +11,7 @@ export const FEATURES = {
   passwordReset: true,
   reminders: false,
   aiPartner: true,
+  liveTalk: true, // canlı sesli konuşma (LiveKit + supabase/talk.sql)
 };
 
 // Adresin sonunda ?dev ya da #dev varsa test araçları açılır.
@@ -42,6 +43,8 @@ export const XP = {
   day: 15,
   partnerTurn: 3,
   partnerWord: 6,
+  talkMinute: 5, // canlı konuşmada her tam dakika
+  talkMinuteCap: 6, // en fazla bu kadar dakika puanlanır
 };
 
 export const PRICES = { heartsRefill: 30, xpBoost: 50 };

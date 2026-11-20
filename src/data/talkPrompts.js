@@ -1,0 +1,23 @@
+// Canlı konuşmada iki tarafa da gösterilen sohbet soruları.
+export const TALK_PROMPTS = [
+  { en: "What did you do last weekend?", tr: "Geçen hafta sonu ne yaptın?" },
+  { en: "Describe your perfect holiday.", tr: "Hayalindeki tatili anlat." },
+  { en: "What is your favorite food and why?", tr: "En sevdiğin yemek ne, neden?" },
+  { en: "Tell me about your city or town.", tr: "Yaşadığın şehri ya da kasabayı anlat." },
+  { en: "What do you usually do in the morning?", tr: "Sabahları genelde ne yaparsın?" },
+  { en: "Why are you learning English?", tr: "Neden İngilizce öğreniyorsun?" },
+  { en: "What is a skill you want to learn?", tr: "Öğrenmek istediğin bir beceri ne?" },
+  { en: "Tell me about a good book, film or series.", tr: "Güzel bir kitap, film ya da diziden bahset." },
+  { en: "What would you do with a free day tomorrow?", tr: "Yarın boş bir günün olsa ne yapardın?" },
+  { en: "Describe your dream job.", tr: "Hayalindeki işi anlat." },
+  { en: "What is the best trip you have ever taken?", tr: "Şimdiye kadarki en iyi yolculuğun hangisiydi?" },
+  { en: "Do you prefer the city or the countryside? Why?", tr: "Şehri mi kırsalı mı tercih edersin? Neden?" },
+  { en: "What makes a good friend?", tr: "İyi bir arkadaşı ne iyi yapar?" },
+  { en: "How do you relax after a busy day?", tr: "Yoğun bir günden sonra nasıl dinlenirsin?" },
+  { en: "What is a goal you have for this year?", tr: "Bu yıl için bir hedefin ne?" },
+  { en: "Tell me about a challenge you solved.", tr: "Çözdüğün bir zorluktan bahset." },
+  { en: "What technology could you not live without?", tr: "Hangi teknoloji olmadan yaşayamazdın?" },
+  { en: "If you could live in another country, which one?", tr: "Başka bir ülkede yaşayabilsen hangisi olurdu?" },
+  { en: "What is a tradition you like in your culture?", tr: "Kültüründe sevdiğin bir gelenek ne?" },
+  { en: "What advice would you give to a new learner?", tr: "Yeni başlayan birine ne tavsiye ederdin?" },
+];

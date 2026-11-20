@@ -1,6 +1,6 @@
 # SwipeVocab
 
-9-14 yaş öğrenciler için Türkçe-İngilizce kelime öğrenme uygulaması (React + Vite + Supabase).
+Türkçe konuşanlar için oyunlaştırılmış İngilizce kelime ve konuşma pratiği uygulaması (React + Vite + Supabase + LiveKit).
 
 Canlı sürüm: https://swipevocab.vercel.app (GitHub'daki `main` dalına her gönderimde Vercel kendiliğinden yayınlar.)
 
@@ -27,7 +27,7 @@ npm run build    # dist/ klasörüne derler
 ### Supabase kurulumu (bir kez)
 
 1. supabase.com'da bir proje oluştur.
-2. **SQL Editor**'da `supabase/schema.sql` dosyasının içeriğini çalıştır.
+2. **SQL Editor**'da önce `supabase/schema.sql`, sonra `supabase/talk.sql` dosyasının içeriğini çalıştır.
 3. **Authentication > URL Configuration**:
    - Site URL: `https://swipevocab.vercel.app`
    - Redirect URLs: `https://swipevocab.vercel.app/**` ve `http://127.0.0.1:5173/**`
@@ -74,8 +74,28 @@ src/
 
 public/audio/w/<id>.mp3      # kelime kayıtları (1-90)
 public/audio/s/<id>.mp3      # örnek cümle kayıtları (1-90)
-supabase/schema.sql          # Supabase tablosu ve güvenlik kuralları
+supabase/schema.sql          # ilerleme tablosu ve güvenlik kuralları
+supabase/talk.sql            # canlı konuşma: profiller, eşleştirme, görüşmeler, engelleme, şikayet
+api/livekit-token.js         # Vercel fonksiyonu: canlı konuşma odası için kısa ömürlü anahtar
 ```
+
+## Canlı konuşma (LiveKit)
+
+Oyun sekmesindeki **Canlı konuşma**, seviyesi yakın (en fazla bir seviye farklı) iki kullanıcıyı
+sesli olarak eşleştirir. İki tarafa da aynı sohbet soruları ve 6 hedef kelime gösterilir; kullanılan
+kelimeler ve konuşulan dakikalar puan kazandırır.
+
+- **Eşleştirme:** `talk_find_partner` veritabanı fonksiyonu (supabase/talk.sql). Uygulama bekleme
+  sırasında 2,5 saniyede bir çağırır; aynı partneri iki kişinin kapmasını `for update skip locked` önler.
+- **Ses:** LiveKit Cloud (bölge: Frankfurt, kayıt tutma kapalı). Tarayıcı, `/api/livekit-token`
+  fonksiyonundan yalnızca kendi görüşmesinin odasına girebilen 15 dakikalık bir anahtar alır.
+- **Güvenlik:** ilk kullanımda 18+ ve kurallar onayı; her görüşmede şikayet (kişiyi ayrıca engeller)
+  ve görüşme sonrası engelleme. Son 7 günde 3 farklı kişiden şikayet alan hesap eşleşemez.
+  Görüşmeler kaydedilmez; karşı taraf yalnızca takma adı ve seviyeyi görür.
+- **Ortam değişkenleri (Vercel):** `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`
+  (son ikisi gizli; asla `VITE_` önekiyle yazma, tarayıcıya gitmemeli).
+- **Yerelde deneme:** `npm run dev` sunucu fonksiyonlarını çalıştırmaz; canlı konuşmayı denemek için
+  `vercel dev` kullan ya da Vercel'deki yayında dene. İki farklı hesap (örneğin iki tarayıcı) gerekir.
 
 ## Kelime havuzu
 

@@ -882,3 +882,32 @@ strong, b { font-weight: 650; }
 .partner-notice-warn { background: var(--amber-soft); border-color: transparent; color: var(--amber); }
 
 
+
+/* ---------- Canlı konuşma ---------- */
+.talk-rules { display: grid; gap: 10px; margin-bottom: 18px; }
+.talk-rules li { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 1.45; color: var(--text-dim); }
+.talk-rules .icon { flex-shrink: 0; margin-top: 3px; color: var(--mint); }
+.talk-consent { display: flex; gap: 10px; align-items: center; padding: 12px 14px; border-radius: var(--r-md); background: var(--plum-1); border: 1.5px solid var(--line-strong); font-size: 14px; cursor: pointer; }
+.talk-consent input { width: 18px; height: 18px; accent-color: var(--violet); flex-shrink: 0; }
+.talk-waiting { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; text-align: center; color: var(--text-dim); }
+.talk-waiting strong { color: var(--text); font-variant-numeric: tabular-nums; }
+.talk-hint { font-size: 13px; color: var(--text-faint); line-height: 1.45; margin: 4px 2px 12px; }
+.talk-timer { font-family: var(--font-mono); font-size: 14px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+.talk-card { margin: 10px 0 18px; padding: 16px 16px 12px; border-radius: var(--r-lg); background: var(--paper); color: var(--ink); box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35); }
+.talk-card-label { font-size: 12px; font-weight: 650; color: var(--ink-dim); }
+.talk-card-en { margin: 6px 0 4px; font-family: var(--font-display); font-size: 20px; font-weight: 700; line-height: 1.3; }
+.talk-card-tr { margin: 0 0 4px; font-size: 14px; color: var(--ink-dim); }
+.talk-card-actions { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+.talk-card-actions .link-btn { color: #4a3fc4; }
+.talk-words { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.talk-word { width: 100%; display: grid; grid-template-columns: auto 1fr; column-gap: 6px; align-items: center; text-align: left; padding: 10px 12px; border-radius: var(--r-md); border: 1.5px solid var(--line-strong); background: var(--plum-1); color: var(--text); cursor: pointer; }
+.talk-word strong { grid-column: 2; font-size: 15px; }
+.talk-word span { grid-column: 2; font-size: 12px; color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.talk-word .icon { grid-row: 1 / span 2; color: var(--mint); }
+.talk-word.is-used { border-color: var(--mint); background: var(--mint-soft); }
+.talk-controls { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 12px var(--pad) calc(14px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--line); }
+.talk-sheet { position: absolute; inset: auto 0 0 0; z-index: 5; max-height: 85%; overflow-y: auto; padding: 18px var(--pad) calc(18px + env(safe-area-inset-bottom, 0px)); border-radius: 24px 24px 0 0; background: var(--night); border-top: 1px solid var(--line-strong); box-shadow: 0 -20px 50px rgba(0, 0, 0, 0.5); }
+.talk-sheet .goal-list { gap: 8px; }
+.talk-sheet-actions { display: grid; gap: 8px; margin-top: 8px; }
+.goal-compact { padding: 10px 14px; }
+.goal-compact .goal-text strong { font-size: 14.5px; }

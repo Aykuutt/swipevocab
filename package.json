@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "2.119.0",
+    "livekit-client": "2.23.0",
+    "livekit-server-sdk": "2.19.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
