@@ -24,6 +24,8 @@ npm run check    # üçü birden; GitHub Actions her gönderimde bunları çalı
   (Hesap, Dil, Öğrenme, Ses, Görünüm, Uygulama; her biri ayrı sayfa).
 - **Temalar:** Gece, Okyanus, Orman, Gün batımı, Açık (Profil > Görünüm). Renkler src/styles/themes.css'te;
   yeni tema için oraya bir blok, src/data/themes.js'e bir kayıt eklemek yeterli.
+- **Oyunlar:** Zamana karşı (60 sn, kombo çarpanı, rekor), Dinle ve yaz (kelimeyi duyup yazma; aksan farkı hata
+  sayılmaz), Boşluğu doldur, Eşleştir. Rekorlar dil başına hesapta saklanır.
 - **Yol:** üniteler konuya göre değişen bir manzara (ev, bulut, filiz, bina, yıldız...) içinde şeritli bir yolda.
 - **Dört dil:** kurulumda ve Ayarlar'da İngilizce, Almanca, İspanyolca ya da Fransızca seçilir. Bilinen
   kelimeler, üniteler ve günlük kartlar her dilde ayrı; XP, seri ve lig ortaktır. Okuma sesi, ses

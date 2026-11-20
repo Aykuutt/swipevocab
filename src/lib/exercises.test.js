@@ -1,6 +1,16 @@
 import { describe, expect, it } from "vitest";
+import { displayWord } from "../data/languages";
 import { WORDS } from "../data/langs/en";
-import { fillBlankExercise, placementLevel, placementTest, translateExercise, unitLesson } from "./exercises";
+import { sameWord, exactWord } from "./typing";
+import {
+  dictationGame,
+  fillBlankExercise,
+  placementLevel,
+  placementTest,
+  timedQuestion,
+  translateExercise,
+  unitLesson,
+} from "./exercises";
 import { cardsForCall } from "./talk";
 import { buildUnits } from "./units";
 
@@ -61,5 +71,54 @@ describe("canlı konuşma kartları", () => {
     expect(a.prompts).toEqual(b.prompts);
     expect(a.targetWords.map((w) => w.id)).toEqual(b.targetWords.map((w) => w.id));
     expect(a.targetWords).toHaveLength(6);
+  });
+});
+
+describe("oyun soruları", () => {
+  it("zamana karşı soruları geçerli: seçenekler benzersiz, doğru cevap listede", () => {
+    const pool = WORDS.slice(0, 40);
+    for (let i = 0; i < 60; i++) {
+      const q = timedQuestion(pool, WORDS);
+      expect(["translate", "reverse"]).toContain(q.type);
+      expect(q.options).toHaveLength(4);
+      expect(new Set(q.options).size).toBe(4);
+      expect(q.correct).toBeGreaterThanOrEqual(0);
+      const expected = q.type === "translate" ? q.word.tr : displayWord(q.word);
+      expect(q.options[q.correct]).toBe(expected);
+    }
+  });
+
+  it("art arda aynı kelimeyi sormaz", () => {
+    const pool = WORDS.slice(0, 10);
+    let last = null;
+    for (let i = 0; i < 50; i++) {
+      const q = timedQuestion(pool, WORDS, last);
+      expect(q.word.id).not.toBe(last);
+      last = q.word.id;
+    }
+  });
+
+  it("dinle ve yaz oyunu istenen kadar, tekrarsız kelime verir", () => {
+    const game = dictationGame(WORDS.slice(0, 30), 8);
+    expect(game).toHaveLength(8);
+    expect(new Set(game.map((g) => g.word.id)).size).toBe(8);
+    expect(game.every((g) => g.type === "dictation")).toBe(true);
+  });
+});
+
+describe("yazım karşılaştırma", () => {
+  it("aksan ve büyük harf farkını hoş görür", () => {
+    expect(sameWord("schon", "schön")).toBe(true);
+    expect(sameWord("  Estacion ", "estación")).toBe(true);
+    expect(sameWord("strasse", "Straße")).toBe(true);
+    expect(sameWord("aujourd'hui", "aujourd’hui")).toBe(true);
+    expect(sameWord("tener en  cuenta", "tener en cuenta")).toBe(true);
+  });
+
+  it("farklı ya da boş yazımı reddeder", () => {
+    expect(sameWord("", "schön")).toBe(false);
+    expect(sameWord("schon", "schnell")).toBe(false);
+    expect(exactWord("schon", "schön")).toBe(false);
+    expect(exactWord("Schön", "schön")).toBe(true);
   });
 });

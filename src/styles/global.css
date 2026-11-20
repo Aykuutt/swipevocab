@@ -1005,3 +1005,32 @@ strong, b { font-weight: 650; }
 .badge-next-title { font-size: 13.5px; font-weight: 650; }
 .badge-next .bar { height: 6px; }
 .badge-all { margin-top: 10px; }
+
+/* ---------- Zamana karşı ve Dinle-yaz ---------- */
+.game-card-text strong .pill { margin-left: 8px; vertical-align: 2px; }
+.timed-board { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0 var(--pad) 4px; }
+.timed-score { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--amber); font-variant-numeric: tabular-nums; }
+.timed-combo { padding: 4px 12px; border-radius: var(--r-pill); background: var(--plum-2); color: var(--text-dim); font-size: 13px; font-weight: 650; transition: background 0.2s, color 0.2s; }
+.timed-combo.is-hot { background: var(--amber-soft); color: var(--amber); }
+.timed-time { position: relative; min-width: 34px; text-align: right; font-family: var(--font-display); font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.timed-time.is-low { color: var(--coral); animation: pop 0.5s ease-out infinite alternate; }
+.timed-penalty { position: absolute; right: 0; top: 26px; color: var(--coral); font-size: 15px; animation: pop 0.3s ease-out; }
+.timed .runner-body { padding-bottom: 24px; }
+.timed .option { padding-block: 14px; }
+.timed-rules { margin: 10px 0 6px; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 13.5px; color: var(--text-dim); }
+.timed-final { font-family: var(--font-display); font-size: 56px; font-weight: 800; line-height: 1.1; color: var(--amber); }
+.timed-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+.timed-stats dt { font-family: var(--font-display); font-size: 22px; font-weight: 700; }
+.timed-stats dd { font-size: 12px; color: var(--text-dim); }
+
+.dictation { display: grid; gap: 16px; justify-items: center; }
+.dictation-play { display: grid; justify-items: center; gap: 10px; margin-top: 6px; }
+.dictation-btn { width: 96px; height: 96px; border-radius: 50%; border: 0; display: grid; place-items: center; cursor: pointer; background: var(--violet-fill); color: #fff; box-shadow: 0 6px 0 var(--violet-shadow); transition: transform 0.1s; }
+.dictation-btn:active { transform: translateY(4px); box-shadow: none; }
+.dictation-slow { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border: 1.5px solid var(--line-strong); border-radius: var(--r-pill); background: var(--plum-1); color: var(--text-dim); font-size: 13px; font-weight: 600; cursor: pointer; }
+.dictation-hint { color: var(--text-dim); font-size: 14px; text-align: center; }
+.dictation-hint strong { color: var(--text); }
+.dictation-input { width: 100%; height: 56px; padding: 0 16px; border-radius: var(--r-md); border: 2px solid var(--line-strong); background: var(--plum-1); color: var(--text); font-size: 20px; font-weight: 600; text-align: center; }
+.dictation-input:focus { border-color: var(--violet); outline: none; box-shadow: 0 0 0 3px var(--violet-soft); }
+.dictation-input:disabled { opacity: 0.7; }
+.dictation-actions { width: 100%; display: grid; gap: 8px; }

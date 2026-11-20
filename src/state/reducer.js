@@ -64,6 +64,7 @@ export const initialState = {
   weekDaysActive: 0,
   lastWeek: null,
   top3Finishes: 0,
+  records: {}, // oyun rekorları: "timed:<dil>" -> en yüksek skor
 };
 
 /** Kayıttan gelen durumu eksik alanları tamamlayarak açar. */
@@ -314,6 +315,11 @@ export function reducer(state, action) {
 
     case "CORRECT":
       return { ...addXp(state, action.xp ?? XP.correct), dailyCorrect: state.dailyCorrect + 1 };
+
+    case "SET_RECORD":
+      return action.value > (state.records?.[action.key] ?? 0)
+        ? { ...state, records: { ...state.records, [action.key]: action.value } }
+        : state;
 
     case "AWARD_XP":
       return addXp(state, action.xp);

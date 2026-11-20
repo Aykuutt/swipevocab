@@ -9,6 +9,7 @@ import HeartTimer from "../HeartTimer";
 import Icon from "../Icon";
 import { Button, EmptyState, ProgressBar } from "../ui";
 import { FillBlankExercise, TranslateExercise } from "./ChoiceExercises";
+import DictationExercise from "./DictationExercise";
 import Feedback from "./Feedback";
 import ListenExercise from "./ListenExercise";
 import MatchExercise from "./MatchExercise";
@@ -66,6 +67,7 @@ const EXERCISES = {
   fill_blank: FillBlankExercise,
   listen_along: ListenExercise,
   match: MatchExercise,
+  dictation: DictationExercise,
 };
 
 export default function ExerciseRunner({ exercises, onComplete, onExit, costsHearts = true }) {

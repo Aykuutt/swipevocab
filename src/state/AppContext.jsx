@@ -189,6 +189,7 @@ export function AppProvider({ children }) {
         dispatch({ type: "RESTART_SESSION", deck: buildDeck(stateRef.current, words, stateRef.current.day, 0) }),
       correct: (xp) => dispatch({ type: "CORRECT", xp }),
       awardXp: (xp) => dispatch({ type: "AWARD_XP", xp }),
+      setRecord: (key, value) => dispatch({ type: "SET_RECORD", key, value }),
       loseLife: () => dispatch({ type: "LOSE_LIFE", now: getNow() }),
       completeUnit: (unitId, wordIds) => dispatch({ type: "COMPLETE_UNIT", unitId, wordIds }),
       buyHearts: () => dispatch({ type: "BUY_HEARTS" }),

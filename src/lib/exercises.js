@@ -1,6 +1,7 @@
 // Alıştırma soruları üretir: çeviri, boşluk doldurma, dinleme, eşleştirme.
 import { GOALS } from "../data/goals";
 import { LEVELS } from "../config";
+import { displayWord } from "../data/languages";
 import { sample, shuffle } from "./random";
 import { replaceWord } from "./wordMatch";
 
@@ -61,6 +62,32 @@ export function fillBlankExercise(word, words) {
     options: options.map((w) => w.word),
     correct: options.findIndex((w) => w.id === word.id),
   };
+}
+
+/** Türkçesi verilir, doğru kelime seçilir (Zamana karşı oyunu için). */
+export function reverseExercise(word, words) {
+  const options = shuffle([word, ...pickDistractors(word, words, 3)]);
+  return {
+    key: nextKey("rev"),
+    type: "reverse",
+    word,
+    options: options.map(displayWord),
+    correct: options.findIndex((w) => w.id === word.id),
+  };
+}
+
+/** Zamana karşı için bir sonraki soru: kelime -> Türkçe ya da Türkçe -> kelime, yarı yarıya. */
+export function timedQuestion(pool, allWords, avoidId = null) {
+  const choices = pool.length > 1 ? pool.filter((w) => w.id !== avoidId) : pool;
+  const word = choices[Math.floor(Math.random() * choices.length)];
+  return Math.random() < 0.5 ? translateExercise(word, allWords) : reverseExercise(word, allWords);
+}
+
+/** Dinle ve yaz: kelime okunur, yazılır. */
+export const dictationExercise = (word) => ({ key: nextKey("dict"), type: "dictation", word });
+
+export function dictationGame(pool, count = 8) {
+  return sample(pool, Math.min(count, pool.length)).map(dictationExercise);
 }
 
 const listenExercise = (word) => ({ key: nextKey("listen"), type: "listen_along", word });

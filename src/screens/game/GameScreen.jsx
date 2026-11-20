@@ -1,5 +1,5 @@
-// "Oyun" sekmesi: boşluk doldurma, eşleştirme, canlı konuşma ve (varsa) yapay zeka partneri.
-import { Suspense, lazy, useEffect, useState } from "react";
+// "Oyun" sekmesi: zamana karşı, dinle ve yaz, boşluk doldurma, eşleştirme, canlı konuşma ve (varsa) yapay zeka partneri.
+import { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import ExerciseRunner from "../../components/exercises/ExerciseRunner";
 import HeartTimer from "../../components/HeartTimer";
 import Icon from "../../components/Icon";
@@ -7,16 +7,35 @@ import { Splash } from "../../components/layout";
 import { Button, EmptyState, Overlay } from "../../components/ui";
 import { FEATURES } from "../../config";
 import { getLanguage } from "../../data/languages";
-import { fillBlankGame, matchGame } from "../../lib/exercises";
+import { useVoiceInfo } from "../../hooks/useVoiceInfo";
+import { dictationGame, fillBlankGame, matchGame } from "../../lib/exercises";
 import { getSampler } from "../../lib/partner";
+import { canSpeak } from "../../lib/speech";
 import { useApp } from "../../state/AppContext";
 import { hasUnlimitedLives } from "../../state/selectors";
 import Partner from "./partner/Partner";
+import TimedGame from "./TimedGame";
 
 // Canlı konuşma (LiveKit kütüphanesiyle birlikte) yalnızca açılınca indirilir.
 const Talk = lazy(() => import("./talk/Talk"));
 
 const GAMES = [
+  {
+    id: "timed",
+    icon: "clock",
+    tone: "coral",
+    title: "Zamana karşı",
+    desc: "60 saniyede olabildiğince çok kelime bil. Kombo yaptıkça puanın katlanır. Can gitmez.",
+    costsHearts: false,
+  },
+  {
+    id: "dictation",
+    icon: "speaker",
+    tone: "sky",
+    title: "Dinle ve yaz",
+    desc: "Kelimeyi dinle, duyduğunu yaz. Hem dinlemeni hem yazımını geliştirir. Can gitmez.",
+    costsHearts: false,
+  },
   {
     id: "blank",
     icon: "book",
@@ -42,6 +61,8 @@ export default function GameScreen() {
   const [partnerAvailable, setPartnerAvailable] = useState(false);
   const [partnerOpen, setPartnerOpen] = useState(false);
   const [talkOpen, setTalkOpen] = useState(false);
+  const [timedOpen, setTimedOpen] = useState(false);
+  const voice = useVoiceInfo();
 
   useEffect(() => {
     if (!FEATURES.aiPartner) return;
@@ -54,9 +75,24 @@ export default function GameScreen() {
 
   const outOfLives = !hasUnlimitedLives(state) && state.lives <= 0;
   const source = pool.length >= 4 ? pool : words;
+  const recordKey = `timed:${state.language}`;
+  const record = state.records?.[recordKey] ?? 0;
+  // Dinle ve yaz için kelimenin sesli okunabilmesi gerekir (cihaz sesi ya da hazır kayıt).
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const speakable = useMemo(() => source.filter((w) => canSpeak(w.word)), [source, voice.status]);
+  const dictationBlocked = speakable.length < 4;
 
   const start = (def) => {
-    const queue = def.id === "blank" ? fillBlankGame(source, words) : matchGame(source);
+    if (def.id === "timed") {
+      setTimedOpen(true);
+      return;
+    }
+    const queue =
+      def.id === "blank"
+        ? fillBlankGame(source, words)
+        : def.id === "dictation"
+          ? dictationGame(speakable)
+          : matchGame(source);
     setFinished(null);
     setGame({ def, queue, run: Date.now() });
   };
@@ -77,20 +113,38 @@ export default function GameScreen() {
       )}
 
       <ul className="game-list">
-        {GAMES.map((g) => (
-          <li key={g.id}>
-            <button type="button" className="game-card" disabled={g.costsHearts && outOfLives} onClick={() => start(g)}>
-              <span className={`row-icon tone-${g.tone}`}>
-                <Icon name={g.icon} size={22} />
-              </span>
-              <span className="game-card-text">
-                <strong>{g.title}</strong>
-                <span>{g.desc}</span>
-              </span>
-              <Icon name="chevronRight" size={20} />
-            </button>
-          </li>
-        ))}
+        {GAMES.map((g) => {
+          const blocked = g.id === "dictation" && dictationBlocked;
+          return (
+            <li key={g.id}>
+              <button
+                type="button"
+                className="game-card"
+                disabled={(g.costsHearts && outOfLives) || blocked}
+                onClick={() => start(g)}
+              >
+                <span className={`row-icon tone-${g.tone}`}>
+                  <Icon name={g.icon} size={22} />
+                </span>
+                <span className="game-card-text">
+                  <strong>
+                    {g.title}
+                    {g.id === "timed" && record > 0 && <span className="pill pill-amber">Rekor {record}</span>}
+                    {(g.id === "timed" || g.id === "dictation") && record === 0 && !blocked && (
+                      <span className="pill pill-mint">Yeni</span>
+                    )}
+                  </strong>
+                  <span>
+                    {blocked
+                      ? `Bu oyun için cihazında ${getLanguage(state.language).name} ses gerekiyor. Profil, Ses bölümüne bak.`
+                      : g.desc}
+                  </span>
+                </span>
+                <Icon name="chevronRight" size={20} />
+              </button>
+            </li>
+          );
+        })}
         <li>
           {/* Canlı konuşma hazır ama kapalı: FEATURES.liveTalk true yapılınca açılır. */}
           <button
@@ -146,6 +200,12 @@ export default function GameScreen() {
       {partnerOpen && (
         <Overlay label="Konuşma partneri">
           <Partner onClose={() => setPartnerOpen(false)} />
+        </Overlay>
+      )}
+
+      {timedOpen && (
+        <Overlay label="Zamana karşı">
+          <TimedGame pool={source} words={words} recordKey={recordKey} onExit={() => setTimedOpen(false)} />
         </Overlay>
       )}
 

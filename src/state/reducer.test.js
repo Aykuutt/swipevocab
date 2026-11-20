@@ -180,3 +180,15 @@ describe("dil değiştirme", () => {
     expect(h.settings.voices).toEqual({ en: "v1" });
   });
 });
+
+describe("oyun rekorları", () => {
+  it("yalnızca daha yüksek skor rekoru günceller", () => {
+    let s = newUser(5);
+    s = reducer(s, { type: "SET_RECORD", key: "timed:en", value: 120 });
+    expect(s.records["timed:en"]).toBe(120);
+    const same = reducer(s, { type: "SET_RECORD", key: "timed:en", value: 90 });
+    expect(same).toBe(s);
+    s = reducer(s, { type: "SET_RECORD", key: "timed:de", value: 40 });
+    expect(s.records).toEqual({ "timed:en": 120, "timed:de": 40 });
+  });
+});

@@ -241,6 +241,12 @@ function speakWithSynth(text, rate) {
   }
 }
 
+/** Bu metin şu an sesli okunabilir mi? (cihazın sesi ya da hazır kayıt var mı) */
+export function canSpeak(text) {
+  if (hasClip(text)) return true;
+  return hasSpeechSynthesis() && getVoiceStatus().status !== "missing";
+}
+
 /** Okumayı tamamen durdurur. */
 export function stopSpeaking() {
   stopClip();
