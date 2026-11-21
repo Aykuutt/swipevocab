@@ -1,7 +1,7 @@
 // Uygulama durumu, kelime listesi ve sekme gezgini için tek bağlam.
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { getLanguage } from "../data/languages";
-import { getBuilding, levelOf, pendingHarvests, upgradeBlock } from "../data/village";
+import { TYPES, buyBlock, canPlace, canSell, itemById, pendingHarvests, upgradeBlock } from "../data/village";
 import { useAccount } from "../hooks/useAccount";
 import { useProgressSave } from "../hooks/useProgressSave";
 import { signOut as authSignOut } from "../lib/auth";
@@ -198,14 +198,35 @@ export function AppProvider({ children }) {
       correct: (xp) => dispatch({ type: "CORRECT", xp }),
       awardXp: (xp) => dispatch({ type: "AWARD_XP", xp }),
       setRecord: (key, value) => dispatch({ type: "SET_RECORD", key, value }),
-      /** Binayı kurar ya da yükseltir. Yapılabildiyse true döner. */
+      /** Dükkândan alınan nesneyi haritaya koyar. Yapılabildiyse true döner. */
+      placeItem(type, x, y) {
+        const s = stateRef.current;
+        if (buyBlock(s, type) || !canPlace(s.village, type, x, y)) return false;
+        dispatch({ type: "VILLAGE_PLACE", itemType: type, x, y });
+        sfx("correct");
+        return true;
+      },
+      moveItem(id, x, y) {
+        const item = itemById(stateRef.current.village, id);
+        if (!item || !canPlace(stateRef.current.village, item.type, x, y, id)) return false;
+        dispatch({ type: "VILLAGE_MOVE", id, x, y });
+        return true;
+      },
+      sellItem(id) {
+        const item = itemById(stateRef.current.village, id);
+        if (!item || !canSell(item)) return false;
+        dispatch({ type: "VILLAGE_SELL", id });
+        sfx("wrong");
+        return true;
+      },
+      /** Binayı yükseltir. Yapılabildiyse true döner. */
       upgradeBuilding(id) {
         const s = stateRef.current;
         if (upgradeBlock(s, id)) return false;
-        const level = levelOf(s.village, id) + 1;
+        const item = itemById(s.village, id);
         dispatch({ type: "VILLAGE_UPGRADE", id });
         sfx("levelup");
-        mascotSay(`${getBuilding(id).name} ${level === 1 ? "kuruldu" : `${level}. seviyeye çıktı`}!`, { mood: "cheer" });
+        mascotSay(`${TYPES[item.type].name} ${item.level + 1}. seviyeye çıktı!`, { mood: "cheer" });
         return true;
       },
       /** Bugünkü hasadı toplar (id yoksa hepsini). Toplanan puanı döndürür. */

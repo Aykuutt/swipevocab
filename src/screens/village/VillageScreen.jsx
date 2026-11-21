@@ -1,97 +1,231 @@
-// "Köy" sekmesi: Kart'ın köyü. Puanlarla bina kurulur ve yükseltilir; Pazar eski Mağaza'nın yerini alır.
-import { useState } from "react";
+// "Köy" sekmesi: Kart'ın köyü, tam ekran. Haritada bina, süs ve yol yerleştirilir, taşınır, satılır;
+// binalara girilip yükseltme ve hasat yönetilir. Pazar eski Mağaza'nın yerini alır.
+import { useRef, useState } from "react";
 import Icon from "../../components/Icon";
 import { Button } from "../../components/ui";
 import {
-  BUILDINGS,
-  MAX_VILLAGE_LEVEL,
-  levelOf,
+  TYPES,
+  buyBlock,
+  buyPrice,
+  canPlace,
+  canSell,
+  isBuilding,
+  itemById,
   pendingHarvests,
-  upgradeBlock,
-  upgradeCost,
+  sellValue,
   villageLevel,
 } from "../../data/village";
+import { useTimeOfDay } from "../../hooks/useTimeOfDay";
+import { mascotSay } from "../../lib/mascot";
 import { useApp } from "../../state/AppContext";
-import BuildingPage from "./BuildingPage";
-import BuildingArt from "./buildingArt";
-import VillageScene from "./VillageScene";
+import BuildingPage, { effectText } from "./BuildingPage";
+import { ItemPreview } from "./isoArt";
+import VillageMap from "./VillageMap";
+import VillageShop from "./VillageShop";
 
-/** Listede bir binanın durumu: hasat, yükseltme bedeli ya da engel. */
-function statusLine(state, b) {
-  const level = levelOf(state.village, b.id);
-  const ready = pendingHarvests(state).find((h) => h.id === b.id);
-  if (ready) return { text: `+${ready.amount} puan hasat bekliyor`, tone: "amber" };
-  const cost = upgradeCost(b.id, level);
-  if (cost === null) return { text: "En üst seviye", tone: "mint" };
-  const block = upgradeBlock(state, b.id);
-  if (block === null) return { text: `${level === 0 ? "Kurulabilir" : "Yükseltilebilir"}: ${cost} puan`, tone: "mint" };
-  if (block === "cap") return { text: "Önce evi yükselt", tone: "dim" };
-  return { text: `${level === 0 ? "Kurulum" : "Yükseltme"}: ${cost} puan`, tone: "dim" };
-}
+const KART_LINES = [
+  "Köyümüz her gün biraz daha güzelleşiyor.",
+  "Bir binayı yükseltmek için puan topla.",
+  "Gece olunca pencereler yanıyor, fark ettin mi?",
+  "Yol döşersen köy daha derli toplu görünür.",
+  "Ağaç dikmeyi unutma, hepsi çok ucuz!",
+];
 
 export default function VillageScreen() {
-  const { state, actions, villageTarget, setVillageTarget } = useApp();
-  const [open, setOpen] = useState(null); // açık bina
-  const current = open ?? villageTarget; // başka ekrandan "Pazar'a git" ile de açılabilir
-  const close = () => {
-    setOpen(null);
+  const { state, actions, goTo, villageTarget, setVillageTarget } = useApp();
+  const mapRef = useRef(null);
+  const tod = useTimeOfDay();
+  const [selectedId, setSelectedId] = useState(null);
+  const [placing, setPlacing] = useState(null); // { type, x, y, moveId?, level? }
+  const [shopOpen, setShopOpen] = useState(false);
+  const [pageId, setPageId] = useState(null);
+  const [confirmSell, setConfirmSell] = useState(false);
+
+  const { village } = state;
+  const pending = pendingHarvests(state);
+  const pendingTotal = pending.reduce((n, h) => n + h.amount, 0);
+  const pendingMap = Object.fromEntries(pending.map((h) => [h.id, h.amount]));
+
+  const selected = selectedId ? itemById(village, selectedId) : null;
+  const pageItem = itemById(village, pageId ?? villageTarget);
+  const closePage = () => {
+    setPageId(null);
     setVillageTarget(null);
   };
 
-  const pending = pendingHarvests(state);
-  const pendingTotal = pending.reduce((n, h) => n + h.amount, 0);
+  /* ---------- yerleştirme ---------- */
+  const startPlacing = (type) => {
+    const pos = mapRef.current.suggest(type);
+    setPlacing({ type, ...pos });
+    setShopOpen(false);
+    setSelectedId(null);
+  };
+  const startMove = (item) => {
+    setPlacing({ type: item.type, x: item.x, y: item.y, moveId: item.id, level: item.level });
+    setSelectedId(null);
+    setConfirmSell(false);
+  };
+  const placeOk = placing ? canPlace(village, placing.type, placing.x, placing.y, placing.moveId ?? null) : false;
+  const placeBlock = placing && !placing.moveId ? buyBlock(state, placing.type) : null;
+
+  const confirmPlace = () => {
+    if (!placing || !placeOk || placeBlock) return;
+    const t = TYPES[placing.type];
+    if (placing.moveId) {
+      actions.moveItem(placing.moveId, placing.x, placing.y);
+      setSelectedId(placing.moveId);
+      setPlacing(null);
+      return;
+    }
+    if (!actions.placeItem(placing.type, placing.x, placing.y)) return;
+    // Yol döşerken devam et: hayalet bir yana kayar.
+    if (t.kind === "road") {
+      setPlacing({ ...placing, x: placing.x + 1 });
+    } else {
+      setPlacing(null);
+    }
+  };
+
+  const sell = () => {
+    if (!selected) return;
+    actions.sellItem(selected.id);
+    setSelectedId(null);
+    setConfirmSell(false);
+  };
+
+  const kartSays = () => {
+    const text = pendingTotal > 0 ? "Hasat zamanı! Bekleyen puanlar var." : KART_LINES[Math.floor(Math.random() * KART_LINES.length)];
+    mascotSay(text, { mood: pendingTotal > 0 ? "cheer" : "happy" });
+  };
+
+  const exit = () => {
+    setVillageTarget(null);
+    goTo("learn");
+  };
+
+  const selType = selected && TYPES[selected.type];
+  const placeType = placing && TYPES[placing.type];
 
   return (
-    <div className="screen village">
-      <div className="village-head">
-        <div>
-          <h1 className="screen-title">Kart'ın köyü</h1>
-          <p className="screen-sub">
-            Köy seviyesi {villageLevel(state.village)}/{MAX_VILLAGE_LEVEL}
-          </p>
+    <div className={`village-full tod-${tod}`}>
+      <VillageMap
+        ref={mapRef}
+        village={village}
+        tod={tod}
+        pending={pendingMap}
+        selectedId={selectedId}
+        placing={placing}
+        onSelect={(id) => {
+          setSelectedId(id);
+          setConfirmSell(false);
+        }}
+        onGhost={(pos) => setPlacing((p) => (p ? { ...p, ...pos } : p))}
+        onHarvest={(id) => actions.harvest(id)}
+        onKart={kartSays}
+      />
+
+      <div className="vhud-top">
+        <button type="button" className="vhud-btn" aria-label="Köyden çık" onClick={exit}>
+          <Icon name="close" size={22} />
+        </button>
+        <div className="vhud-title">
+          <strong>Kart'ın köyü</strong>
+          <span>Köy seviyesi {villageLevel(village)}</span>
         </div>
-        <div className="balance balance-compact">
+        <div className="vhud-balance" aria-label={`${state.xp} puan`}>
           <Icon name="star" size={18} filled />
-          <strong>{state.xp}</strong>
+          {state.xp}
         </div>
       </div>
 
-      {pendingTotal > 0 && (
-        <Button block variant="success" icon="star" onClick={() => actions.harvest()}>
-          Hepsini topla (+{pendingTotal} puan)
-        </Button>
+      {pendingTotal > 0 && !placing && (
+        <button type="button" className="vhud-harvest" onClick={() => actions.harvest()}>
+          <Icon name="star" size={16} filled />
+          Hepsini topla (+{pendingTotal})
+        </button>
       )}
 
-      <VillageScene state={state} onOpen={setOpen} />
+      <div className="vhud-zoom">
+        <button type="button" className="vhud-btn" aria-label="Yakınlaştır" onClick={() => mapRef.current.zoomBy(1.25)}>
+          +
+        </button>
+        <button type="button" className="vhud-btn" aria-label="Uzaklaştır" onClick={() => mapRef.current.zoomBy(0.8)}>
+          −
+        </button>
+      </div>
 
-      <h2 className="group-title">Binalar</h2>
-      <ul className="vlist">
-        {BUILDINGS.map((b) => {
-          const level = levelOf(state.village, b.id);
-          const st = statusLine(state, b);
-          return (
-            <li key={b.id}>
-              <button type="button" className="vlist-row" onClick={() => setOpen(b.id)}>
-                <span className="vlist-art">
-                  <BuildingArt id={b.id} level={level} size={46} />
-                </span>
-                <span className="vlist-text">
-                  <strong>{b.name}</strong>
-                  <span className={`vlist-status is-${st.tone}`}>{st.text}</span>
-                </span>
-                <span className="vlist-level">{level === 0 ? "Arsa" : `Sv. ${level}`}</span>
-                <Icon name="chevronRight" size={18} className="row-chevron" />
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-      <p className="group-hint">
-        Puanı kelime öğrenerek, oyun oynayarak ve ünite bitirerek kazanırsın. Her gün binalardan hasat toplamayı
-        unutma.
-      </p>
+      {/* alt çubuk: yerleştirme, seçim ya da ana düğmeler */}
+      {placing ? (
+        <div className="vbar" role="group" aria-label="Yerleştirme">
+          <div className="vbar-info">
+            <ItemPreview type={placing.type} level={placing.level ?? 1} size={46} />
+            <div>
+              <strong>{placeType.name}</strong>
+              <span>
+                {placing.moveId
+                  ? "Yeni yerine sürükle ya da dokun."
+                  : placeBlock === "xp"
+                    ? "Puan yetmiyor."
+                    : `${buyPrice(placing.type, village)} puan · sürükle ya da dokun`}
+              </span>
+            </div>
+          </div>
+          <div className="vbar-actions">
+            <Button variant="success" disabled={!placeOk || !!placeBlock} onClick={confirmPlace}>
+              {placing.moveId ? "Taşı" : "Onayla"}
+            </Button>
+            <Button variant="secondary" onClick={() => setPlacing(null)}>
+              {placeType.kind === "road" && !placing.moveId ? "Bitir" : "İptal"}
+            </Button>
+          </div>
+          {!placeOk && <p className="vbar-note">Buraya konamaz: dolu ya da arazinin dışında.</p>}
+        </div>
+      ) : selected ? (
+        <div className="vbar" role="group" aria-label={selType.name}>
+          <div className="vbar-info">
+            <ItemPreview type={selected.type} level={selected.level} size={46} />
+            <div>
+              <strong>{selType.name}</strong>
+              <span>
+                {isBuilding(selected.type) ? `Seviye ${selected.level} · ${effectText(selected.type, selected.level)}` : selType.kind === "road" ? "Yürüyüş yolu" : "Süs"}
+              </span>
+            </div>
+            <button type="button" className="icon-btn" aria-label="Seçimi kapat" onClick={() => setSelectedId(null)}>
+              <Icon name="close" size={18} />
+            </button>
+          </div>
+          <div className="vbar-actions">
+            {isBuilding(selected.type) && <Button onClick={() => setPageId(selected.id)}>Gir</Button>}
+            <Button variant="secondary" onClick={() => startMove(selected)}>
+              Taşı
+            </Button>
+            {canSell(selected) &&
+              (confirmSell ? (
+                <>
+                  <Button variant="danger" onClick={sell}>
+                    Sat (+{sellValue(selected)})
+                  </Button>
+                  <Button variant="ghost" onClick={() => setConfirmSell(false)}>
+                    Vazgeç
+                  </Button>
+                </>
+              ) : (
+                <Button variant="secondary" onClick={() => setConfirmSell(true)}>
+                  Sat
+                </Button>
+              ))}
+          </div>
+        </div>
+      ) : (
+        <div className="vbar vbar-main">
+          <Button size="lg" icon="store" onClick={() => setShopOpen(true)}>
+            Dükkân
+          </Button>
+        </div>
+      )}
 
-      {current && <BuildingPage id={current} onClose={close} />}
+      {shopOpen && <VillageShop state={state} onPick={startPlacing} onClose={() => setShopOpen(false)} />}
+      {pageItem && <BuildingPage id={pageItem.id} onClose={closePage} />}
     </div>
   );
 }

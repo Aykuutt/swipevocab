@@ -26,9 +26,11 @@ npm run check    # üçü birden; GitHub Actions her gönderimde bunları çalı
   yeni tema için oraya bir blok, src/data/themes.js'e bir kayıt eklemek yeterli.
 - **Oyunlar:** Zamana karşı (60 sn, kombo çarpanı, rekor), Dinle ve yaz (kelimeyi duyup yazma; aksan farkı hata
   sayılmaz), Boşluğu doldur, Eşleştir. Rekorlar dil başına hesapta saklanır.
-- **Kart'ın köyü:** puanla bina kurulan ve yükseltilen bir köy (Köy sekmesi; eski Mağaza artık Pazar binası).
-  Ev, Pazar, Fırın, Bahçe, Çeşme; evin seviyesi diğer binaların sınırını belirler, hasatlı binalar günde bir puan
-  verir, Pazar büyüdükçe fiyatlar düşer. Sahne saate göre gündüz/akşam/gece olur. Kurallar src/data/village.js'te.
+- **Kart'ın köyü:** Township tarzı, tam ekran izometrik köy (Köy sekmesi; eski Mağaza artık Pazar binası). Puan köyün
+  parasıdır: dükkândan bina, süs ve yol alınır, ızgara üzerinde sürükleyerek yerleştirilir, taşınır, satılır; binalara
+  girilip yükseltilir. Ev, Pazar, Fırın, Bahçe, Çeşme; evin seviyesi diğer binaların sınırını belirler, hasatlı binalar
+  günde bir puan verir (balona dokun), Pazar büyüdükçe fiyatlar düşer. Sahne saate göre gündüz/akşam/gece olur.
+  Kurallar src/data/village.js'te, çizimler src/screens/village/isoArt.jsx'te.
 - **Yol:** üniteler konuya göre değişen bir manzara (ev, bulut, filiz, bina, yıldız...) içinde şeritli bir yolda.
 - **Dört dil:** kurulumda ve Ayarlar'da İngilizce, Almanca, İspanyolca ya da Fransızca seçilir. Bilinen
   kelimeler, üniteler ve günlük kartlar her dilde ayrı; XP, seri ve lig ortaktır. Okuma sesi, ses

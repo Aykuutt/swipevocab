@@ -2,7 +2,7 @@
 import HeartTimer from "../../components/HeartTimer";
 import { Button, Group, Row } from "../../components/ui";
 import { FEATURES, MAX_LIVES, PRICES } from "../../config";
-import { levelOf, marketPrice } from "../../data/village";
+import { marketLevel, marketPrice } from "../../data/village";
 import { useApp } from "../../state/AppContext";
 import { hasUnlimitedLives } from "../../state/selectors";
 
@@ -14,7 +14,7 @@ export default function MarketPanel() {
   const unlimited = hasUnlimitedLives(state);
   const heartsPrice = marketPrice(PRICES.heartsRefill, village);
   const boostPrice = marketPrice(PRICES.xpBoost, village);
-  const discounted = levelOf(village, "market") > 1;
+  const discounted = marketLevel(village) > 1;
 
   const heartsDesc = unlimited ? (
     "Pro'dasın, canların zaten sınırsız."

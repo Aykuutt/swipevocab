@@ -14,7 +14,20 @@ import {
 import { DEFAULT_GOAL } from "../data/goals";
 import { DEFAULT_LANGUAGE, LANGUAGES } from "../data/languages";
 import { DEFAULT_THEME, THEMES } from "../data/themes";
-import { initialVillage, levelOf, marketPrice, pendingHarvests, upgradeBlock, upgradeCost } from "../data/village";
+import {
+  buyBlock,
+  buyPrice,
+  canPlace,
+  canSell,
+  initialVillage,
+  itemById,
+  marketPrice,
+  migrateVillage,
+  pendingHarvests,
+  sellValue,
+  upgradeBlock,
+  upgradeCost,
+} from "../data/village";
 import { leagueRank } from "../lib/league";
 import { unique } from "../lib/random";
 import { weekOfDay } from "../lib/time";
@@ -70,12 +83,6 @@ export const initialState = {
   village: initialVillage(), // Kart'ın köyü: bina seviyeleri ve son hasat günleri
 };
 
-/** Kayıtlı köyü varsayılanlarla birleştirir (sonradan eklenen binalar kayıtta yoktur). */
-function mergeVillage(saved) {
-  const base = initialVillage();
-  return { levels: { ...base.levels, ...saved?.levels }, collected: { ...saved?.collected } };
-}
-
 /** Kayıttan gelen durumu eksik alanları tamamlayarak açar. */
 export function hydrate(saved) {
   const { profileId, ...rest } = saved; // eski SQL eşitlemesinden kalan alan
@@ -90,7 +97,7 @@ export function hydrate(saved) {
     settings,
     languages: rest.languages || {},
     xpTotal: Math.max(rest.xpTotal ?? 0, rest.xp ?? 0),
-    village: mergeVillage(rest.village),
+    village: migrateVillage(rest.village),
   };
   if (!LANGUAGES[s.language]) s = { ...s, language: DEFAULT_LANGUAGE };
   return FEATURES.pro ? s : { ...s, isPro: false, freezes: 0 };
@@ -365,14 +372,60 @@ export function reducer(state, action) {
       return { ...state, xp: state.xp - price, xpBoost: true };
     }
 
-    case "VILLAGE_UPGRADE": {
-      // Bina kurmak ya da yükseltmek puan harcar. Ömür boyu puan (xpTotal) düşmez.
-      if (upgradeBlock(state, action.id)) return state;
-      const level = levelOf(state.village, action.id);
+    case "VILLAGE_PLACE": {
+      // Dükkândan alınan nesneyi haritaya koyar; puan burada harcanır.
+      const { itemType: type, x, y } = action;
+      if (buyBlock(state, type) || !canPlace(state.village, type, x, y)) return state;
+      const price = buyPrice(type, state.village);
+      const id = `i${state.village.nextId}`;
       return {
         ...state,
-        xp: state.xp - upgradeCost(action.id, level),
-        village: { ...state.village, levels: { ...state.village.levels, [action.id]: level + 1 } },
+        xp: state.xp - price,
+        village: {
+          ...state.village,
+          nextId: state.village.nextId + 1,
+          items: [...state.village.items, { id, type, x, y, level: 1 }],
+        },
+      };
+    }
+
+    case "VILLAGE_MOVE": {
+      const item = itemById(state.village, action.id);
+      if (!item || !canPlace(state.village, item.type, action.x, action.y, item.id)) return state;
+      if (item.x === action.x && item.y === action.y) return state;
+      return {
+        ...state,
+        village: {
+          ...state.village,
+          items: state.village.items.map((i) => (i.id === item.id ? { ...i, x: action.x, y: action.y } : i)),
+        },
+      };
+    }
+
+    case "VILLAGE_SELL": {
+      // Ev ve pazar satılamaz. Geri gelen puan kazanç sayılmaz (xpTotal artmaz).
+      const item = itemById(state.village, action.id);
+      if (!item || !canSell(item)) return state;
+      const collected = { ...state.village.collected };
+      delete collected[item.id];
+      return {
+        ...state,
+        xp: state.xp + sellValue(item),
+        village: { ...state.village, collected, items: state.village.items.filter((i) => i.id !== item.id) },
+      };
+    }
+
+    case "VILLAGE_UPGRADE": {
+      // Bina yükseltmek puan harcar. Ömür boyu puan (xpTotal) düşmez.
+      if (upgradeBlock(state, action.id)) return state;
+      const item = itemById(state.village, action.id);
+      return {
+        ...state,
+        xp: state.xp - upgradeCost(item),
+        village: {
+          ...state.village,
+          items: state.village.items.map((i) => (i.id === item.id ? { ...i, level: i.level + 1 } : i)),
+        },
       };
     }
 
