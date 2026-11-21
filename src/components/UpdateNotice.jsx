@@ -18,13 +18,12 @@ function usedBefore() {
   }
 }
 
+// Sayfa açılır açılmaz (kurulum adımları veri yazmadan önce) bakılır: hiç kullanılmamış cihaz = yeni kullanıcı.
+if (typeof window !== "undefined" && !storage.get(SEEN_KEY) && !usedBefore()) storage.set(SEEN_KEY, APP_VERSION);
+
 function initialNotice() {
   const seen = storage.get(SEEN_KEY);
   if (seen && !isNewer(APP_VERSION, seen)) return null;
-  if (!seen && !usedBefore()) {
-    storage.set(SEEN_KEY, APP_VERSION); // yeni kullanıcı: kart gösterme
-    return null;
-  }
   const items = changesSince(seen);
   if (items.length === 0) {
     storage.set(SEEN_KEY, APP_VERSION);

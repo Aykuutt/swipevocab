@@ -2,6 +2,10 @@
 // Yeni sürüm yayınlarken buraya kısa, kullanıcının anlayacağı maddeler ekle. config.js'teki APP_VERSION ile aynı sürüm.
 export const CHANGELOG = [
   {
+    version: "0.21.1",
+    items: ["Yeni gelenlere yanlışlıkla çıkan \"Uygulama güncellendi\" kartı kaldırıldı."],
+  },
+  {
     version: "0.21.0",
     items: ["Yeni gelenlere Dilbaz ilk kartta uygulamayı adım adım gösteriyor: dokun, kaydır, hedefini gör."],
   },
