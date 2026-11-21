@@ -1,7 +1,7 @@
 // Uygulama genelindeki sabitler ve özellik anahtarları.
 
 export const APP_NAME = "SwipeVocab";
-export const APP_VERSION = "0.11.1";
+export const APP_VERSION = "0.11.2";
 
 // Özellik anahtarları: kapalı olanlar arayüzde hiç görünmez.
 export const FEATURES = {
@@ -29,7 +29,8 @@ export const DAILY_GOAL_OPTIONS = [5, 10, 20];
 export const DEFAULT_DAILY_GOAL = 10;
 
 export const MAX_LIVES = 5;
-export const LIFE_REGEN_MS = 4 * 60 * 60 * 1000; // bir can 4 saatte gelir
+// 5 canın tamamı 3 saatte dolar: bir can 36 dakikada gelir.
+export const LIFE_REGEN_MS = 36 * 60 * 1000;
 
 // Aralıklı tekrar: kaçıncı aşamada kaç gün sonra tekrar sorulacak.
 export const REVIEW_INTERVALS = [1, 3, 7, 14, 30];

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { LIFE_REGEN_MS, MAX_LIVES } from "../config";
 import { WORDS } from "../data/langs/en";
 import { WORDS as DE_WORDS } from "../data/langs/de";
 import { itemById, pendingHarvests } from "../data/village";
@@ -114,11 +115,20 @@ describe("canlar", () => {
     let s = newUser();
     s = reducer(s, { type: "LOSE_LIFE", now: 0 });
     s = reducer(s, { type: "LOSE_LIFE", now: 0 });
-    s = reducer(s, { type: "HEARTS_TICK", now: 4 * 3600_000 });
-    expect(s.lives).toBe(2);
-    s = reducer(s, { type: "HEARTS_TICK", now: 8 * 3600_000 });
-    expect(s.lives).toBe(3);
+    expect(s.lives).toBe(MAX_LIVES - 2);
+    s = reducer(s, { type: "HEARTS_TICK", now: LIFE_REGEN_MS });
+    expect(s.lives).toBe(MAX_LIVES - 1);
+    s = reducer(s, { type: "HEARTS_TICK", now: 2 * LIFE_REGEN_MS });
+    expect(s.lives).toBe(MAX_LIVES);
     expect(s.regenAt).toBeNull();
+  });
+
+  it("5 can boşken hepsi 3 saatte dolar", () => {
+    let s = newUser();
+    for (let i = 0; i < MAX_LIVES; i++) s = reducer(s, { type: "LOSE_LIFE", now: 0 });
+    expect(s.lives).toBe(0);
+    s = reducer(s, { type: "HEARTS_TICK", now: 3 * 3600_000 });
+    expect(s.lives).toBe(MAX_LIVES);
   });
 
   it("puan yetmiyorsa can satın alınamaz", () => {
@@ -271,7 +281,7 @@ describe("Kart'ın köyü", () => {
     s = reducer(s, { type: "VILLAGE_UPGRADE", id: "market" }); // 2. seviye: %10 indirim
     s = { ...s, lives: 1, xp: 27 };
     s = reducer(s, { type: "BUY_HEARTS" });
-    expect(s.lives).toBe(3);
+    expect(s.lives).toBe(MAX_LIVES);
     expect(s.xp).toBe(0);
   });
 
