@@ -48,11 +48,25 @@ export function buildDeck(state, words, day = state.day, swipedToday = day === s
     studyLevelIndex(state, pool)
   ).map((w) => ({ id: w.id }));
 
-  const deck = [...reviews, ...fresh];
   const limit = dailyCardLimit(state);
-  if (limit === null) return deck.slice(0, reviews.length + PRO_DECK_SIZE);
   // Günlük sınır: bugün kaydırılanlar düşülür; tekrarlar da sınıra dahildir.
-  return deck.slice(0, Math.max(0, limit - swipedToday));
+  const target = limit === null ? reviews.length + PRO_DECK_SIZE : Math.max(0, limit - swipedToday);
+  let deck = [...reviews, ...fresh];
+
+  // Yeni kelime tükendiyse ve bugün tekrarı gelen az ise deste eksik kalmasın: bilinen kelimelerden
+  // tekrar zamanı en yakın olanlarla (unutmaya en yakın) tamamla. Böylece her gün hedef kadar kart gelir.
+  if (deck.length < target) {
+    const inDeck = new Set(deck.map((c) => c.id));
+    const exists = new Set(words.map((w) => w.id));
+    const extra = state.knownIds
+      .filter((id) => !inDeck.has(id) && exists.has(id))
+      .map((id) => ({ id, due: state.schedule[id]?.due ?? 0 }))
+      .sort((a, b) => a.due - b.due)
+      .slice(0, target - deck.length)
+      .map(({ id }) => ({ id, isReview: true }));
+    deck = [...deck, ...extra];
+  }
+  return deck.slice(0, target);
 }
 
 /** Sınırsız planda (Pro) deste azaldığında eklenecek kartlar. Yeni kelime kalmadıysa eskileri döndürür. */

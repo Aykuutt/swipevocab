@@ -1273,3 +1273,15 @@ strong, b { font-weight: 650; }
 .friend-village-msg.is-bottom { top: auto; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
 
 .row-badge { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px; margin-left: 6px; border-radius: 11px; background: var(--coral); color: #fff; font-size: 12px; font-weight: 800; }
+
+/* ---------- Köy haritası: telefonda akıcı kaydırma ---------- */
+.vmap { -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+/* Sürüklerken ve iki parmakla yakınlaştırırken animasyonlar durur. */
+.vmap.is-moving svg * { animation-play-state: paused !important; }
+@media (pointer: coarse) {
+  /* Telefonda süs animasyonları kapalı (her kare bütün köyü yeniden çizdiriyordu); uyarı balonları sallanmaya devam eder. */
+  .iso-smoke, .iso-villager { animation: none; }
+  .iso-kart { animation: none; transform: translate(-26px, -52px); }
+  /* Karışım modu telefonda pahalı: aynı renk tonu düz katmanla. */
+  .vmap-tint { mix-blend-mode: normal; }
+}

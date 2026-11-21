@@ -174,6 +174,7 @@ const VillageMap = forwardRef(function VillageMap(
     if (!el) return;
     const cw = el.clientWidth;
     const ch = el.clientHeight;
+    if (![cam.current.x, cam.current.y, cam.current.k].every(Number.isFinite)) cam.current = { x: 0, y: 0, k: 0.5 };
     const c = cam.current;
     c.k = clamp(c.k, MIN_K, MAX_K);
     const [lx, ly] = landCenter();
@@ -264,6 +265,18 @@ const VillageMap = forwardRef(function VillageMap(
     const ptrs = new Map();
     let g = null;
 
+    let frame = 0;
+    const schedule = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        keepInView();
+        apply();
+      });
+    };
+    // Sürüklerken animasyonları durdur: telefonda her kare bütün köyü yeniden çizdirmesin.
+    const setMoving = (on) => el.classList.toggle("is-moving", on);
+
     const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
     const mid = (a, b) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
 
@@ -332,8 +345,8 @@ const VillageMap = forwardRef(function VillageMap(
         cam.current.k = k;
         cam.current.x = m.x - r.left - wx * k;
         cam.current.y = m.y - r.top - wy * k;
-        keepInView();
-        apply();
+        setMoving(true);
+        schedule();
         return;
       }
       const dx = e.clientX - g.sx;
@@ -345,8 +358,8 @@ const VillageMap = forwardRef(function VillageMap(
       } else {
         cam.current.x = g.cx + dx;
         cam.current.y = g.cy + dy;
-        keepInView();
-        apply();
+        setMoving(true);
+        schedule();
       }
     };
 
@@ -354,9 +367,17 @@ const VillageMap = forwardRef(function VillageMap(
       if (!ptrs.has(e.pointerId)) return;
       ptrs.delete(e.pointerId);
       if (g && !g.pinch && !g.moved && ptrs.size === 0 && e.type === "pointerup") tap(e, g);
-      if (ptrs.size === 0) g = null;
-      else if (g?.pinch) g = { moved: true, dead: true };
+      if (ptrs.size === 0) {
+        g = null;
+        setMoving(false);
+      } else if (g?.pinch) {
+        const [p] = [...ptrs.values()];
+        g = { sx: p.x, sy: p.y, cx: cam.current.x, cy: cam.current.y, moved: true, target: null, ghost: false, touch: true };
+      }
     };
+
+    // Uzun basınca açılan sistem menüsü dokunmayı kesmesin.
+    const onContext = (e) => e.preventDefault();
 
     const onWheel = (e) => {
       e.preventDefault();
@@ -368,7 +389,10 @@ const VillageMap = forwardRef(function VillageMap(
     window.addEventListener("pointerup", onUp);
     window.addEventListener("pointercancel", onUp);
     el.addEventListener("wheel", onWheel, { passive: false });
+    el.addEventListener("contextmenu", onContext);
     return () => {
+      cancelAnimationFrame(frame);
+      el.removeEventListener("contextmenu", onContext);
       el.removeEventListener("pointerdown", onDown);
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
