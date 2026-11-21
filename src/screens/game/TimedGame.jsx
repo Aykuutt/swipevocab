@@ -66,7 +66,7 @@ export default function TimedGame({ pool, words, recordKey, onExit }) {
     if (phase !== "over" || saved.current) return;
     saved.current = true;
     const isRecord = g.score > startRecord.current && g.score > 0;
-    const bonus = Math.min(15, Math.floor(g.score / 40));
+    const bonus = Math.min(8, Math.floor(g.score / 80));
     if (g.score > 0) actions.setRecord(recordKey, g.score);
     if (bonus > 0) actions.awardXp(bonus);
     if (isRecord) sfx("levelup");

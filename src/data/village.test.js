@@ -84,9 +84,9 @@ describe("köy kuralları", () => {
 
   it("dükkân: ikinci kopya iki kat, üst sınırda ve puansızken satılmaz", () => {
     const v = initialVillage();
-    expect(buyPrice("bakery", v)).toBe(40);
+    expect(buyPrice("bakery", v)).toBe(100);
     const two = { ...v, items: [...v.items, { id: "x", type: "bakery", x: 6, y: 10, level: 1 }] };
-    expect(buyPrice("bakery", two)).toBe(80);
+    expect(buyPrice("bakery", two)).toBe(200);
     expect(buyBlock({ xp: 1000, village: v }, "bakery")).toBeNull();
     expect(buyBlock({ xp: 10, village: v }, "bakery")).toBe("xp");
     const full = { ...two, items: [...two.items, { id: "y", type: "bakery", x: 11, y: 10, level: 1 }] };
@@ -104,15 +104,15 @@ describe("köy kuralları", () => {
     expect(upgradeBlock({ ...state, xp: 0 }, "home")).toBe("xp");
     expect(upgradeBlock(state, "home")).toBeNull();
     expect(upgradeBlock(state, "yok")).toBe("none");
-    expect(upgradeCost(bakery)).toBe(260);
+    expect(upgradeCost(bakery)).toBe(650);
   });
 
   it("satış: ev ve pazar satılmaz, binada yatırımın yarısı, süste fiyatın yarısı geri gelir", () => {
     expect(canSell({ type: "home" })).toBe(false);
     expect(sellValue({ type: "home", level: 3 })).toBe(0);
-    expect(sellValue({ type: "bakery", level: 2 })).toBe(70);
-    expect(sellValue({ type: "tree", level: 1 })).toBe(4);
-    expect(sellValue({ type: "road", level: 1 })).toBe(1);
+    expect(sellValue({ type: "bakery", level: 2 })).toBe(175);
+    expect(sellValue({ type: "tree", level: 1 })).toBe(10);
+    expect(sellValue({ type: "road", level: 1 })).toBe(2);
   });
 
   it("pazar indirimi fiyatı düşürür", () => {
@@ -124,7 +124,7 @@ describe("köy kuralları", () => {
   });
 
   it("arazi genişletme: bedel artar, ev şartı gelir, haritanın kenarında durur", () => {
-    expect([0, 1, 2, 3].map(expandCost)).toEqual([100, 150, 230, 340]);
+    expect([0, 1, 2, 3].map(expandCost)).toEqual([250, 400, 640, 1020]);
     expect([0, 1, 2, 3, 4, 9].map(expandRequirement)).toEqual([1, 1, 2, 2, 3, 3]);
     const v = initialVillage();
     expect(expandedLand(v.land, "x1")).toEqual({ x0: 4, y0: 4, x1: 18, y1: 16 });

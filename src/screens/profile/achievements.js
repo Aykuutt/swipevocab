@@ -3,7 +3,7 @@ import { currentStreak } from "../../state/selectors";
 
 export const BADGES = [
   { key: "streak", icon: "flame", title: "İstikrarlı", tiers: [3, 7, 14, 30], desc: (n) => `${n} günlük bir seriye ulaş` },
-  { key: "xp", icon: "star", title: "Bilge", tiers: [50, 150, 400, 1000], desc: (n) => `${n} puan kazan` },
+  { key: "xp", icon: "star", title: "Bilge", tiers: [30, 90, 250, 600], desc: (n) => `${n} puan kazan` },
   { key: "words", icon: "book", title: "Kelime ustası", tiers: [5, 15, 40, 90], desc: (n) => `${n} kelime öğren` },
   { key: "units", icon: "path", title: "Yol gezgini", tiers: [1, 3, 6, 12], desc: (n) => `${n} ünite tamamla` },
   { key: "languages", icon: "game", title: "Dil meraklısı", tiers: [2, 3, 4], desc: (n) => `${n} farklı dilde kelime öğren` },

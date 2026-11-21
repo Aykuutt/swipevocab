@@ -1,7 +1,7 @@
 // Uygulama genelindeki sabitler ve özellik anahtarları.
 
 export const APP_NAME = "SwipeVocab";
-export const APP_VERSION = "0.10.0";
+export const APP_VERSION = "0.11.0";
 
 // Özellik anahtarları: kapalı olanlar arayüzde hiç görünmez.
 export const FEATURES = {
@@ -36,14 +36,14 @@ export const REVIEW_INTERVALS = [1, 3, 7, 14, 30];
 export const WORDS_PER_UNIT = 8;
 
 export const XP = {
-  swipe: 2,
-  correct: 4,
-  unit: 30,
-  unitReplay: 10,
-  day: 15,
-  partnerTurn: 3,
-  partnerWord: 6,
-  talkMinute: 5, // canlı konuşmada her tam dakika
+  swipe: 1,
+  correct: 2,
+  unit: 15,
+  unitReplay: 5,
+  day: 8,
+  partnerTurn: 1,
+  partnerWord: 3,
+  talkMinute: 3, // canlı konuşmada her tam dakika
   talkMinuteCap: 6, // en fazla bu kadar dakika puanlanır
 };
 

@@ -203,10 +203,10 @@ describe("Kart'ın köyü", () => {
     let s = place(rich(), "bakery", 6, 10);
     const bakery = first(s, "bakery");
     expect(bakery).toMatchObject({ x: 6, y: 10, level: 1 });
-    expect(s.xp).toBe(360);
+    expect(s.xp).toBe(300);
     expect(s.xpTotal).toBe(400);
     s = place(s, "bakery", 11, 10); // ikinci kopya iki kat
-    expect(s.xp).toBe(280);
+    expect(s.xp).toBe(100);
     expect(place(s, "bakery", 8, 12)).toBe(s); // üst sınır: en çok 2 fırın
   });
 
@@ -233,14 +233,14 @@ describe("Kart'ın köyü", () => {
     const before = s.xp;
     const total = s.xpTotal;
     s = reducer(s, { type: "VILLAGE_SELL", id });
-    expect(s.xp).toBe(before + 70);
+    expect(s.xp).toBe(before + 175);
     expect(s.xpTotal).toBe(total);
     expect(first(s, "bakery")).toBeUndefined();
     expect(reducer(s, { type: "VILLAGE_SELL", id: "home" })).toBe(s);
   });
 
   it("evin sınırı aşılamaz; ev büyüyünce diğer binalar da büyür", () => {
-    let s = reducer(newUser(5), { type: "AWARD_XP", xp: 800 });
+    let s = reducer(newUser(5), { type: "AWARD_XP", xp: 3000 });
     s = place(s, "bakery", 6, 10);
     const id = first(s, "bakery").id;
     s = reducer(s, { type: "VILLAGE_UPGRADE", id }); // 2
@@ -256,10 +256,10 @@ describe("Kart'ın köyü", () => {
     const id = first(s, "bakery").id;
     s = { ...s, xpBoost: true };
     const before = s.xp;
-    expect(pendingHarvests(s)).toEqual([{ id, amount: 3 }]);
+    expect(pendingHarvests(s)).toEqual([{ id, amount: 2 }]);
     s = reducer(s, { type: "VILLAGE_HARVEST" });
-    expect(s.xp).toBe(before + 3);
-    expect(s.xpTotal).toBe(400 + 3);
+    expect(s.xp).toBe(before + 2);
+    expect(s.xpTotal).toBe(400 + 2);
     expect(pendingHarvests(s)).toEqual([]);
     expect(reducer(s, { type: "VILLAGE_HARVEST" })).toBe(s);
     s = reducer(s, { type: "SYNC_DAY", day: s.day + 1, deck: [] });
@@ -289,14 +289,14 @@ describe("köylü sohbetleri (durum)", () => {
     let s = newUser(5);
     const before = s.xp;
     s = reducer(s, { type: "VILLAGER_TALK", id: "merchant" });
-    expect(s.xp).toBe(before + 16);
-    expect(s.xpTotal).toBe(16);
+    expect(s.xp).toBe(before + 8);
+    expect(s.xpTotal).toBe(8);
     expect(s.village.villagers.merchant).toEqual({ talks: 1, last: s.day });
     expect(reducer(s, { type: "VILLAGER_TALK", id: "merchant" })).toBe(s);
     s = reducer(s, { type: "SYNC_DAY", day: s.day + 1, deck: [] });
     s = reducer(s, { type: "VILLAGER_TALK", id: "merchant" });
     expect(s.village.villagers.merchant.talks).toBe(2);
-    expect(s.xp).toBe(before + 16 + 6);
+    expect(s.xp).toBe(before + 8 + 3);
   });
 
   it("binası olmayan köylüyle ya da bilinmeyen köylüyle sohbet olmaz", () => {
@@ -308,15 +308,15 @@ describe("köylü sohbetleri (durum)", () => {
 
 describe("arazi genişletme (durum)", () => {
   it("puan harcar, araziyi büyütür, sayacı artırır; ev şartı ve puan yetmezliğinde olmaz", () => {
-    let s = reducer(newUser(5), { type: "AWARD_XP", xp: 1000 });
+    let s = reducer(newUser(5), { type: "AWARD_XP", xp: 3000 });
     s = reducer(s, { type: "VILLAGE_EXPAND", side: "x1" });
     expect(s.village.land).toEqual({ x0: 4, y0: 4, x1: 18, y1: 16 });
     expect(s.village.expansions).toBe(1);
-    expect(s.xp).toBe(900);
-    expect(s.xpTotal).toBe(1000);
+    expect(s.xp).toBe(2750);
+    expect(s.xpTotal).toBe(3000);
     s = reducer(s, { type: "VILLAGE_EXPAND", side: "y0" });
     expect(s.village.land.y0).toBe(2);
-    expect(s.xp).toBe(750);
+    expect(s.xp).toBe(2350);
     // 3. genişletme için ev 2. seviye olmalı
     expect(reducer(s, { type: "VILLAGE_EXPAND", side: "y1" })).toBe(s);
     s = reducer(s, { type: "VILLAGE_UPGRADE", id: "home" });
@@ -370,7 +370,7 @@ describe("sayaçlar ve siparişler (durum)", () => {
     s = { ...s, counters: { ...s.counters, [order.kind]: s.counters[order.kind] + order.target } };
     const before = s.xp;
     s = reducer(s, { type: "ORDER_CLAIM", id: "merchant" });
-    expect(s.xp).toBe(before + order.reward + 10); // ilk kalp bonusu
+    expect(s.xp).toBe(before + order.reward + 5); // ilk kalp bonusu
     expect(s.village.villagers.merchant.talks).toBe(1);
     expect(s.village.orders.merchant.claimed).toBe(true);
     expect(reducer(s, { type: "ORDER_CLAIM", id: "merchant" })).toBe(s); // ikinci kez olmaz

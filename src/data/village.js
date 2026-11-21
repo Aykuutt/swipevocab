@@ -27,7 +27,7 @@ export const TYPES = {
     w: 2,
     d: 2,
     max: 1,
-    costs: [0, 80, 220],
+    costs: [0, 200, 550],
     essential: true,
   },
   market: {
@@ -39,7 +39,7 @@ export const TYPES = {
     w: 2,
     d: 2,
     max: 1,
-    costs: [0, 60, 180],
+    costs: [0, 150, 450],
     discount: [0, 0.1, 0.2],
     essential: true,
   },
@@ -52,8 +52,8 @@ export const TYPES = {
     w: 2,
     d: 2,
     max: 2,
-    costs: [40, 100, 260],
-    harvest: [3, 6, 10],
+    costs: [100, 250, 650],
+    harvest: [2, 3, 5],
     shop: "buildings",
   },
   garden: {
@@ -65,8 +65,8 @@ export const TYPES = {
     w: 2,
     d: 2,
     max: 2,
-    costs: [60, 140, 320],
-    harvest: [4, 8, 12],
+    costs: [150, 350, 800],
+    harvest: [2, 4, 6],
     shop: "buildings",
   },
   fountain: {
@@ -78,17 +78,17 @@ export const TYPES = {
     w: 2,
     d: 2,
     max: 1,
-    costs: [30, 90, 240],
-    harvest: [2, 4, 7],
+    costs: [80, 220, 600],
+    harvest: [1, 2, 3],
     shop: "buildings",
   },
-  tree: { id: "tree", kind: "deco", name: "Meşe ağacı", short: "Meşe", w: 1, d: 1, max: 80, price: 8, shop: "decor" },
-  pine: { id: "pine", kind: "deco", name: "Çam ağacı", short: "Çam", w: 1, d: 1, max: 80, price: 8, shop: "decor" },
-  flowers: { id: "flowers", kind: "deco", name: "Çiçek tarhı", short: "Çiçek", w: 1, d: 1, max: 80, price: 10, shop: "decor" },
-  hedge: { id: "hedge", kind: "deco", name: "Çit", short: "Çit", w: 1, d: 1, max: 80, price: 6, shop: "decor" },
-  bench: { id: "bench", kind: "deco", name: "Bank", short: "Bank", w: 1, d: 1, max: 40, price: 20, shop: "decor" },
-  lamp: { id: "lamp", kind: "deco", name: "Sokak lambası", short: "Lamba", w: 1, d: 1, max: 40, price: 25, shop: "decor" },
-  road: { id: "road", kind: "road", name: "Taş yol", short: "Yol", w: 1, d: 1, max: 300, price: 2, shop: "roads" },
+  tree: { id: "tree", kind: "deco", name: "Meşe ağacı", short: "Meşe", w: 1, d: 1, max: 80, price: 20, shop: "decor" },
+  pine: { id: "pine", kind: "deco", name: "Çam ağacı", short: "Çam", w: 1, d: 1, max: 80, price: 20, shop: "decor" },
+  flowers: { id: "flowers", kind: "deco", name: "Çiçek tarhı", short: "Çiçek", w: 1, d: 1, max: 80, price: 25, shop: "decor" },
+  hedge: { id: "hedge", kind: "deco", name: "Çit", short: "Çit", w: 1, d: 1, max: 80, price: 15, shop: "decor" },
+  bench: { id: "bench", kind: "deco", name: "Bank", short: "Bank", w: 1, d: 1, max: 40, price: 50, shop: "decor" },
+  lamp: { id: "lamp", kind: "deco", name: "Sokak lambası", short: "Lamba", w: 1, d: 1, max: 40, price: 60, shop: "decor" },
+  road: { id: "road", kind: "road", name: "Taş yol", short: "Yol", w: 1, d: 1, max: 300, price: 5, shop: "roads" },
 };
 
 export const SHOP_TABS = [
@@ -262,7 +262,7 @@ export const SIDES = [
 ];
 
 /** n. genişletmenin bedeli (n: şimdiye kadar yapılan genişletme sayısı). */
-export const expandCost = (n) => Math.round((100 * 1.5 ** n) / 10) * 10;
+export const expandCost = (n) => Math.round((250 * 1.6 ** n) / 10) * 10;
 /** n. genişletme için evin en az kaçıncı seviyede olması gerektiği. */
 export const expandRequirement = (n) => Math.min(MAX_LEVEL, 1 + Math.floor(n / 2));
 

@@ -79,7 +79,7 @@ export default function VillagerTalk({ id, onClose }) {
     if (options[i].ok) {
       setOkIdx(i);
       sfx("correct");
-      if (!practice) actions.correct(2);
+      if (!practice) actions.correct(1);
       setTimeout(() => speak(dialogue.reply), 350);
     } else {
       sfx("wrong");
@@ -92,7 +92,7 @@ export default function VillagerTalk({ id, onClose }) {
   const onWord = (res) => {
     setWordRes(res);
     sfx(res.correct ? "correct" : "wrong");
-    if (res.correct && !practice) actions.correct(2);
+    if (res.correct && !practice) actions.correct(1);
   };
 
   const finish = () => {

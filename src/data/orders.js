@@ -7,10 +7,10 @@ import { availableVillagers, getVillager, heartBonus, talkState } from "./villag
 import { villageLevel } from "./village";
 
 export const ORDER_KINDS = {
-  correct: { base: 5, step: 2, reward: (n) => n * 2 + 8, text: (n) => `Bugün ${n} soruyu doğru cevapla.`, unit: "doğru cevap" },
-  cards: { base: 8, step: 2, reward: (n) => Math.round(n * 1.5) + 6, text: (n) => `${n} kelime kartı kaydır.`, unit: "kart" },
-  learned: { base: 2, step: 1, reward: (n) => n * 7 + 6, text: (n) => `${n} yeni kelime öğren.`, unit: "kelime" },
-  units: { base: 1, step: 0, reward: (n) => n * 30, text: (n) => (n === 1 ? "Yoldan bir üniteyi bitir." : `Yoldan ${n} üniteyi bitir.`), unit: "ünite" },
+  correct: { base: 5, step: 2, reward: (n) => n + 4, text: (n) => `Bugün ${n} soruyu doğru cevapla.`, unit: "doğru cevap" },
+  cards: { base: 8, step: 2, reward: (n) => Math.round(n * 0.75) + 3, text: (n) => `${n} kelime kartı kaydır.`, unit: "kart" },
+  learned: { base: 2, step: 1, reward: (n) => n * 3 + 3, text: (n) => `${n} yeni kelime öğren.`, unit: "kelime" },
+  units: { base: 1, step: 0, reward: (n) => n * 15, text: (n) => (n === 1 ? "Yoldan bir üniteyi bitir." : `Yoldan ${n} üniteyi bitir.`), unit: "ünite" },
 };
 
 // Hangi köylü ne ister: mesleğine yakın işler.

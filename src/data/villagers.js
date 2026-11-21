@@ -11,9 +11,9 @@ export const VILLAGERS = [
 export const getVillager = (id) => VILLAGERS.find((v) => v.id === id);
 
 /* ---------- arkadaşlık ---------- */
-export const TALK_REWARD = 6; // günlük sohbet ödülü
+export const TALK_REWARD = 3; // günlük sohbet ödülü
 export const HEART_AT = [1, 3, 6, 10, 15]; // 1..5. kalp için gereken sohbet sayısı
-export const HEART_BONUS = [0, 10, 15, 25, 40, 60]; // kalp kazanılınca verilen bonus
+export const HEART_BONUS = [0, 5, 8, 12, 20, 30]; // kalp kazanılınca verilen bonus
 
 export const heartsFor = (talks) => HEART_AT.filter((n) => talks >= n).length;
 

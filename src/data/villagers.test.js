@@ -33,9 +33,9 @@ describe("köylü sohbetleri", () => {
     expect(heartsFor(0)).toBe(0);
     expect(heartsFor(HEART_AT[0])).toBe(1);
     expect(heartsFor(100)).toBe(HEART_AT.length);
-    expect(talkReward(0)).toBe(16); // ilk sohbet: 6 + 1. kalp bonusu 10
-    expect(talkReward(1)).toBe(6);
-    expect(talkReward(2)).toBe(21); // 3. sohbet: 2. kalp
+    expect(talkReward(0)).toBe(8); // ilk sohbet: 3 + 1. kalp bonusu 5
+    expect(talkReward(1)).toBe(3);
+    expect(talkReward(2)).toBe(11); // 3. sohbet: 2. kalp (3 + 8)
   });
 
   it("köylü ancak binası kurulunca belirir (Pazar baştan var)", () => {
