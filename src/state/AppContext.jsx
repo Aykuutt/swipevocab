@@ -113,11 +113,30 @@ export function AppProvider({ children }) {
       if (day > s.day) dispatch({ type: "SYNC_DAY", day, deck: buildDeck(s, words, day) });
     };
     sync();
+    // Tam gece yarısında yeni güne geç (30 saniyelik kontrolü beklemeden); sonra bir sonraki gece yarısını kur.
+    let midnight;
+    const armMidnight = () => {
+      midnight = setTimeout(
+        () => {
+          sync();
+          armMidnight();
+        },
+        Math.min(msUntilMidnight(getNow()) + 500, 2_147_483_000)
+      );
+    };
+    armMidnight();
+    // Yedek: telefon uykudan çıkınca zamanlayıcılar gecikebilir.
     const timer = setInterval(sync, 30_000);
+    // Uygulamaya geri dönülünce hemen kontrol et (sekme, odak, iPhone'da geri gelen sayfa).
     document.addEventListener("visibilitychange", sync);
+    window.addEventListener("focus", sync);
+    window.addEventListener("pageshow", sync);
     return () => {
+      clearTimeout(midnight);
       clearInterval(timer);
       document.removeEventListener("visibilitychange", sync);
+      window.removeEventListener("focus", sync);
+      window.removeEventListener("pageshow", sync);
     };
   }, [active, words, state.clockOffsetMs, getNow]);
 
