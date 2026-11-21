@@ -2,10 +2,13 @@
 // Kurallar saf fonksiyonlardır (test edilebilir); durum state.village içinde tutulur:
 //   { v: 2, items: [{ id, type, x, y, level }], nextId, land: { x0, y0, x1, y1 }, collected: { itemId: gün },
 //     villagers: { köylüId: { talks, last } } }
-// Harita MAP_SIZE x MAP_SIZE karedir; yalnızca `land` içindeki kareler kullanılabilir (araziyi sonra genişletiriz).
+// Harita MAP_MIN..MAP_MAX karedir (negatif koordinat olabilir); yalnızca `land` içindeki kareler kullanılabilir.
+// Arazi puanla kenarlardan 2'şer sıra genişletilir (expansions: kaç kez genişletildi).
 
 export const MAX_LEVEL = 3;
-export const MAP_SIZE = 20;
+export const MAP_MIN = -4;
+export const MAP_MAX = 24;
+export const MAP_SIZE = MAP_MAX - MAP_MIN;
 
 /**
  * Nesne türleri. w x d: kaç kare yer kaplar.
@@ -124,6 +127,7 @@ export const initialVillage = () => ({
   land: { ...DEFAULT_LAND },
   collected: {},
   villagers: {}, // köylü id -> { talks: sohbet sayısı, last: son sohbet günü }
+  expansions: 0,
 });
 
 /** Kayıtlı köyü açar: yeni biçim olduğu gibi, eski biçim (sabit bina seviyeleri) haritaya taşınır. */
@@ -136,6 +140,7 @@ export function migrateVillage(saved) {
       land: { ...DEFAULT_LAND, ...saved.land },
       collected: { ...saved.collected },
       villagers: { ...saved.villagers },
+      expansions: saved.expansions ?? 0,
     };
   }
   const village = initialVillage();
@@ -241,6 +246,52 @@ export function sellValue(item) {
   if (!t || t.essential) return 0;
   if (t.costs) return Math.floor(t.costs.slice(0, item.level).reduce((a, b) => a + b, 0) / 2);
   return Math.floor(t.price / 2);
+}
+
+/* ---------- arazi genişletme ---------- */
+
+export const EXPAND_STEP = 2;
+// Ekranda bakılan yöne göre: x azalınca sol üste, y azalınca sağ üste, x artınca sağ alta, y artınca sol alta gidilir.
+export const SIDES = [
+  { id: "x0", label: "Sol üst" },
+  { id: "y0", label: "Sağ üst" },
+  { id: "x1", label: "Sağ alt" },
+  { id: "y1", label: "Sol alt" },
+];
+
+/** n. genişletmenin bedeli (n: şimdiye kadar yapılan genişletme sayısı). */
+export const expandCost = (n) => Math.round((100 * 1.5 ** n) / 10) * 10;
+/** n. genişletme için evin en az kaçıncı seviyede olması gerektiği. */
+export const expandRequirement = (n) => Math.min(MAX_LEVEL, 1 + Math.floor(n / 2));
+
+export const expandedLand = (land, side) => ({
+  x0: side === "x0" ? land.x0 - EXPAND_STEP : land.x0,
+  y0: side === "y0" ? land.y0 - EXPAND_STEP : land.y0,
+  x1: side === "x1" ? land.x1 + EXPAND_STEP : land.x1,
+  y1: side === "y1" ? land.y1 + EXPAND_STEP : land.y1,
+});
+
+/** Genişletmeyle eklenecek şerit (önizleme için). */
+export function expandStrip(land, side) {
+  const e = expandedLand(land, side);
+  if (side === "x0") return { x0: e.x0, y0: land.y0, x1: land.x0, y1: land.y1 };
+  if (side === "y0") return { x0: land.x0, y0: e.y0, x1: land.x1, y1: land.y0 };
+  if (side === "x1") return { x0: land.x1, y0: land.y0, x1: e.x1, y1: land.y1 };
+  return { x0: land.x0, y0: land.y1, x1: land.x1, y1: e.y1 };
+}
+
+/**
+ * Genişletme yapılabilir mi? null: yapılabilir. Aksi halde neden:
+ * "edge" haritanın kenarına geldi, "level" önce ev yükselmeli, "xp" puan yetmiyor.
+ */
+export function expandBlock(state, side) {
+  const { village } = state;
+  const n = village.expansions ?? 0;
+  const next = expandedLand(village.land, side);
+  if (next.x0 < MAP_MIN + 1 || next.y0 < MAP_MIN + 1 || next.x1 > MAP_MAX - 1 || next.y1 > MAP_MAX - 1) return "edge";
+  if (homeLevel(village) < expandRequirement(n)) return "level";
+  if (state.xp < expandCost(n)) return "xp";
+  return null;
 }
 
 /** Saate göre köyün görünümü. */

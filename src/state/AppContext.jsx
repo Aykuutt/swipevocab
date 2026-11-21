@@ -2,7 +2,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { getLanguage } from "../data/languages";
 import { canTalkToday, getVillager, talkReward, talkState } from "../data/villagers";
-import { TYPES, buyBlock, canPlace, canSell, itemById, pendingHarvests, upgradeBlock } from "../data/village";
+import { TYPES, buyBlock, canPlace, canSell, expandBlock, itemById, pendingHarvests, upgradeBlock } from "../data/village";
 import { useAccount } from "../hooks/useAccount";
 import { useProgressSave } from "../hooks/useProgressSave";
 import { signOut as authSignOut } from "../lib/auth";
@@ -218,6 +218,14 @@ export function AppProvider({ children }) {
         if (!item || !canSell(item)) return false;
         dispatch({ type: "VILLAGE_SELL", id });
         sfx("wrong");
+        return true;
+      },
+      /** Araziyi bir kenardan genişletir. Yapılabildiyse true döner. */
+      expandLand(side) {
+        if (expandBlock(stateRef.current, side)) return false;
+        dispatch({ type: "VILLAGE_EXPAND", side });
+        sfx("levelup");
+        mascotSay("Arazin büyüdü! Yeni topraklara bina ve süs koyabilirsin.", { mood: "cheer" });
         return true;
       },
       /** Binayı yükseltir. Yapılabildiyse true döner. */

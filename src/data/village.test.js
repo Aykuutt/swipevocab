@@ -5,7 +5,14 @@ import {
   buyBlock,
   buyPrice,
   canPlace,
+  MAP_MAX,
+  MAP_MIN,
   canSell,
+  expandBlock,
+  expandCost,
+  expandRequirement,
+  expandedLand,
+  expandStrip,
   initialVillage,
   levelCap,
   marketPrice,
@@ -114,6 +121,25 @@ describe("köy kuralları", () => {
     expect(marketPrice(30, lvl(1))).toBe(30);
     expect(marketPrice(30, lvl(2))).toBe(27);
     expect(marketPrice(30, lvl(3))).toBe(24);
+  });
+
+  it("arazi genişletme: bedel artar, ev şartı gelir, haritanın kenarında durur", () => {
+    expect([0, 1, 2, 3].map(expandCost)).toEqual([100, 150, 230, 340]);
+    expect([0, 1, 2, 3, 4, 9].map(expandRequirement)).toEqual([1, 1, 2, 2, 3, 3]);
+    const v = initialVillage();
+    expect(expandedLand(v.land, "x1")).toEqual({ x0: 4, y0: 4, x1: 18, y1: 16 });
+    expect(expandStrip(v.land, "x0")).toEqual({ x0: 2, y0: 4, x1: 4, y1: 16 });
+    expect(expandBlock({ xp: 1000, village: v }, "x1")).toBeNull();
+    expect(expandBlock({ xp: 10, village: v }, "x1")).toBe("xp");
+    // 3. genişletme için ev 2. seviyede olmalı
+    const third = { ...v, expansions: 2 };
+    expect(expandBlock({ xp: 5000, village: third }, "x1")).toBe("level");
+    const home2 = { ...third, items: third.items.map((i) => (i.type === "home" ? { ...i, level: 2 } : i)) };
+    expect(expandBlock({ xp: 5000, village: home2 }, "x1")).toBeNull();
+    // kenar: arazi haritanın dışına taşamaz
+    const wide = { ...v, land: { x0: MAP_MIN + 1, y0: 4, x1: MAP_MAX - 1, y1: 16 } };
+    expect(expandBlock({ xp: 5000, village: wide }, "x0")).toBe("edge");
+    expect(expandBlock({ xp: 5000, village: wide }, "x1")).toBe("edge");
   });
 
   it("saate göre gün, alacakaranlık, gece", () => {

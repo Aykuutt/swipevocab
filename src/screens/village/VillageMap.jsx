@@ -2,7 +2,7 @@
 // yerleştirirken hayaleti sürükle. Kamera React durumunda değil doğrudan DOM'da tutulur (akıcı kaydırma için).
 import { forwardRef, memo, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef } from "react";
 import Mascot from "../../components/Mascot";
-import { MAP_SIZE, TYPES, canPlace } from "../../data/village";
+import { MAP_MAX, MAP_MIN, MAP_SIZE, SIDES, TYPES, canPlace, expandStrip } from "../../data/village";
 import { availableVillagers } from "../../data/villagers";
 import { Flat, ItemArt, Rock, TH, TW, isFlat, p } from "./isoArt";
 import VillagerArt from "./villagerArt";
@@ -17,23 +17,25 @@ const MAX_K = 1.7;
 const TAP_SLOP = 7; // bu kadar piksel içindeki hareket dokunma sayılır
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
-const at = (gx, gy, z = 0) => `translate(${OX + p(gx, gy, z)[0]} ${OY + p(gx, gy, z)[1]})`;
+// Izgara koordinatından (negatif olabilir) harita içi izometrik noktaya.
+const q = (gx, gy, z = 0) => p(gx - MAP_MIN, gy - MAP_MIN, z);
+const at = (gx, gy, z = 0) => `translate(${OX + q(gx, gy, z)[0]} ${OY + q(gx, gy, z)[1]})`;
 
 /* ---------- zemin (yalnızca arazi değişince yeniden çizilir) ---------- */
-const diamond = (x, y, w, d) => [p(x, y), p(x + w, y), p(x + w, y + d), p(x, y + d)].map((q) => q.join(",")).join(" ");
+const diamond = (x, y, w, d) => [q(x, y), q(x + w, y), q(x + w, y + d), q(x, y + d)].map((q) => q.join(",")).join(" ");
 
 const Ground = memo(function Ground({ land }) {
   const tiles = [];
-  for (let gy = 0; gy < N; gy++) {
-    for (let gx = 0; gx < N; gx++) {
+  for (let gy = MAP_MIN; gy < MAP_MAX; gy++) {
+    for (let gx = MAP_MIN; gx < MAP_MAX; gx++) {
       const inside = gx >= land.x0 && gx < land.x1 && gy >= land.y0 && gy < land.y1;
       const even = (gx + gy) % 2 === 0;
       const fill = inside ? (even ? "#9bd37d" : "#92cc74") : even ? "#7fb868" : "#78b062";
       tiles.push(<polygon key={`${gx}-${gy}`} points={diamond(gx, gy, 1, 1)} fill={fill} />);
     }
   }
-  const lowL = [p(0, N), p(N, N), p(N, N, -26), p(0, N, -26)].map((q) => q.join(",")).join(" ");
-  const lowR = [p(N, N), p(N, 0), p(N, 0, -26), p(N, N, -26)].map((q) => q.join(",")).join(" ");
+  const lowL = [q(MAP_MIN, MAP_MAX), q(MAP_MAX, MAP_MAX), q(MAP_MAX, MAP_MAX, -26), q(MAP_MIN, MAP_MAX, -26)].map((q) => q.join(",")).join(" ");
+  const lowR = [q(MAP_MAX, MAP_MAX), q(MAP_MAX, MAP_MIN), q(MAP_MAX, MAP_MIN, -26), q(MAP_MAX, MAP_MAX, -26)].map((q) => q.join(",")).join(" ");
   return (
     <g transform={`translate(${OX} ${OY})`}>
       <polygon points={lowL} fill="#8c6c4b" />
@@ -46,8 +48,8 @@ const Ground = memo(function Ground({ land }) {
 
 const GridLines = memo(function GridLines({ land }) {
   const lines = [];
-  for (let gx = land.x0; gx <= land.x1; gx++) lines.push(<line key={`a${gx}`} x1={p(gx, land.y0)[0]} y1={p(gx, land.y0)[1]} x2={p(gx, land.y1)[0]} y2={p(gx, land.y1)[1]} />);
-  for (let gy = land.y0; gy <= land.y1; gy++) lines.push(<line key={`b${gy}`} x1={p(land.x0, gy)[0]} y1={p(land.x0, gy)[1]} x2={p(land.x1, gy)[0]} y2={p(land.x1, gy)[1]} />);
+  for (let gx = land.x0; gx <= land.x1; gx++) lines.push(<line key={`a${gx}`} x1={q(gx, land.y0)[0]} y1={q(gx, land.y0)[1]} x2={q(gx, land.y1)[0]} y2={q(gx, land.y1)[1]} />);
+  for (let gy = land.y0; gy <= land.y1; gy++) lines.push(<line key={`b${gy}`} x1={q(land.x0, gy)[0]} y1={q(land.x0, gy)[1]} x2={q(land.x1, gy)[0]} y2={q(land.x1, gy)[1]} />);
   return (
     <g transform={`translate(${OX} ${OY})`} stroke="rgba(255,255,255,0.28)" strokeWidth="1" pointerEvents="none">
       {lines}
@@ -58,12 +60,12 @@ const GridLines = memo(function GridLines({ land }) {
 // Arazi dışındaki yabani çevre: deterministik ağaç, çam ve taşlar.
 function scenery(land) {
   const list = [];
-  for (let gy = 0; gy < N; gy++) {
-    for (let gx = 0; gx < N; gx++) {
+  for (let gy = MAP_MIN; gy < MAP_MAX; gy++) {
+    for (let gx = MAP_MIN; gx < MAP_MAX; gx++) {
       if (gx >= land.x0 && gx < land.x1 && gy >= land.y0 && gy < land.y1) continue;
       const h = (Math.imul(gx + 11, 73856093) ^ Math.imul(gy + 7, 19349663)) >>> 0;
       const r = h % 100;
-      const type = r < 26 ? "tree" : r < 40 ? "pine" : r < 47 ? "rock" : null;
+      const type = r < 22 ? "tree" : r < 34 ? "pine" : r < 39 ? "rock" : null;
       if (type) list.push({ key: `w-${gx}-${gy}`, type, x: gx, y: gy, w: 1, d: 1, variant: h % 2, wild: true });
     }
   }
@@ -77,15 +79,6 @@ const Entry = memo(function Entry({ type, level, lit, variant, id, x, y }) {
     </g>
   );
 });
-
-// Kart'ın yürüyüş yolu üstünde durabileceği kareler (ev önü).
-const KART_SPOTS = [
-  [9, 8],
-  [8, 8],
-  [10, 8],
-  [9, 9],
-  [10, 9],
-];
 
 /** Her köylünün bulunduğu kare: kendi binasının yanında, boş bir yerde. */
 function villagerSpots(village, kart) {
@@ -118,24 +111,31 @@ function villagerSpots(village, kart) {
 const BUBBLE_Y = { home: 112, market: 96, bakery: 108, garden: 66, fountain: 96 };
 
 const VillageMap = forwardRef(function VillageMap(
-  { village, tod, pending, alerts, selectedId, placing, onSelect, onGhost, onHarvest, onKart, onVillager },
+  { village, tod, pending, alerts, expand, expandSide, selectedId, placing, onSelect, onGhost, onHarvest, onKart, onVillager, onExpand },
   ref
 ) {
   const box = useRef(null);
   const world = useRef(null);
   const cam = useRef({ x: 0, y: 0, k: 0.5 });
   const latest = useRef({});
-  latest.current = { village, placing, onSelect, onGhost, onHarvest, onKart, onVillager };
+  latest.current = { village, placing, onSelect, onGhost, onHarvest, onKart, onVillager, onExpand };
 
   const lit = tod === "night";
 
   /* ---------- çizim listesi ---------- */
   const wild = useMemo(() => scenery(village.land), [village.land]);
   const kart = useMemo(() => {
+    // Evin önünde, yolun üstünde durur; yer doluysa yanındaki karelere kayar.
+    const home = village.items.find((i) => i.type === "home");
+    if (!home) return undefined;
     const standing = village.items.filter((i) => !isFlat(i.type));
-    return KART_SPOTS.find(([x, y]) =>
-      standing.every((i) => x < i.x || x >= i.x + TYPES[i.type].w || y < i.y || y >= i.y + TYPES[i.type].d)
-    );
+    return [
+      [home.x + 2, home.y + 2],
+      [home.x + 1, home.y + 2],
+      [home.x + 3, home.y + 2],
+      [home.x + 2, home.y + 3],
+      [home.x + 3, home.y + 3],
+    ].find(([x, y]) => standing.every((i) => x < i.x || x >= i.x + TYPES[i.type].w || y < i.y || y >= i.y + TYPES[i.type].d));
   }, [village.items]);
 
   const spots = useMemo(() => villagerSpots(village, kart), [village, kart]);
@@ -165,7 +165,7 @@ const VillageMap = forwardRef(function VillageMap(
 
   const landCenter = useCallback(() => {
     const { land } = latest.current.village;
-    const [sx, sy] = p((land.x0 + land.x1) / 2, (land.y0 + land.y1) / 2);
+    const [sx, sy] = q((land.x0 + land.x1) / 2, (land.y0 + land.y1) / 2);
     return [OX + sx, OY + sy];
   }, []);
 
@@ -190,11 +190,11 @@ const VillageMap = forwardRef(function VillageMap(
     const k = clamp((el.clientWidth * 1.5) / diamondW, MIN_K, MAX_K);
     const core = latest.current.village.items.filter((i) => i.type === "home" || i.type === "market");
     const [fx, fy] = core.length
-      ? p(
+      ? q(
           core.reduce((n, i) => n + i.x + TYPES[i.type].w / 2, 0) / core.length,
           core.reduce((n, i) => n + i.y + TYPES[i.type].d / 2, 0) / core.length
         )
-      : p((land.x0 + land.x1) / 2, (land.y0 + land.y1) / 2);
+      : q((land.x0 + land.x1) / 2, (land.y0 + land.y1) / 2);
     cam.current = { k, x: el.clientWidth / 2 - (OX + fx) * k, y: el.clientHeight * 0.45 - (OY + fy) * k };
     keepInView();
     apply();
@@ -209,7 +209,7 @@ const VillageMap = forwardRef(function VillageMap(
     const { x, y, k } = cam.current;
     const u = ((cx - r.left - x) / k - OX) / (TW / 2);
     const v = ((cy - r.top - y) / k - OY) / (TH / 2);
-    return [(u + v) / 2, (v - u) / 2];
+    return [(u + v) / 2 + MAP_MIN, (v - u) / 2 + MAP_MIN];
   }, []);
 
   const zoomAt = useCallback(
@@ -281,6 +281,8 @@ const VillageMap = forwardRef(function VillageMap(
       const bubble = target.closest?.("[data-harvest]");
       if (bubble) return L.onHarvest(bubble.dataset.harvest);
       if (target.closest?.("[data-kart]")) return L.onKart();
+      const ex = target.closest?.("[data-expand]");
+      if (ex && !L.placing) return L.onExpand(ex.dataset.expand);
       const vil = target.closest?.("[data-villager]");
       if (vil && !L.placing) return L.onVillager(vil.dataset.villager);
       if (L.placing) return ghostAt(e.clientX, e.clientY, false);
@@ -389,6 +391,21 @@ const VillageMap = forwardRef(function VillageMap(
           <Ground land={village.land} />
           {placing && <GridLines land={village.land} />}
 
+          {expandSide && (
+            <g transform={`translate(${OX} ${OY})`} pointerEvents="none">
+              <polygon
+                points={(() => {
+                  const s = expandStrip(village.land, expandSide);
+                  return diamond(s.x0, s.y0, s.x1 - s.x0, s.y1 - s.y0);
+                })()}
+                fill="rgba(255,255,255,0.3)"
+                stroke="#fff"
+                strokeWidth="2.6"
+                strokeDasharray="8 6"
+              />
+            </g>
+          )}
+
           {flat.map((e) => (
             <Entry key={e.key} id={e.id} type={e.type} level={e.level} lit={lit} variant={e.variant} x={e.x} y={e.y} />
           ))}
@@ -430,11 +447,37 @@ const VillageMap = forwardRef(function VillageMap(
             </g>
           )}
 
+          {!placing &&
+            expand &&
+            SIDES.map(({ id }) => {
+              const info = expand[id];
+              if (!info || info.block === "edge") return null;
+              const { land } = village;
+              const mx = Math.floor((land.x0 + land.x1) / 2);
+              const my = Math.floor((land.y0 + land.y1) / 2);
+              const tile = { x0: [land.x0 - 1, my], y0: [mx, land.y0 - 1], x1: [land.x1, my], y1: [mx, land.y1] }[id];
+              const [ex, ey] = q(tile[0] + 0.5, tile[1] + 0.5, 36);
+              const locked = info.block === "level";
+              const label = locked ? `Ev ${info.need}` : info.cost;
+              return (
+                <g key={`x-${id}`} transform={`translate(${OX + ex} ${OY + ey})`} data-expand={id}>
+                  <g className="iso-harvest">
+                    <rect x="-34" y="-14" width="68" height="28" rx="14" fill={locked ? "#8d96a8" : "#3fae7a"} stroke="#fff" strokeWidth="2" />
+                    <path d="M-24 3 q0 -9 7 -9 q7 0 7 9 z M-17 3 v5" fill="#fff" stroke="#fff" strokeWidth="1.6" strokeLinejoin="round" />
+                    <text x="10" y="5.5" textAnchor="middle" fontSize="14" fontWeight="800" fill="#fff">
+                      {label}
+                    </text>
+                    <polygon points="-5,14 5,14 0,21" fill={locked ? "#8d96a8" : "#3fae7a"} stroke="#fff" strokeWidth="1.6" strokeLinejoin="round" />
+                  </g>
+                </g>
+              );
+            })}
+
           {village.items.map((i) => {
             const amount = ready[i.id];
             if (!amount || i.id === placing?.moveId) return null;
             const t = TYPES[i.type];
-            const [bx, by] = p(i.x + t.w / 2, i.y + t.d / 2, BUBBLE_Y[i.type] ?? 90);
+            const [bx, by] = q(i.x + t.w / 2, i.y + t.d / 2, BUBBLE_Y[i.type] ?? 90);
             return (
               <g key={`h-${i.id}`} transform={`translate(${OX + bx} ${OY + by})`} data-harvest={i.id}>
                 {/* animasyon iç grupta: CSS transform dış grubun konum özniteliğini ezmesin */}

@@ -19,6 +19,9 @@ import {
   buyPrice,
   canPlace,
   canSell,
+  expandBlock,
+  expandCost,
+  expandedLand,
   initialVillage,
   itemById,
   marketPrice,
@@ -413,6 +416,17 @@ export function reducer(state, action) {
         ...state,
         xp: state.xp + sellValue(item),
         village: { ...state.village, collected, items: state.village.items.filter((i) => i.id !== item.id) },
+      };
+    }
+
+    case "VILLAGE_EXPAND": {
+      // Araziyi bir kenardan genişletir; puan harcanır (xpTotal düşmez).
+      if (expandBlock(state, action.side)) return state;
+      const n = state.village.expansions ?? 0;
+      return {
+        ...state,
+        xp: state.xp - expandCost(n),
+        village: { ...state.village, land: expandedLand(state.village.land, action.side), expansions: n + 1 },
       };
     }
 

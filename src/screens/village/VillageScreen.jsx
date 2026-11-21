@@ -4,11 +4,17 @@ import { useRef, useState } from "react";
 import Icon from "../../components/Icon";
 import { Button } from "../../components/ui";
 import {
+  EXPAND_STEP,
+  SIDES,
   TYPES,
   buyBlock,
   buyPrice,
   canPlace,
   canSell,
+  expandBlock,
+  expandCost,
+  expandRequirement,
+  homeLevel,
   isBuilding,
   itemById,
   pendingHarvests,
@@ -43,6 +49,7 @@ export default function VillageScreen() {
   const [pageId, setPageId] = useState(null);
   const [confirmSell, setConfirmSell] = useState(false);
   const [talkId, setTalkId] = useState(null);
+  const [expandSide, setExpandSide] = useState(null);
 
   const { village } = state;
   const pending = pendingHarvests(state);
@@ -51,6 +58,12 @@ export default function VillageScreen() {
 
   // Bugün henüz konuşulmamış köylüler: başlarında sohbet balonu çıkar.
   const alerts = new Set(availableVillagers(village).filter((v) => talkState(village, v.id).last !== state.day).map((v) => v.id));
+
+  // Arazi genişletme işaretleri: her kenar için bedel ve engel.
+  const expansions = village.expansions ?? 0;
+  const expandInfo = Object.fromEntries(
+    SIDES.map(({ id }) => [id, { cost: expandCost(expansions), block: expandBlock(state, id), need: expandRequirement(expansions) }])
+  );
 
   const selected = selectedId ? itemById(village, selectedId) : null;
   const pageItem = itemById(village, pageId ?? villageTarget);
@@ -65,6 +78,7 @@ export default function VillageScreen() {
     setPlacing({ type, ...pos });
     setShopOpen(false);
     setSelectedId(null);
+    setExpandSide(null);
   };
   const startMove = (item) => {
     setPlacing({ type: item.type, x: item.x, y: item.y, moveId: item.id, level: item.level });
@@ -122,9 +136,17 @@ export default function VillageScreen() {
         alerts={alerts}
         selectedId={selectedId}
         placing={placing}
+        expand={expandInfo}
+        expandSide={expandSide}
+        onExpand={(side) => {
+          setSelectedId(null);
+          setConfirmSell(false);
+          setExpandSide(side);
+        }}
         onSelect={(id) => {
           setSelectedId(id);
           setConfirmSell(false);
+          setExpandSide(null);
         }}
         onGhost={(pos) => setPlacing((p) => (p ? { ...p, ...pos } : p))}
         onHarvest={(id) => actions.harvest(id)}
@@ -190,6 +212,33 @@ export default function VillageScreen() {
             </Button>
           </div>
           {!placeOk && <p className="vbar-note">Buraya konamaz: dolu ya da arazinin dışında.</p>}
+        </div>
+      ) : expandSide ? (
+        <div className="vbar" role="group" aria-label="Arazi genişletme">
+          <div className="vbar-info">
+            <div>
+              <strong>Araziyi genişlet</strong>
+              <span>
+                {SIDES.find((s) => s.id === expandSide).label} tarafa {EXPAND_STEP} sıra yeni toprak. Ağaçlar temizlenir, yeni yere bina koyabilirsin.
+              </span>
+            </div>
+          </div>
+          <div className="vbar-actions">
+            <Button
+              variant="success"
+              disabled={!!expandInfo[expandSide].block}
+              onClick={() => {
+                if (actions.expandLand(expandSide)) setExpandSide(null);
+              }}
+            >
+              Genişlet ({expandInfo[expandSide].cost} puan)
+            </Button>
+            <Button variant="secondary" onClick={() => setExpandSide(null)}>
+              Vazgeç
+            </Button>
+          </div>
+          {expandInfo[expandSide].block === "level" && <p className="vbar-note">Önce evi {expandInfo[expandSide].need}. seviyeye yükselt (şu an {homeLevel(village)}).</p>}
+          {expandInfo[expandSide].block === "xp" && <p className="vbar-note">{expandInfo[expandSide].cost - state.xp} puan daha lazım.</p>}
         </div>
       ) : selected ? (
         <div className="vbar" role="group" aria-label={selType.name}>

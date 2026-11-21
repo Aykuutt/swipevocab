@@ -30,6 +30,8 @@ npm run check    # üçü birden; GitHub Actions her gönderimde bunları çalı
   parasıdır: dükkândan bina, süs ve yol alınır, ızgara üzerinde sürükleyerek yerleştirilir, taşınır, satılır; binalara
   girilip yükseltilir. Ev, Pazar, Fırın, Bahçe, Çeşme; evin seviyesi diğer binaların sınırını belirler, hasatlı binalar
   günde bir puan verir (balona dokun), Pazar büyüdükçe fiyatlar düşer. Sahne saate göre gündüz/akşam/gece olur.
+  Arazi puanla dört kenardan 2'şer sıra genişletilir (haritadaki yeşil işaretlere dokun; ormanın ağaçları temizlenir,
+  bedel her genişletmede artar, ev seviyesi şart koşulur).
   Kurallar src/data/village.js'te, çizimler src/screens/village/isoArt.jsx'te.
 - **Köylüler:** Pazar, Fırın ve Bahçe'nin köylüleri (Tomas, Lena, Oskar) binaları kurulunca köyde belirir. Dokununca
   öğrenilen dilde kısa bir sohbet açılır (uygun cevabı seç), ardından o konudan bir kelime sorulur. Günde bir sohbet

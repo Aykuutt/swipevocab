@@ -305,3 +305,32 @@ describe("köylü sohbetleri (durum)", () => {
     expect(reducer(s, { type: "VILLAGER_TALK", id: "yok" })).toBe(s);
   });
 });
+
+describe("arazi genişletme (durum)", () => {
+  it("puan harcar, araziyi büyütür, sayacı artırır; ev şartı ve puan yetmezliğinde olmaz", () => {
+    let s = reducer(newUser(5), { type: "AWARD_XP", xp: 1000 });
+    s = reducer(s, { type: "VILLAGE_EXPAND", side: "x1" });
+    expect(s.village.land).toEqual({ x0: 4, y0: 4, x1: 18, y1: 16 });
+    expect(s.village.expansions).toBe(1);
+    expect(s.xp).toBe(900);
+    expect(s.xpTotal).toBe(1000);
+    s = reducer(s, { type: "VILLAGE_EXPAND", side: "y0" });
+    expect(s.village.land.y0).toBe(2);
+    expect(s.xp).toBe(750);
+    // 3. genişletme için ev 2. seviye olmalı
+    expect(reducer(s, { type: "VILLAGE_EXPAND", side: "y1" })).toBe(s);
+    s = reducer(s, { type: "VILLAGE_UPGRADE", id: "home" });
+    s = reducer(s, { type: "VILLAGE_EXPAND", side: "y1" });
+    expect(s.village.expansions).toBe(3);
+    const poor = newUser(5);
+    expect(reducer(poor, { type: "VILLAGE_EXPAND", side: "x1" })).toBe(poor);
+  });
+
+  it("yeni toprağa bina konabilir", () => {
+    let s = reducer(newUser(5), { type: "AWARD_XP", xp: 1000 });
+    expect(reducer(s, { type: "VILLAGE_PLACE", itemType: "tree", x: 17, y: 8 })).toBe(s); // arazi dışı
+    s = reducer(s, { type: "VILLAGE_EXPAND", side: "x1" });
+    const placed = reducer(s, { type: "VILLAGE_PLACE", itemType: "tree", x: 17, y: 8 });
+    expect(placed.village.items.some((i) => i.x === 17 && i.y === 8)).toBe(true);
+  });
+});
