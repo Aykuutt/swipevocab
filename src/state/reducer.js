@@ -31,7 +31,7 @@ import {
   upgradeBlock,
   upgradeCost,
 } from "../data/village";
-import { claimReward, needsNewOrder, makeOrder, orderDone } from "../data/orders";
+import { claimReward, makeOrder, makeWeekly, needsNewOrder, needsNewWeekly, orderDone } from "../data/orders";
 import { availableVillagers, getVillager, isAvailable, talkReward, talkState } from "../data/villagers";
 import { leagueRank } from "../lib/league";
 import { unique } from "../lib/random";
@@ -474,7 +474,23 @@ function baseReducer(state, action) {
           changed = true;
         }
       }
-      return changed ? { ...state, village: { ...state.village, orders } } : state;
+      const weekly = needsNewWeekly(state, state.village.weekly) ? makeWeekly(state) : state.village.weekly;
+      if (weekly !== state.village.weekly) changed = true;
+      return changed ? { ...state, village: { ...state.village, orders, weekly } } : state;
+    }
+
+    case "WEEKLY_CLAIM": {
+      // Haftalık büyük siparişi teslim eder. Boost katlamaz.
+      const w = state.village.weekly;
+      if (!w || w.claimed || !orderDone(state, w)) return state;
+      return {
+        ...state,
+        xp: state.xp + w.reward,
+        xpTotal: (state.xpTotal ?? 0) + w.reward,
+        weeklyXp: state.weeklyXp + w.reward,
+        dailyXp: state.dailyXp + w.reward,
+        village: { ...state.village, weekly: { ...w, claimed: true } },
+      };
     }
 
     case "ORDER_CLAIM": {

@@ -82,6 +82,34 @@ export const TYPES = {
     harvest: [1, 2, 3],
     shop: "buildings",
   },
+  inn: {
+    id: "inn",
+    kind: "building",
+    name: "Gezgin hanı",
+    short: "Han",
+    role: "Uzak diyarlardan gezginler konaklar. Her gün yol hikâyeleriyle puan bırakır.",
+    w: 2,
+    d: 2,
+    max: 1,
+    costs: [200, 450, 950],
+    harvest: [2, 4, 5],
+    needHome: 2,
+    shop: "buildings",
+  },
+  library: {
+    id: "library",
+    kind: "building",
+    name: "Kütüphane",
+    short: "Kütüphane",
+    role: "Köyün en bilgili yeri. En çok hasadı verir ama büyük bir ev ister.",
+    w: 2,
+    d: 2,
+    max: 1,
+    costs: [300, 600, 1200],
+    harvest: [3, 5, 7],
+    needHome: 3,
+    shop: "buildings",
+  },
   tree: { id: "tree", kind: "deco", name: "Meşe ağacı", short: "Meşe", w: 1, d: 1, max: 80, price: 20, shop: "decor" },
   pine: { id: "pine", kind: "deco", name: "Çam ağacı", short: "Çam", w: 1, d: 1, max: 80, price: 20, shop: "decor" },
   flowers: { id: "flowers", kind: "deco", name: "Çiçek tarhı", short: "Çiçek", w: 1, d: 1, max: 80, price: 25, shop: "decor" },
@@ -224,6 +252,7 @@ export function buyBlock(state, type) {
   const t = TYPES[type];
   if (!t?.shop) return "none";
   if (itemsOfType(state.village, type).length >= t.max) return "max";
+  if (t.needHome && homeLevel(state.village) < t.needHome) return "home";
   if (state.xp < buyPrice(type, state.village)) return "xp";
   return null;
 }

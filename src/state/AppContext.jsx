@@ -297,6 +297,15 @@ export function AppProvider({ children }) {
         mascotSay(`${getVillager(id).name}: Teşekkürler! +${gained} puan`, { mood: "cheer" });
         return gained;
       },
+      /** Haftalık büyük siparişi teslim eder. */
+      claimWeekly() {
+        const w = stateRef.current.village.weekly;
+        if (!w || w.claimed) return 0;
+        dispatch({ type: "WEEKLY_CLAIM" });
+        sfx("levelup");
+        mascotSay(`Haftalık görev tamam! +${w.reward} puan`, { mood: "cheer" });
+        return w.reward;
+      },
       /** Bugünkü hasadı toplar (id yoksa hepsini). Toplanan puanı döndürür. */
       harvest(id) {
         const total = pendingHarvests(stateRef.current)

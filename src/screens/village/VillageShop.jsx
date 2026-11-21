@@ -56,6 +56,11 @@ export default function VillageShop({ state, onPick, onClose }) {
                 <span className={`vshop-price ${block === "xp" ? "is-short" : ""}`}>
                   {block === "max" ? (
                     `Tamam (${owned}/${t.max})`
+                  ) : block === "home" ? (
+                    <>
+                      <Icon name="lock" size={13} />
+                      Ev {t.needHome}. seviye
+                    </>
                   ) : (
                     <>
                       <Icon name="star" size={14} filled />

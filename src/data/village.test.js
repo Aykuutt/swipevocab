@@ -94,6 +94,17 @@ describe("köy kuralları", () => {
     expect(buyBlock({ xp: 1000, village: v }, "home")).toBe("none");
   });
 
+  it("han ve kütüphane büyük bir ev ister", () => {
+    const v = initialVillage();
+    expect(buyBlock({ xp: 5000, village: v }, "inn")).toBe("home");
+    expect(buyBlock({ xp: 5000, village: v }, "library")).toBe("home");
+    const home2 = { ...v, items: v.items.map((i) => (i.type === "home" ? { ...i, level: 2 } : i)) };
+    expect(buyBlock({ xp: 5000, village: home2 }, "inn")).toBeNull();
+    expect(buyBlock({ xp: 5000, village: home2 }, "library")).toBe("home");
+    const home3 = { ...v, items: v.items.map((i) => (i.type === "home" ? { ...i, level: 3 } : i)) };
+    expect(buyBlock({ xp: 5000, village: home3 }, "library")).toBeNull();
+  });
+
   it("evden başka bina evin bir üstüne kadar çıkar", () => {
     const v = initialVillage();
     const bakery = { id: "b", type: "bakery", x: 6, y: 10, level: 2 };

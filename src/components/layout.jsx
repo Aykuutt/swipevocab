@@ -1,7 +1,7 @@
 // Uygulama iskeleti: arka plan, üst bilgi çubuğu, alt sekmeler, açılış ekranı.
 import { useEffect, useReducer, useState } from "react";
 import { MAX_LIVES } from "../config";
-import { claimableOrders } from "../data/orders";
+import { claimableOrders, weeklyClaimable } from "../data/orders";
 import { pendingHarvests } from "../data/village";
 import { useValueDelta } from "../hooks/useValueDelta";
 import { NO_VOICE_EVENT } from "../lib/speech";
@@ -99,7 +99,7 @@ const TABS = [
 export function TabBar() {
   const { tab, setTab, setProfileView, state } = useApp();
   // Köy sekmesindeki nokta: toplanacak hasat ya da teslim edilecek sipariş var.
-  const harvestReady = pendingHarvests(state).length > 0 || claimableOrders(state).length > 0;
+  const harvestReady = pendingHarvests(state).length > 0 || claimableOrders(state).length > 0 || weeklyClaimable(state);
   return (
     <nav className="tabbar" aria-label="Ana menü">
       {TABS.map((t) => (

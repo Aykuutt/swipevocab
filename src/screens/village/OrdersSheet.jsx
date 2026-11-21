@@ -1,10 +1,53 @@
 // Siparişler: her köylünün bugünkü isteği, ilerlemesi ve teslim düğmesi. Siparişler her gün kendiliğinden yenilenir.
 import Icon from "../../components/Icon";
 import { Button, ProgressBar } from "../../components/ui";
-import { ORDER_KINDS, claimReward, orderDone, orderProgress, orderText } from "../../data/orders";
+import { ORDER_KINDS, claimReward, orderDone, orderProgress, orderText, weeklyDaysLeft, weeklyText } from "../../data/orders";
+import Mascot from "../../components/Mascot";
 import { availableVillagers, heartsFor, talkState } from "../../data/villagers";
 import { useApp } from "../../state/AppContext";
 import { VillagerPortrait } from "./villagerArt";
+
+/** Dilbaz'ın haftalık büyük siparişi: listenin en üstünde. */
+function WeeklyCard() {
+  const { state, actions } = useApp();
+  const w = state.village.weekly;
+  if (!w) return null;
+  const progress = orderProgress(state, w);
+  const done = orderDone(state, w);
+  const left = weeklyDaysLeft(state);
+  return (
+    <section className={`vweekly ${w.claimed ? "is-claimed" : ""} ${done && !w.claimed ? "is-ready" : ""}`} aria-label="Haftalık büyük sipariş">
+      <Mascot mood={done ? "cheer" : "happy"} size={46} />
+      <div className="vorder-body">
+        <strong>
+          Haftalık büyük sipariş <small>{w.claimed ? "gelecek hafta yenisi" : left <= 1 ? "bugün son gün" : `${left} gün kaldı`}</small>
+        </strong>
+        <span>{weeklyText(w)}</span>
+        <div className="vorder-bar">
+          <ProgressBar value={(progress / w.target) * 100} tone={done ? "mint" : "amber"} label="Haftalık sipariş" />
+          <small>
+            {progress}/{w.target}
+          </small>
+        </div>
+      </div>
+      <div className="vorder-side">
+        {w.claimed ? (
+          <span className="pill pill-mint">Teslim edildi</span>
+        ) : (
+          <>
+            <span className="vorder-reward">
+              <Icon name="star" size={14} filled />
+              {w.reward}
+            </span>
+            <Button size="sm" disabled={!done} onClick={() => actions.claimWeekly()}>
+              Teslim et
+            </Button>
+          </>
+        )}
+      </div>
+    </section>
+  );
+}
 
 export default function OrdersSheet({ onClose }) {
   const { state, actions } = useApp();
@@ -24,6 +67,7 @@ export default function OrdersSheet({ onClose }) {
           <Icon name="close" size={20} />
         </button>
       </div>
+      <WeeklyCard />
       <p className="vorders-hint">Köylüler her gün yeni bir şey ister. Öğrenerek bitir, teslim et: puan ve arkadaşlık kazan.</p>
       <ul className="vorders">
         {rows.map(({ villager, order }) => {

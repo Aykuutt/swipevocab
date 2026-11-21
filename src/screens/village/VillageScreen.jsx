@@ -24,7 +24,7 @@ import {
 import { useTimeOfDay } from "../../hooks/useTimeOfDay";
 import { mascotSay } from "../../lib/mascot";
 import { useApp } from "../../state/AppContext";
-import { claimableOrders } from "../../data/orders";
+import { claimableOrders, weeklyClaimable } from "../../data/orders";
 import { availableVillagers, talkState } from "../../data/villagers";
 import BuildingPage, { effectText } from "./BuildingPage";
 import { ItemPreview } from "./isoArt";
@@ -61,7 +61,7 @@ export default function VillageScreen() {
 
   // Bugün henüz konuşulmamış köylüler: başlarında sohbet balonu çıkar.
   const claimable = new Set(claimableOrders(state).map((x) => x.villager.id));
-  const claimCount = claimable.size;
+  const claimCount = claimable.size + (weeklyClaimable(state) ? 1 : 0);
   const alerts = new Map(
     availableVillagers(village).flatMap((v) =>
       claimable.has(v.id) ? [[v.id, "order"]] : talkState(village, v.id).last !== state.day ? [[v.id, "talk"]] : []

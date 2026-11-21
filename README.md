@@ -28,18 +28,19 @@ npm run check    # üçü birden; GitHub Actions her gönderimde bunları çalı
   sayılmaz), Boşluğu doldur, Eşleştir. Rekorlar dil başına hesapta saklanır.
 - **Dilbaz'ın köyü:** Township tarzı, tam ekran izometrik köy (Köy sekmesi; eski Mağaza artık Pazar binası). Puan köyün
   parasıdır: dükkândan bina, süs ve yol alınır, ızgara üzerinde sürükleyerek yerleştirilir, taşınır, satılır; binalara
-  girilip yükseltilir. Ev, Pazar, Fırın, Bahçe, Çeşme; evin seviyesi diğer binaların sınırını belirler, hasatlı binalar
+  girilip yükseltilir. Ev, Pazar, Fırın, Bahçe, Çeşme, Gezgin hanı (ev 2. seviye ister), Kütüphane (ev 3. seviye ister); evin seviyesi diğer binaların sınırını belirler, hasatlı binalar
   günde bir puan verir (balona dokun), Pazar büyüdükçe fiyatlar düşer. Sahne saate göre gündüz/akşam/gece olur.
   Arazi puanla dört kenardan 2'şer sıra genişletilir (haritadaki yeşil işaretlere dokun; ormanın ağaçları temizlenir,
   bedel her genişletmede artar, ev seviyesi şart koşulur).
   Kurallar src/data/village.js'te, çizimler src/screens/village/isoArt.jsx'te.
-- **Köylüler:** Pazar, Fırın ve Bahçe'nin köylüleri (Tomas, Lena, Oskar) binaları kurulunca köyde belirir. Dokununca
+- **Köylüler:** Pazar, Fırın, Bahçe, Han ve Kütüphane'nin köylüleri (Tomas, Lena, Oskar, Rafael, Mira) binaları kurulunca köyde belirir. Dokununca
   öğrenilen dilde kısa bir sohbet açılır (uygun cevabı seç), ardından o konudan bir kelime sorulur. Günde bir sohbet
   puan ve arkadaşlık (kalp) getirir. Sohbetler hazır yazılı, her dil için src/data/villagers.js'te.
 - **Siparişler (sonsuz görev sistemi):** her köylü her gün öğrenmeyle ilgili bir şey ister (soru çöz, kart kaydır,
   kelime öğren, ünite bitir). Siparişler elle yazılmaz, src/data/orders.js'teki kurallardan kendiliğinden üretilir:
   tür günün tarihinden seçilir, hedef köy seviyesi ve öğrenilen kelimeyle büyür. İlerleme ömür boyu sayaçlardan
-  (state.counters) ölçülür. Teslim puan ve arkadaşlık getirir.
+  (state.counters) ölçülür. Teslim puan ve arkadaşlık getirir. Ayrıca Dilbaz her hafta tek bir büyük sipariş verir
+  (haftalık hedef, büyük ödül; tür haftaya göre döner, bitmeyen hafta sonunda yenilenir).
 - **Yol:** üniteler konuya göre değişen bir manzara (ev, bulut, filiz, bina, yıldız...) içinde şeritli bir yolda.
 - **Dört dil:** kurulumda ve Ayarlar'da İngilizce, Almanca, İspanyolca ya da Fransızca seçilir. Bilinen
   kelimeler, üniteler ve günlük kartlar her dilde ayrı; XP, seri ve lig ortaktır. Okuma sesi, ses
@@ -139,8 +140,7 @@ kelimeler ve konuşulan dakikalar puan kazandırır.
 
 ## Kelime havuzu
 
-Her dilin kelimeleri `src/data/langs/<dil>.js` içinde: İngilizce 190, Almanca, İspanyolca ve Fransızca
-120'şer kelime. Her kayıt `id`, `word`, `phonetic`, `pos`, `level`,
+Her dilin kelimeleri `src/data/langs/<dil>.js` içinde: her dilde 250 kelime. Her kayıt `id`, `word`, `phonetic`, `pos`, `level`,
 `topic`, `tr`, `definition` ve `example` alanlarını içerir. Yeni kayıt eklerken benzersiz bir
 id ver ve `topic` olarak `daily`, `travel`, `growth`, `work` ya da `academic` seç; üniteler
 havuzdan otomatik oluşur. Örnek cümle kelimenin kendisini aynen içermeli (boşluk doldurma

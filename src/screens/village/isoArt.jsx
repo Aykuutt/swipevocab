@@ -521,6 +521,132 @@ function Road() {
   );
 }
 
+/* ---------- Gezgin hanı ---------- */
+const INN = { left: "#e9d2ad", right: "#cdb38a", top: "#f1dfbf" };
+const BEAM = "#7a5034";
+
+function Inn({ level, lit }) {
+  const a0 = 0.16;
+  const b0 = 0.2;
+  const w = 1.68;
+  const d = 1.6;
+  const z = 6; // taş temelin üstü
+  const h = level === 1 ? 36 : level === 2 ? 50 : 64;
+  const rows = level === 1 ? [0.4] : [0.12, 0.62];
+  return (
+    <g>
+      <Shadow rx={58} />
+      <Box a0={a0 - 0.04} b0={b0 - 0.04} w={w + 0.08} d={d + 0.08} h={z} c={{ left: "#a9a49b", right: "#8f8a82", top: "#bdb8ae" }} />
+      <Box a0={a0} b0={b0} w={w} d={d} h={h} z={z} c={INN} />
+      {/* ahşap kirişler */}
+      {[0, 0.33, 0.66, 1].map((u) => (
+        <g key={u} stroke={BEAM} strokeWidth="2" fill="none">
+          <polyline points={pts([p(a0 + u * w, b0 + d, z), p(a0 + u * w, b0 + d, z + h)])} />
+          <polyline points={pts([p(a0 + w, b0 + d - u * d, z), p(a0 + w, b0 + d - u * d, z + h)])} />
+        </g>
+      ))}
+      {level >= 2 && (
+        <polyline points={pts([p(a0, b0 + d, z + h * 0.5), p(a0 + w, b0 + d, z + h * 0.5), p(a0 + w, b0, z + h * 0.5)])} stroke={BEAM} strokeWidth="2.4" fill="none" />
+      )}
+      <Gable a0={a0} b0={b0} w={w} d={d} z={z + h} rh={level === 3 ? 30 : 24} roof="#4f8a5b" roofDark="#3d6f48" gable={INN.right} />
+      <Chimney a0={a0 + w * 0.2} b0={b0 + d * 0.25} z={z + h + 6} h={22} />
+      {level >= 2 && <Smoke a={a0 + w * 0.32} b={b0 + d * 0.37} z={z + h + 28} />}
+      <Poly list={wallL(a0, b0, w, d, z, h, 0.4, 0.6, 0, level === 1 ? 0.62 : 0.4)} fill="#5a3a26" />
+      {rows.map((v) => (
+        <g key={v}>
+          <Window list={wallL(a0, b0, w, d, z, h, 0.08, 0.28, v, v + (level === 1 ? 0.38 : 0.24))} lit={lit} />
+          <Window list={wallL(a0, b0, w, d, z, h, 0.72, 0.92, v, v + (level === 1 ? 0.38 : 0.24))} lit={lit} />
+          <Window list={wallR(a0, b0, w, d, z, h, 0.4, 0.6, v, v + (level === 1 ? 0.38 : 0.24))} lit={lit} />
+        </g>
+      ))}
+      {level >= 2 && <Window list={wallL(a0, b0, w, d, z, h, 0.4, 0.6, 0.62, 0.86)} lit={lit} />}
+      {/* asılı tabela: pusula */}
+      {(() => {
+        const [sx, sy] = p(a0 + w * 0.5, b0 + d + 0.32, z + (level === 1 ? h * 0.82 : h * 0.47));
+        return (
+          <g>
+            <line x1={sx} y1={sy - 14} x2={sx} y2={sy - 8} stroke={BEAM} strokeWidth="1.6" />
+            <rect x={sx - 11} y={sy - 8} width="22" height="16" rx="3" fill="#f3e2c0" stroke={BEAM} strokeWidth="1.4" />
+            <circle cx={sx} cy={sy} r="5" fill="none" stroke="#4f8a5b" strokeWidth="1.3" />
+            <polygon points={`${sx},${sy - 5} ${sx + 1.6},${sy} ${sx},${sy + 5} ${sx - 1.6},${sy}`} fill="#c8553d" />
+          </g>
+        );
+      })()}
+      {level === 3 &&
+        (() => {
+          const [fx, fy] = p(a0 + w - 0.1, b0 + d / 2, z + h + 30);
+          return (
+            <g>
+              <line x1={fx} y1={fy} x2={fx} y2={fy - 26} stroke="#5a3a26" strokeWidth="1.6" />
+              <path d={`M${fx} ${fy - 26} l16 4 l-16 5 Z`} fill="#e0a548" />
+              {/* kapı önünde bavullar */}
+              <Box a0={1.86} b0={1.5} w={0.22} d={0.3} h={9} c={{ left: "#8a5a3a", right: "#6f4529", top: "#a06c48" }} />
+              <Box a0={1.88} b0={1.55} w={0.18} d={0.22} h={7} z={9} c={{ left: "#c8553d", right: "#a8432f", top: "#d86a52" }} />
+            </g>
+          );
+        })()}
+    </g>
+  );
+}
+
+/* ---------- Kütüphane ---------- */
+const LIB = { left: "#e6e1d6", right: "#c9c3b5", top: "#f0ece3" };
+const Column = ({ a, b, h, z = 0 }) => (
+  <Box a0={a - 0.05} b0={b - 0.05} w={0.1} d={0.1} h={h} z={z} c={{ left: "#f4f1ea", right: "#d8d3c8", top: "#ffffff" }} />
+);
+
+function Library({ level, lit }) {
+  const a0 = 0.2;
+  const b0 = 0.16;
+  const w = 1.6;
+  const d = 1.44;
+  const z = 4; // basamakların üstü
+  const h = level === 1 ? 38 : level === 2 ? 46 : 52;
+  const porch = level >= 2;
+  const front = b0 + d + (porch ? 0.34 : 0.08); // alınlığın ön çizgisi
+  const zTop = z + h + 6;
+  return (
+    <g>
+      <Shadow rx={60} />
+      <Box a0={0.1} b0={0.1} w={1.8} d={1.86} h={z} c={{ left: "#bdb6a6", right: "#a39c8c", top: "#d3ccbc" }} />
+      <Box a0={a0} b0={b0} w={w} d={d} h={h} z={z} c={LIB} />
+      {[0.1, 0.3, 0.7, 0.9].map((u) => (
+        <Window key={u} list={wallL(a0, b0, w, d, z, h, u - 0.07, u + 0.07, 0.3, 0.8)} lit={lit} />
+      ))}
+      <Window list={wallR(a0, b0, w, d, z, h, 0.2, 0.4, 0.3, 0.8)} lit={lit} />
+      <Window list={wallR(a0, b0, w, d, z, h, 0.6, 0.8, 0.3, 0.8)} lit={lit} />
+      <Poly list={wallL(a0, b0, w, d, z, h, 0.42, 0.58, 0, 0.66)} fill="#3d5a8a" />
+      {/* saçak: 2. seviyeden itibaren sütunlu giriş üstünü de örter */}
+      <Box a0={a0 - 0.08} b0={b0 - 0.08} w={w + 0.16} d={front - b0 + 0.08} h={6} z={z + h} c={{ left: "#5a77a8", right: "#47618e", top: "#6d8bbd" }} />
+      {porch && [0.06, 0.48, 1.12, 1.54].map((a) => <Column key={a} a={a0 + a} b={front - 0.06} h={h} z={z} />)}
+      <polygon points={pts([p(a0 - 0.08, front, zTop), p(a0 + w + 0.08, front, zTop), p(a0 + w / 2, front, zTop + 20)])} fill="#f0ece3" stroke={EDGE} strokeWidth="0.8" />
+      {(() => {
+        const [bx, by] = p(a0 + w / 2, front, zTop + 7);
+        return (
+          <g>
+            <path d={`M${bx} ${by + 3} q-6 -4 -10 -1 v-6 q4 -3 10 1 Z`} fill="#ffffff" stroke="#3d5a8a" strokeWidth="1" />
+            <path d={`M${bx} ${by + 3} q6 -4 10 -1 v-6 q-4 -3 -10 1 Z`} fill="#ffffff" stroke="#3d5a8a" strokeWidth="1" />
+          </g>
+        );
+      })()}
+      {level === 3 &&
+        (() => {
+          const [cx, cy] = p(a0 + w / 2, b0 + d / 2, zTop);
+          return (
+            <g>
+              <rect x={cx - 15} y={cy - 12} width="30" height="12" fill="#d8d3c8" stroke={EDGE} strokeWidth="0.8" />
+              {lit && <rect x={cx - 11} y={cy - 10} width="22" height="7" fill="#ffd98a" opacity="0.9" />}
+              <path d={`M${cx - 17} ${cy - 12} a17 16 0 0 1 34 0 Z`} fill="#6d8bbd" stroke={EDGE} strokeWidth="0.8" />
+              <path d={`M${cx - 10} ${cy - 17} a12 10 0 0 1 8 -8`} stroke="rgba(255,255,255,0.45)" strokeWidth="2" fill="none" />
+              <line x1={cx} y1={cy - 28} x2={cx} y2={cy - 36} stroke="#e0a548" strokeWidth="2" />
+              <circle cx={cx} cy={cy - 37} r="2.6" fill="#e0a548" />
+            </g>
+          );
+        })()}
+    </g>
+  );
+}
+
 /** Taş (haritanın yabani çevresi için). */
 export function Rock() {
   const [cx, cy] = p(0.5, 0.5, 0);
@@ -533,7 +659,7 @@ export function Rock() {
   );
 }
 
-const ART = { home: Home, market: Market, bakery: Bakery, garden: Garden, fountain: Fountain };
+const ART = { home: Home, market: Market, bakery: Bakery, garden: Garden, fountain: Fountain, inn: Inn, library: Library };
 
 /** Bir nesnenin çizimi (yerel koordinatlarda, köşesi 0,0). lit: gece ışıkları yansın. */
 export function ItemArt({ type, level = 1, lit = false, variant = 0 }) {

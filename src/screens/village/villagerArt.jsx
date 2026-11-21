@@ -5,6 +5,8 @@ const LOOK = {
   merchant: { skin: "#f0c9a0", body: "#4a7bd0", pants: "#3d3a52", hair: "#5a3e2b" },
   baker: { skin: "#f6d3b0", body: "#f4efe4", pants: "#7a6a5a", hair: "#b0562f" },
   gardener: { skin: "#e3b48a", body: "#5e9a4e", pants: "#6b5238", hair: "#4a3a2a" },
+  traveler: { skin: "#d9a57c", body: "#c8763a", pants: "#4a5a6a", hair: "#2f2a26" },
+  librarian: { skin: "#f3d0b4", body: "#7a5bb0", pants: "#3f3a4f", hair: "#8a4a2a" },
 };
 
 function Hat({ id }) {
@@ -24,6 +26,27 @@ function Hat({ id }) {
         <ellipse cx="0" cy="-42" rx="15" ry="4.4" fill="#e3c76f" stroke="#b79a4a" strokeWidth="0.8" />
         <path d="M-8 -42 Q-7 -52 0 -52 Q7 -52 8 -42 Z" fill="#ecd283" stroke="#b79a4a" strokeWidth="0.8" />
         <rect x="-8" y="-45" width="16" height="3" fill="#8a5a3a" />
+      </g>
+    );
+  }
+  if (id === "traveler") {
+    return (
+      <g>
+        <ellipse cx="0" cy="-42" rx="14" ry="3.8" fill="#6f4a2e" stroke="#4f3420" strokeWidth="0.8" />
+        <path d="M-8 -42 Q-8 -52 0 -52 Q8 -52 8 -42 Z" fill="#8a5d3a" stroke="#4f3420" strokeWidth="0.8" />
+        <rect x="-8" y="-45" width="16" height="2.6" fill="#c8553d" />
+      </g>
+    );
+  }
+  if (id === "librarian") {
+    return (
+      <g>
+        <circle cx="0" cy="-46" r="5" fill="#8a4a2a" />
+        <g fill="none" stroke="#2b1f1a" strokeWidth="0.9">
+          <circle cx="-3.4" cy="-35" r="2.6" />
+          <circle cx="3.4" cy="-35" r="2.6" />
+          <line x1="-0.8" y1="-35" x2="0.8" y2="-35" />
+        </g>
       </g>
     );
   }
@@ -47,6 +70,8 @@ export default function VillagerArt({ id, alert = false }) {
         {id === "baker" && <rect x="-6" y="-22" width="12" height="14" rx="3" fill="#e4dccb" />}
         {id === "merchant" && <path d="M-9.5 -20 H9.5 V-12 H-9.5 Z" fill="#d6b27a" opacity="0.9" />}
         {id === "gardener" && <path d="M-9.5 -16 H9.5 V-8 H-9.5 Z" fill="#6b5238" opacity="0.55" />}
+        {id === "traveler" && <path d="M-6 -27 L6 -9 M6 -27 L-6 -9" stroke="#6f4a2e" strokeWidth="2" />}
+        {id === "librarian" && <rect x="7" y="-22" width="7" height="9" rx="1" fill="#3d5a8a" stroke="#22365a" strokeWidth="0.7" />}
         <rect x="-13" y="-25" width="5" height="14" rx="2.5" fill={c.body} stroke="rgba(0,0,0,0.15)" strokeWidth="0.7" />
         <rect x="8" y="-25" width="5" height="14" rx="2.5" fill={c.body} stroke="rgba(0,0,0,0.15)" strokeWidth="0.7" />
         <circle cx="-10.5" cy="-10" r="2.8" fill={c.skin} />

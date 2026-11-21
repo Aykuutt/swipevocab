@@ -108,7 +108,7 @@ function villagerSpots(village, kart) {
   return spots;
 }
 
-const BUBBLE_Y = { home: 112, market: 96, bakery: 108, garden: 66, fountain: 96 };
+const BUBBLE_Y = { home: 112, market: 96, bakery: 108, garden: 66, fountain: 96, inn: 124, library: 112 };
 
 const VillageMap = forwardRef(function VillageMap(
   { village, tod, pending, alerts, expand, expandSide, selectedId, placing, onSelect, onGhost, onHarvest, onKart, onVillager, onExpand },

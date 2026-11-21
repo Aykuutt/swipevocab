@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ORDER_KINDS, ORDER_PREFS, claimableOrders, makeOrder, needsNewOrder, orderDone, orderProgress, orderText, orderTier } from "./orders";
+import { ORDER_KINDS, ORDER_PREFS, claimableOrders, makeOrder, makeWeekly, needsNewOrder, needsNewWeekly, orderDone, orderProgress, orderText, orderTier, weeklyClaimable, weeklyDaysLeft, weeklyText } from "./orders";
 import { VILLAGERS } from "./villagers";
 import { initialVillage } from "./village";
 
@@ -60,5 +60,30 @@ describe("köylü siparişleri", () => {
     const s = state({ counters: { cards: 0, correct: 20, learned: 0, units: 0 } });
     s.village.orders = { merchant: { kind: "correct", target: 5, base: 0, reward: 18, day: 3, claimed: false } };
     expect(claimableOrders(s).map((x) => x.villager.id)).toEqual(["merchant"]);
+  });
+});
+
+describe("haftalık büyük sipariş", () => {
+  it("aynı hafta içinde hep aynı, haftalar arasında türü değişir", () => {
+    const a = makeWeekly(state({ day: 1 }));
+    expect(makeWeekly(state({ day: 7 }))).toEqual({ ...a });
+    const kinds = new Set(Array.from({ length: 20 }, (_, i) => makeWeekly(state({ day: i * 7 + 1 })).kind));
+    expect(kinds.size).toBeGreaterThan(1);
+    expect(weeklyText(a)).toMatch(/Bu hafta/);
+    expect(a.reward).toBeGreaterThanOrEqual(60);
+  });
+
+  it("ilerler, bitince teslim edilebilir; hafta dönünce bitmemişse yenilenir", () => {
+    const s = state({ day: 2 });
+    const w = makeWeekly(s);
+    const village = { ...s.village, weekly: w };
+    expect(weeklyClaimable({ ...s, village })).toBe(false);
+    const done = { ...s, village, counters: { ...s.counters, [w.kind]: w.target } };
+    expect(weeklyClaimable(done)).toBe(true);
+    expect(needsNewWeekly({ ...done, day: 9 }, w)).toBe(false); // bitmiş, teslim bekliyor
+    expect(needsNewWeekly({ ...s, day: 9 }, w)).toBe(true); // bitmemiş, yeni hafta
+    expect(needsNewWeekly(s, w)).toBe(false);
+    expect(weeklyDaysLeft(state({ day: 1 }))).toBe(7);
+    expect(weeklyDaysLeft(state({ day: 7 }))).toBe(1);
   });
 });

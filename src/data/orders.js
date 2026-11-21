@@ -5,6 +5,7 @@
 // İlerleme `state.counters` içindeki ömür boyu sayaçlardan ölçülür (siparişin oluştuğu andaki değer `base`'tir).
 import { availableVillagers, getVillager, heartBonus, talkState } from "./villagers";
 import { villageLevel } from "./village";
+import { weekOfDay } from "../lib/time";
 
 export const ORDER_KINDS = {
   correct: { base: 5, step: 2, reward: (n) => n + 4, text: (n) => `Bugün ${n} soruyu doğru cevapla.`, unit: "doğru cevap" },
@@ -18,6 +19,8 @@ export const ORDER_PREFS = {
   merchant: ["correct", "cards"],
   baker: ["learned", "units", "correct"],
   gardener: ["cards", "learned", "correct"],
+  traveler: ["units", "cards", "correct"],
+  librarian: ["learned", "correct", "units"],
 };
 
 const hash = (text) => {
@@ -60,5 +63,35 @@ export function claimableOrders(state) {
 export function claimReward(state, villagerId, order) {
   return order.reward + heartBonus(talkState(state.village, villagerId).talks);
 }
+
+/* ---------- haftalık büyük sipariş ---------- */
+// Dilbaz her hafta tek ve büyük bir iş ister. Tür haftaya göre döner, hedef ve ödül oyuncunun kademesiyle büyür.
+// Hafta bitince bitmemişse yenisi gelir; bitmiş ama teslim edilmemişse teslim edilene kadar durur.
+export const WEEKLY_KINDS = {
+  learned: { target: (t) => 12 + 3 * t, text: (n) => `Bu hafta ${n} yeni kelime öğren.` },
+  correct: { target: (t) => 40 + 10 * t, text: (n) => `Bu hafta ${n} soruyu doğru cevapla.` },
+  units: { target: (t) => 3 + Math.floor(t / 2), text: (n) => `Bu hafta yoldan ${n} ünite bitir.` },
+  cards: { target: (t) => 50 + 10 * t, text: (n) => `Bu hafta ${n} kelime kartı kaydır.` },
+};
+const WEEKLY_ORDER = ["learned", "correct", "units", "cards"];
+export const weeklyReward = (tier) => 60 + 10 * tier;
+
+export function makeWeekly(state) {
+  const week = weekOfDay(state.day);
+  const kind = WEEKLY_ORDER[hash(`week:${week}`) % WEEKLY_ORDER.length];
+  const tier = orderTier(state);
+  const target = WEEKLY_KINDS[kind].target(tier);
+  return { kind, target, base: state.counters?.[kind] ?? 0, reward: weeklyReward(tier), week, claimed: false };
+}
+
+export const weeklyText = (w) => WEEKLY_KINDS[w.kind].text(w.target);
+export const needsNewWeekly = (state, w) =>
+  !w || (w.week !== weekOfDay(state.day) && (w.claimed || !orderDone(state, w)));
+export const weeklyClaimable = (state) => {
+  const w = state.village?.weekly;
+  return !!w && !w.claimed && orderDone(state, w);
+};
+/** Bu haftanın bitmesine kalan gün (bugün dahil). */
+export const weeklyDaysLeft = (state) => weekOfDay(state.day) * 7 - state.day + 1;
 
 export { getVillager };
