@@ -321,6 +321,8 @@ export function AppProvider({ children }) {
         mascotSay(`${getVillager(id).name}: Teşekkürler! +${gained} puan`, { mood: "cheer" });
         return gained;
       },
+      /** Köy turu bitti ya da geçildi (bir daha kendiliğinden açılmaz). */
+      finishVillageTour: () => dispatch({ type: "VILLAGE_TOUR_DONE" }),
       /** Kelime defterinden: bu kelimeyi yarınki kartlarda tekrar sor. */
       reviewAgain: (id) => dispatch({ type: "REVIEW_AGAIN", id }),
       /** Haftalık büyük siparişi teslim eder. */

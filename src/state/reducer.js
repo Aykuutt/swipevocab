@@ -486,6 +486,9 @@ function baseReducer(state, action) {
       return changed ? { ...state, village: { ...state.village, orders, weekly } } : state;
     }
 
+    case "VILLAGE_TOUR_DONE":
+      return state.village.tour ? state : { ...state, village: { ...state.village, tour: true } };
+
     case "WEEKLY_CLAIM": {
       // Haftalık büyük siparişi teslim eder. Boost katlamaz.
       const w = state.village.weekly;

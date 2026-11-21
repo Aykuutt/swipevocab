@@ -60,6 +60,9 @@ describe("köy kuralları", () => {
     expect(byType("fountain")[0].level).toBe(1);
     expect(byType("garden")).toHaveLength(0);
     expect(v.collected).toEqual({ bakery: 5 });
+    const kept = migrateVillage({ ...initialVillage(), weekly: { kind: "cards", week: 2, target: 50, base: 3, reward: 60, claimed: false }, tour: true });
+    expect(kept.weekly).toMatchObject({ week: 2, base: 3 });
+    expect(kept.tour).toBe(true);
     expect(overlaps(v.items)).toBeNull();
   });
 

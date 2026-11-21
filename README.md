@@ -33,6 +33,9 @@ npm run check    # üçü birden; GitHub Actions her gönderimde bunları çalı
   Arazi puanla dört kenardan 2'şer sıra genişletilir (haritadaki yeşil işaretlere dokun; ormanın ağaçları temizlenir,
   bedel her genişletmede artar, ev seviyesi şart koşulur).
   Kurallar src/data/village.js'te, çizimler src/screens/village/isoArt.jsx'te.
+- **Köy turu ve ipucu:** köye ilk girişte Dilbaz 8 adımlık bir turla puanı, hasadı, köylüleri, siparişleri ve dükkânı
+  gösterir (anlattığı yer parlar; "Turu geç" var, bir kez gösterilir). Üstteki ? düğmesi o an yapılacak en mantıklı
+  şeyi söyler (src/data/villageHint.js) ve turu tekrar açar.
 - **Köylüler:** Pazar, Fırın, Bahçe, Han ve Kütüphane'nin köylüleri (Tomas, Lena, Oskar, Rafael, Mira) binaları kurulunca köyde belirir. Dokununca
   öğrenilen dilde kısa bir sohbet açılır (uygun cevabı seç), ardından o konudan bir kelime sorulur. Günde bir sohbet
   puan ve arkadaşlık (kalp) getirir. Sohbetler hazır yazılı, her dil için src/data/villagers.js'te.

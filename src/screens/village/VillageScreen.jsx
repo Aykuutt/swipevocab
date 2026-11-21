@@ -34,6 +34,8 @@ import OrdersSheet from "./OrdersSheet";
 import VillageMap from "./VillageMap";
 import VillageShop from "./VillageShop";
 import VillagerTalk from "./VillagerTalk";
+import VillageHelp from "./VillageHelp";
+import VillageTour from "./VillageTour";
 
 const KART_LINES = [
   "Köyümüz her gün biraz daha güzelleşiyor.",
@@ -55,6 +57,10 @@ export default function VillageScreen() {
   const [talkId, setTalkId] = useState(null);
   const [expandSide, setExpandSide] = useState(null);
   const [ordersOpen, setOrdersOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+  // İlk girişte tur kendiliğinden açılır; "Turu tekrar izle" ile yeniden.
+  const [tourAgain, setTourAgain] = useState(false);
+  const tourOpen = tourAgain || !state.village.tour;
 
   const { village } = state;
   const pending = pendingHarvests(state);
@@ -185,21 +191,24 @@ export default function VillageScreen() {
           <strong>Dilbaz'ın köyü</strong>
           <span>Köy seviyesi {villageLevel(village)}</span>
         </div>
-        <div className="vhud-balance" aria-label={`${state.xp} puan`}>
+        <button type="button" className="vhud-btn vhud-help" aria-label="Ne yapmalıyım?" data-tour="help" onClick={() => setHelpOpen(true)}>
+          ?
+        </button>
+        <div className="vhud-balance" aria-label={`${state.xp} puan`} data-tour="balance">
           <Icon name="star" size={18} filled />
           {state.xp}
         </div>
       </div>
 
       {pendingTotal > 0 && !placing && (
-        <button type="button" className="vhud-harvest" onClick={() => actions.harvest()}>
+        <button type="button" className="vhud-harvest" data-tour="harvest" onClick={() => actions.harvest()}>
           <Icon name="star" size={16} filled />
           Hepsini topla (+{pendingTotal})
         </button>
       )}
 
       {lockedTotal > 0 && !placing && (
-        <button type="button" className="vhud-harvest is-locked" onClick={() => goTo("learn")}>
+        <button type="button" className="vhud-harvest is-locked" data-tour="harvest" onClick={() => goTo("learn")}>
           <Icon name="lock" size={15} />
           Hasat için bugünkü kartları bitir ({Math.min(state.swipedToday, goal)}/{goal})
         </button>
@@ -305,17 +314,42 @@ export default function VillageScreen() {
         </div>
       ) : (
         <div className="vbar vbar-main">
-          <Button size="lg" variant="secondary" icon="check" onClick={() => setOrdersOpen(true)}>
+          <Button size="lg" variant="secondary" icon="check" data-tour="orders" onClick={() => setOrdersOpen(true)}>
             Siparişler
             {claimCount > 0 && <span className="vbtn-badge">{claimCount}</span>}
           </Button>
-          <Button size="lg" icon="store" onClick={() => setShopOpen(true)}>
+          <Button size="lg" icon="store" data-tour="shop" onClick={() => setShopOpen(true)}>
             Dükkân
           </Button>
         </div>
       )}
 
       {ordersOpen && <OrdersSheet onClose={() => setOrdersOpen(false)} />}
+      {helpOpen && (
+        <VillageHelp
+          onClose={() => setHelpOpen(false)}
+          onTour={() => {
+            setHelpOpen(false);
+            setTourAgain(true);
+          }}
+          onAction={(a) => {
+            setHelpOpen(false);
+            if (a === "orders") setOrdersOpen(true);
+            else if (a === "harvest") actions.harvest();
+            else if (a === "learn") goTo("learn");
+            else if (a === "shop") setShopOpen(true);
+            else if (a === "home") setPageId("home");
+          }}
+        />
+      )}
+      {tourOpen && !placing && !shopOpen && !ordersOpen && !talkId && !pageItem && (
+        <VillageTour
+          onDone={() => {
+            setTourAgain(false);
+            actions.finishVillageTour();
+          }}
+        />
+      )}
       {shopOpen && <VillageShop state={state} onPick={startPlacing} onClose={() => setShopOpen(false)} />}
       {talkId && <VillagerTalk key={talkId} id={talkId} onClose={() => setTalkId(null)} />}
       {pageItem && <BuildingPage id={pageItem.id} onClose={closePage} />}

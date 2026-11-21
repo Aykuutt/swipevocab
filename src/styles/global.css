@@ -1285,3 +1285,26 @@ strong, b { font-weight: 650; }
   /* Karışım modu telefonda pahalı: aynı renk tonu düz katmanla. */
   .vmap-tint { mix-blend-mode: normal; }
 }
+
+/* ---------- Köy turu ve "Ne yapmalıyım?" ---------- */
+.vhud-help { font-family: var(--font-display); font-size: 20px; color: var(--amber); }
+.vtour { position: absolute; inset: 0; z-index: 40; }
+.vtour-dim { position: absolute; inset: 0; background: rgba(10, 8, 24, 0.6); }
+.vtour-spot { position: absolute; border-radius: 16px; box-shadow: 0 0 0 9999px rgba(10, 8, 24, 0.6), 0 0 0 3px #ffd166 inset; transition: all 0.28s ease; pointer-events: none; }
+.vtour-card { position: absolute; left: 16px; right: 16px; display: flex; align-items: flex-end; gap: 8px; animation: overlay-in 0.24s ease-out; }
+.vtour-card.is-center { top: 50%; transform: translateY(-50%); }
+.vtour-card.is-top { top: calc(70px + env(safe-area-inset-top, 0px)); }
+.vtour-card.is-bottom { bottom: calc(110px + env(safe-area-inset-bottom, 0px)); }
+.vtour-body { flex: 1; display: grid; gap: 10px; padding: 14px; border-radius: 18px; background: #fffaf0; color: #2a2238; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); }
+.vtour-body p { margin: 0; font-size: 15px; line-height: 1.45; font-weight: 600; }
+.vtour-actions { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+.vtour-count { margin-right: auto; font-size: 12px; color: #7a7290; font-weight: 700; }
+.vtour-actions .btn-ghost { color: #5d5878; }
+.vhelp-backdrop { position: absolute; inset: 0; z-index: 35; display: flex; align-items: flex-end; background: rgba(10, 8, 24, 0.45); }
+.vhelp { position: relative; width: 100%; display: grid; gap: 14px; padding: 18px 16px calc(20px + env(safe-area-inset-bottom, 0px)); border-radius: 22px 22px 0 0; background: var(--night); animation: overlay-in 0.22s ease-out; }
+.vhelp-close { position: absolute; top: 10px; right: 10px; }
+.vhelp-row { display: flex; align-items: flex-end; gap: 8px; padding-right: 28px; }
+.vhelp-bubble { flex: 1; padding: 12px 14px; border-radius: 16px; background: var(--plum-2); border: 1.5px solid var(--line); }
+.vhelp-bubble small { color: var(--text-faint); font-weight: 700; font-size: 12px; }
+.vhelp-bubble p { margin: 2px 0 0; font-size: 15px; line-height: 1.45; }
+.vhelp-actions { display: grid; gap: 8px; }

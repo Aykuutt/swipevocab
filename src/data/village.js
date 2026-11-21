@@ -171,6 +171,9 @@ export function migrateVillage(saved) {
       villagers: { ...saved.villagers },
       expansions: saved.expansions ?? 0,
       orders: { ...saved.orders },
+      // Haftalık büyük sipariş ve köy turu da korunur (eskiden yüklemede düşüyordu, haftalık ilerleme sıfırlanıyordu).
+      ...(saved.weekly ? { weekly: { ...saved.weekly } } : {}),
+      ...(saved.tour ? { tour: true } : {}),
     };
   }
   const village = initialVillage();
