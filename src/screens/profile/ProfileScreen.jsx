@@ -312,14 +312,22 @@ const PAGES = {
 
 /** Profil'de kelime defterine giriş. */
 function NotebookLink() {
-  const { state, setProfileView } = useApp();
+  const { state, setProfileView, friendRequests } = useApp();
+  const incoming = friendRequests.incoming;
   const count = state.knownIds.length + state.learningIds.length;
   return (
     <section className="group">
       <ul className="group-list">
         <NavRow icon="book" tone="sky" title="Kelime defterim" summary={`${count} kelime`} onClick={() => setProfileView("notebook")} />
         {FEATURES.friends && (
-          <NavRow icon="user" tone="rose" title="Arkadaşlarım" summary="Köylerini gez, beğeni bırak" onClick={() => setProfileView("friends")} />
+          <NavRow
+            icon="user"
+            tone="rose"
+            title="Arkadaşlarım"
+            summary={incoming > 0 ? `${incoming} yeni arkadaşlık isteği!` : "Köylerini gez, beğeni bırak"}
+            badge={incoming}
+            onClick={() => setProfileView("friends")}
+          />
         )}
       </ul>
     </section>

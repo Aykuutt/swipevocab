@@ -97,7 +97,7 @@ const TABS = [
 ];
 
 export function TabBar() {
-  const { tab, setTab, setProfileView, state } = useApp();
+  const { tab, setTab, setProfileView, state, friendRequests } = useApp();
   // Köy sekmesindeki nokta: toplanacak hasat ya da teslim edilecek sipariş var.
   const harvestReady = pendingHarvests(state).length > 0 || claimableOrders(state).length > 0 || weeklyClaimable(state);
   return (
@@ -117,6 +117,7 @@ export function TabBar() {
           <span className="tab-icon">
             <Icon name={t.icon} size={22} />
             {t.id === "village" && harvestReady && <i className="tab-dot" aria-label="Köyde seni bekleyen bir şey var" />}
+            {t.id === "profile" && friendRequests.incoming > 0 && <i className="tab-dot" aria-label="Yeni arkadaşlık isteği var" />}
           </span>
           <span>{t.label}</span>
         </button>

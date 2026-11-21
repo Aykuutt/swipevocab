@@ -58,7 +58,8 @@ function MyCode({ code }) {
 }
 
 export default function FriendsPage() {
-  const { state, friendCode } = useApp();
+  const { state, friendCode, friendRequests } = useApp();
+  const setIncoming = friendRequests.setIncoming;
   const user = state.user;
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
@@ -71,15 +72,24 @@ export default function FriendsPage() {
   const refresh = useCallback(async () => {
     if (!user || user.guest) return;
     try {
-      setData(await loadFriends(user.id));
+      const d = await loadFriends(user.id);
+      setData(d);
+      setIncoming(d.incoming.length);
       setError("");
     } catch (err) {
       setError(err.message);
     }
-  }, [user]);
+  }, [user, setIncoming]);
 
+  // Sayfa açıkken yeni istekler ve beğeniler birkaç saniyede bir kendiliğinden gelir.
   useEffect(() => {
     refresh();
+    const timer = setInterval(() => document.visibilityState === "visible" && refresh(), 8000);
+    window.addEventListener("focus", refresh);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("focus", refresh);
+    };
   }, [refresh]);
 
   if (!user || user.guest) {

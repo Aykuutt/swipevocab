@@ -190,7 +190,7 @@ export function Row({ icon, tone = "violet", title, desc, children, stacked = fa
 }
 
 /** Alt sayfaya giden satır (Profil'deki ayar listesi): simge, başlık, kısa özet, ok. */
-export function NavRow({ icon, tone = "violet", title, summary, onClick }) {
+export function NavRow({ icon, tone = "violet", title, summary, onClick, badge = 0 }) {
   return (
     <li className="row-navwrap">
       <button type="button" className="row-nav" onClick={onClick}>
@@ -205,6 +205,7 @@ export function NavRow({ icon, tone = "violet", title, summary, onClick }) {
             {summary && <span className="row-desc">{summary}</span>}
           </span>
         </span>
+        {badge > 0 && <span className="row-badge">{badge}</span>}
         <Icon name="chevronRight" size={18} className="row-chevron" />
       </button>
     </li>

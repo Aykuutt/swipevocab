@@ -60,6 +60,13 @@ export async function removeFriend(otherId) {
   if (error) throw fail(error);
 }
 
+/** Gelen arkadaşlık isteği sayısı (bildirim noktası için). */
+export async function countIncoming() {
+  const { data, error } = await supabase.rpc("friend_incoming");
+  if (error) throw fail(error);
+  return data?.length ?? 0;
+}
+
 /** Arkadaşlar, gelen ve gönderilen istekler, bugün beğenilenler ve son gelen beğeniler. */
 export async function loadFriends(userId) {
   const [friends, incoming, outgoing, likes] = await Promise.all([

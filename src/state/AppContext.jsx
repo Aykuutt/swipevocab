@@ -19,6 +19,7 @@ import { loadWords } from "../lib/words";
 import { initialState, reducer } from "./reducer";
 import { activeLevels, currentStreak, dailyCardLimit, wordPool } from "./selectors";
 import { useVillagePublish } from "../hooks/useVillagePublish";
+import { useFriendRequests } from "../hooks/useFriendRequests";
 
 const AppContext = createContext(null);
 
@@ -187,6 +188,7 @@ export function AppProvider({ children }) {
   const flushProgress = useProgressSave(state, inApp, dispatch);
   // Hesaplı kullanıcının köyü arkadaşlarına görünsün diye vitrin kopyası güncel tutulur.
   const friendCode = useVillagePublish(state, active, currentStreak(state));
+  const friendRequests = useFriendRequests(state, active);
 
   /* ---------- Tema ---------- */
   const theme = state.settings.theme;
@@ -373,6 +375,7 @@ export function AppProvider({ children }) {
       reloadWords,
       account,
       friendCode,
+      friendRequests,
       pool: wordPool(state, words),
       tab,
       setTab,
@@ -387,7 +390,7 @@ export function AppProvider({ children }) {
       getNow,
       sfx,
     }),
-    [state, actions, words, wordsById, units, wordsStatus, reloadWords, account, friendCode, tab, profileView, openProfile, villageTarget, openVillage, leaveVillage, getNow, sfx]
+    [state, actions, words, wordsById, units, wordsStatus, reloadWords, account, friendCode, friendRequests, tab, profileView, openProfile, villageTarget, openVillage, leaveVillage, getNow, sfx]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
