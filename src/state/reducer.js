@@ -14,6 +14,7 @@ import {
 import { DEFAULT_GOAL } from "../data/goals";
 import { DEFAULT_LANGUAGE, LANGUAGES } from "../data/languages";
 import { DEFAULT_THEME, THEMES } from "../data/themes";
+import { initialVillage, levelOf, marketPrice, pendingHarvests, upgradeBlock, upgradeCost } from "../data/village";
 import { leagueRank } from "../lib/league";
 import { unique } from "../lib/random";
 import { weekOfDay } from "../lib/time";
@@ -65,7 +66,15 @@ export const initialState = {
   lastWeek: null,
   top3Finishes: 0,
   records: {}, // oyun rekorları: "timed:<dil>" -> en yüksek skor
+  xpTotal: 0, // ömür boyu kazanılan puan (harcamak bunu düşürmez; başarımlar bunu kullanır)
+  village: initialVillage(), // Kart'ın köyü: bina seviyeleri ve son hasat günleri
 };
+
+/** Kayıtlı köyü varsayılanlarla birleştirir (sonradan eklenen binalar kayıtta yoktur). */
+function mergeVillage(saved) {
+  const base = initialVillage();
+  return { levels: { ...base.levels, ...saved?.levels }, collected: { ...saved?.collected } };
+}
 
 /** Kayıttan gelen durumu eksik alanları tamamlayarak açar. */
 export function hydrate(saved) {
@@ -75,7 +84,14 @@ export function hydrate(saved) {
   if (!THEMES.some((t) => t.id === settings.theme)) settings.theme = DEFAULT_THEME;
   // Dil seçimi gelmeden önce seçilen ses İngilizce sesiydi.
   if (settings.voiceURI && !settings.voices.en) settings.voices.en = settings.voiceURI;
-  let s = { ...initialState, ...rest, settings, languages: rest.languages || {} };
+  let s = {
+    ...initialState,
+    ...rest,
+    settings,
+    languages: rest.languages || {},
+    xpTotal: Math.max(rest.xpTotal ?? 0, rest.xp ?? 0),
+    village: mergeVillage(rest.village),
+  };
   if (!LANGUAGES[s.language]) s = { ...s, language: DEFAULT_LANGUAGE };
   return FEATURES.pro ? s : { ...s, isPro: false, freezes: 0 };
 }
@@ -130,7 +146,13 @@ const scheduleAt = (day, stage) => ({ stage, due: day + REVIEW_INTERVALS[stage] 
 
 function addXp(s, amount) {
   const gained = s.xpBoost ? amount * 2 : amount;
-  return { ...s, xp: s.xp + gained, weeklyXp: s.weeklyXp + gained, dailyXp: s.dailyXp + gained };
+  return {
+    ...s,
+    xp: s.xp + gained,
+    xpTotal: (s.xpTotal ?? 0) + gained,
+    weeklyXp: s.weeklyXp + gained,
+    dailyXp: s.dailyXp + gained,
+  };
 }
 
 /** Günü tamamlandı say: seriyi güncelle, günlük puanı ver. */
@@ -331,13 +353,45 @@ export function reducer(state, action) {
     case "HEARTS_TICK":
       return regenLives(state, action.now);
 
-    case "BUY_HEARTS":
-      if (state.xp < PRICES.heartsRefill || state.lives >= MAX_LIVES) return state;
-      return { ...state, xp: state.xp - PRICES.heartsRefill, lives: MAX_LIVES, regenAt: null };
+    case "BUY_HEARTS": {
+      const price = marketPrice(PRICES.heartsRefill, state.village); // Pazar büyüdükçe ucuzlar
+      if (state.xp < price || state.lives >= MAX_LIVES) return state;
+      return { ...state, xp: state.xp - price, lives: MAX_LIVES, regenAt: null };
+    }
 
-    case "BUY_BOOST":
-      if (state.xp < PRICES.xpBoost || state.xpBoost) return state;
-      return { ...state, xp: state.xp - PRICES.xpBoost, xpBoost: true };
+    case "BUY_BOOST": {
+      const price = marketPrice(PRICES.xpBoost, state.village);
+      if (state.xp < price || state.xpBoost) return state;
+      return { ...state, xp: state.xp - price, xpBoost: true };
+    }
+
+    case "VILLAGE_UPGRADE": {
+      // Bina kurmak ya da yükseltmek puan harcar. Ömür boyu puan (xpTotal) düşmez.
+      if (upgradeBlock(state, action.id)) return state;
+      const level = levelOf(state.village, action.id);
+      return {
+        ...state,
+        xp: state.xp - upgradeCost(action.id, level),
+        village: { ...state.village, levels: { ...state.village.levels, [action.id]: level + 1 } },
+      };
+    }
+
+    case "VILLAGE_HARVEST": {
+      // id yoksa bugün bekleyen hepsi. 2 kat puan güçlendiricisi hasatı katlamaz.
+      const ready = pendingHarvests(state).filter((h) => !action.id || h.id === action.id);
+      if (ready.length === 0) return state;
+      const gained = ready.reduce((n, h) => n + h.amount, 0);
+      const collected = { ...state.village.collected };
+      ready.forEach((h) => (collected[h.id] = state.day));
+      return {
+        ...state,
+        xp: state.xp + gained,
+        xpTotal: (state.xpTotal ?? 0) + gained,
+        weeklyXp: state.weeklyXp + gained,
+        dailyXp: state.dailyXp + gained,
+        village: { ...state.village, collected },
+      };
+    }
 
     case "COMPLETE_UNIT": {
       const { unitId, wordIds } = action;

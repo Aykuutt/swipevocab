@@ -1,10 +1,12 @@
 // Uygulama durumu, kelime listesi ve sekme gezgini için tek bağlam.
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { getLanguage } from "../data/languages";
+import { getBuilding, levelOf, pendingHarvests, upgradeBlock } from "../data/village";
 import { useAccount } from "../hooks/useAccount";
 import { useProgressSave } from "../hooks/useProgressSave";
 import { signOut as authSignOut } from "../lib/auth";
 import { buildDeck, topUpCards } from "../lib/deck";
+import { mascotSay } from "../lib/mascot";
 import { localCache } from "../lib/progress";
 import { playSfx } from "../lib/sfx";
 import { setPreferredVoice, setSpeechLanguage } from "../lib/speech";
@@ -42,6 +44,12 @@ export function AppProvider({ children }) {
   const openProfile = useCallback((view = null) => {
     setProfileView(view);
     setTab("profile");
+  }, []);
+  // Köy sekmesinde açılacak bina (örneğin başka ekrandan "Pazar"a yönlendirme).
+  const [villageTarget, setVillageTarget] = useState(null);
+  const openVillage = useCallback((buildingId = null) => {
+    setVillageTarget(buildingId);
+    setTab("village");
   }, []);
 
   /* ---------- Kelime listesi (öğrenilen dile göre) ---------- */
@@ -190,6 +198,27 @@ export function AppProvider({ children }) {
       correct: (xp) => dispatch({ type: "CORRECT", xp }),
       awardXp: (xp) => dispatch({ type: "AWARD_XP", xp }),
       setRecord: (key, value) => dispatch({ type: "SET_RECORD", key, value }),
+      /** Binayı kurar ya da yükseltir. Yapılabildiyse true döner. */
+      upgradeBuilding(id) {
+        const s = stateRef.current;
+        if (upgradeBlock(s, id)) return false;
+        const level = levelOf(s.village, id) + 1;
+        dispatch({ type: "VILLAGE_UPGRADE", id });
+        sfx("levelup");
+        mascotSay(`${getBuilding(id).name} ${level === 1 ? "kuruldu" : `${level}. seviyeye çıktı`}!`, { mood: "cheer" });
+        return true;
+      },
+      /** Bugünkü hasadı toplar (id yoksa hepsini). Toplanan puanı döndürür. */
+      harvest(id) {
+        const total = pendingHarvests(stateRef.current)
+          .filter((h) => !id || h.id === id)
+          .reduce((n, h) => n + h.amount, 0);
+        if (total === 0) return 0;
+        dispatch({ type: "VILLAGE_HARVEST", id });
+        sfx("correct");
+        mascotSay(`+${total} puan hasat ettin!`, { mood: "happy" });
+        return total;
+      },
       loseLife: () => dispatch({ type: "LOSE_LIFE", now: getNow() }),
       completeUnit: (unitId, wordIds) => dispatch({ type: "COMPLETE_UNIT", unitId, wordIds }),
       buyHearts: () => dispatch({ type: "BUY_HEARTS" }),
@@ -207,7 +236,7 @@ export function AppProvider({ children }) {
           now: getNow(),
         }),
     }),
-    [words, getNow, flushProgress]
+    [words, getNow, flushProgress, sfx]
   );
 
   const value = useMemo(
@@ -228,10 +257,13 @@ export function AppProvider({ children }) {
       profileView,
       setProfileView,
       openProfile,
+      villageTarget,
+      setVillageTarget,
+      openVillage,
       getNow,
       sfx,
     }),
-    [state, actions, words, wordsById, units, wordsStatus, reloadWords, account, tab, profileView, openProfile, getNow, sfx]
+    [state, actions, words, wordsById, units, wordsStatus, reloadWords, account, tab, profileView, openProfile, villageTarget, openVillage, getNow, sfx]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

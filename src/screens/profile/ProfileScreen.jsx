@@ -62,7 +62,7 @@ function StatGrid() {
   const { state } = useApp();
   const items = [
     { icon: "flame", tone: "coral", value: currentStreak(state), label: "gün serisi" },
-    { icon: "star", tone: "amber", value: state.xp, label: "toplam puan" },
+    { icon: "star", tone: "amber", value: state.xpTotal ?? state.xp, label: "toplam puan" },
     { icon: "check", tone: "mint", value: state.knownIds.length, label: "bildiğin kelime" },
     { icon: "path", tone: "violet", value: state.completedUnits.length, label: "tamamlanan ünite" },
   ];

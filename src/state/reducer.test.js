@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { WORDS } from "../data/langs/en";
 import { WORDS as DE_WORDS } from "../data/langs/de";
+import { levelOf, pendingHarvests } from "../data/village";
 import { buildDeck, topUpCards } from "../lib/deck";
 import { hydrate, initialState, reducer } from "./reducer";
 import { dailyCardLimit } from "./selectors";
@@ -190,5 +191,63 @@ describe("oyun rekorları", () => {
     expect(same).toBe(s);
     s = reducer(s, { type: "SET_RECORD", key: "timed:de", value: 40 });
     expect(s.records).toEqual({ "timed:en": 120, "timed:de": 40 });
+  });
+});
+
+describe("Kart'ın köyü", () => {
+  const rich = () => reducer(newUser(5), { type: "AWARD_XP", xp: 400 });
+
+  it("bina kurmak puan harcar ama ömür boyu puanı düşürmez", () => {
+    let s = rich();
+    expect(s.xpTotal).toBe(400);
+    s = reducer(s, { type: "VILLAGE_UPGRADE", id: "bakery" });
+    expect(levelOf(s.village, "bakery")).toBe(1);
+    expect(s.xp).toBe(360);
+    expect(s.xpTotal).toBe(400);
+  });
+
+  it("puan yetmezse ya da evin sınırı aşılırsa yükseltme olmaz", () => {
+    const poor = newUser(5);
+    expect(reducer(poor, { type: "VILLAGE_UPGRADE", id: "bakery" })).toBe(poor);
+    let s = reducer(newUser(5), { type: "AWARD_XP", xp: 700 });
+    s = reducer(s, { type: "VILLAGE_UPGRADE", id: "bakery" });
+    s = reducer(s, { type: "VILLAGE_UPGRADE", id: "bakery" }); // 2. seviye: ev 1 iken sınır 2
+    expect(levelOf(s.village, "bakery")).toBe(2);
+    expect(reducer(s, { type: "VILLAGE_UPGRADE", id: "bakery" })).toBe(s); // 3. için ev 2 olmalı
+    s = reducer(s, { type: "VILLAGE_UPGRADE", id: "home" });
+    s = reducer(s, { type: "VILLAGE_UPGRADE", id: "bakery" });
+    expect(levelOf(s.village, "bakery")).toBe(3);
+  });
+
+  it("hasat günde bir kez toplanır, ertesi gün yeniden hazır olur, güçlendirici katlamaz", () => {
+    let s = rich();
+    s = reducer(s, { type: "VILLAGE_UPGRADE", id: "bakery" });
+    s = { ...s, xpBoost: true };
+    const before = s.xp;
+    expect(pendingHarvests(s)).toEqual([{ id: "bakery", amount: 3 }]);
+    s = reducer(s, { type: "VILLAGE_HARVEST" });
+    expect(s.xp).toBe(before + 3);
+    expect(s.xpTotal).toBe(400 + 3);
+    expect(pendingHarvests(s)).toEqual([]);
+    expect(reducer(s, { type: "VILLAGE_HARVEST" })).toBe(s);
+    s = reducer(s, { type: "SYNC_DAY", day: s.day + 1, deck: [] });
+    expect(pendingHarvests(s)).toHaveLength(1);
+  });
+
+  it("Pazar büyüyünce can yenileme ucuzlar", () => {
+    let s = rich();
+    s = reducer(s, { type: "VILLAGE_UPGRADE", id: "market" }); // 2. seviye: %10 indirim
+    s = { ...s, lives: 1, xp: 27 };
+    s = reducer(s, { type: "BUY_HEARTS" });
+    expect(s.lives).toBe(3);
+    expect(s.xp).toBe(0);
+  });
+
+  it("eski kayıtlar köy ve ömür boyu puanla açılır", () => {
+    const { village, xpTotal, ...old } = newUser(5);
+    const h = hydrate({ ...old, xp: 50 });
+    expect(h.xpTotal).toBe(50);
+    expect(levelOf(h.village, "home")).toBe(1);
+    expect(levelOf(h.village, "bakery")).toBe(0);
   });
 });

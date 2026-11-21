@@ -1034,3 +1034,70 @@ strong, b { font-weight: 650; }
 .dictation-input:focus { border-color: var(--violet); outline: none; box-shadow: 0 0 0 3px var(--violet-soft); }
 .dictation-input:disabled { opacity: 0.7; }
 .dictation-actions { width: 100%; display: grid; gap: 8px; }
+
+/* ---------- Köy ---------- */
+.tab-icon { position: relative; display: inline-flex; }
+.tab-dot { position: absolute; top: -2px; right: -5px; width: 9px; height: 9px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 0 2px var(--night); }
+.village-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.village-head .screen-title { margin-bottom: 2px; }
+.village-head .screen-sub { margin-bottom: 0; }
+.balance-compact { display: inline-flex; align-items: center; gap: 6px; margin: 6px 0 0; padding: 6px 12px; border-radius: var(--r-pill); background: var(--amber-soft); color: var(--amber); }
+.village .btn-block { margin-bottom: 12px; }
+
+.village-scene {
+  position: relative; height: 372px; margin: 0 0 18px; overflow: hidden; border-radius: var(--r-xl);
+  background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bot) 62%);
+  box-shadow: 0 0 0 1px var(--line);
+  --kart-glow: transparent;
+}
+/* gün / akşam / gece paletleri: sahne uygulama temasından bağımsızdır */
+.tod-day { --sky-top: #8ac6ee; --sky-bot: #dcf0fb; --hill-far: #a6cf93; --hill-near: #86bb74; --ground: #79b266; --road: #e7d7b0; --road-edge: #cdb98c; --orb: #ffe27a; --label: rgba(255, 255, 255, 0.82); --label-ink: #2c3a2e; }
+.tod-dusk { --sky-top: #4f4283; --sky-bot: #f0a47a; --hill-far: #6f7d86; --hill-near: #587a64; --ground: #4f7a5b; --road: #c9ae8a; --road-edge: #a88e6e; --orb: #ffb36a; --label: rgba(255, 238, 220, 0.85); --label-ink: #3a2a2a; }
+.tod-night { --sky-top: #0c1430; --sky-bot: #2a3868; --hill-far: #25365a; --hill-near: #1f3a4a; --ground: #1c3a3f; --road: #3f4f66; --road-edge: #2d3a4d; --orb: #e9eefc; --label: rgba(20, 28, 52, 0.82); --label-ink: #e8edfa; }
+.vs-orb { position: absolute; top: 30px; right: 54px; width: 38px; height: 38px; border-radius: 50%; background: var(--orb); box-shadow: 0 0 36px 10px color-mix(in srgb, var(--orb) 55%, transparent); }
+.tod-dusk .vs-orb { top: 96px; right: 40px; }
+.tod-night .vs-orb { box-shadow: 0 0 26px 6px rgba(200, 215, 255, 0.35); }
+.vs-stars { position: absolute; inset: 0; background-image: radial-gradient(1.4px 1.4px at 12% 18%, #fff, transparent), radial-gradient(1.2px 1.2px at 30% 40px, #fff, transparent), radial-gradient(1.6px 1.6px at 52% 22%, #fff, transparent), radial-gradient(1.2px 1.2px at 70% 52px, #fff, transparent), radial-gradient(1.4px 1.4px at 88% 26%, #fff, transparent), radial-gradient(1px 1px at 40% 64px, #fff, transparent); opacity: 0.85; }
+.vs-cloud { position: absolute; width: 70px; height: 20px; border-radius: 20px; background: rgba(255, 255, 255, 0.7); animation: cloud-drift 60s linear infinite alternate; }
+.vs-cloud::before { content: ""; position: absolute; left: 14px; top: -10px; width: 30px; height: 24px; border-radius: 50%; background: inherit; }
+.vs-cloud-1 { top: 36px; left: 6%; }
+.vs-cloud-2 { top: 72px; left: 46%; transform: scale(0.8); animation-duration: 80s; animation-direction: alternate-reverse; }
+.tod-dusk .vs-cloud { background: rgba(255, 220, 200, 0.5); }
+@keyframes cloud-drift { from { margin-left: 0; } to { margin-left: 26%; } }
+.vs-land { position: absolute; inset: 0; width: 100%; height: 100%; }
+.vs-hill-far { fill: var(--hill-far); }
+.vs-hill-near { fill: var(--hill-near); }
+.vs-ground { fill: var(--ground); }
+.vs-road-edge { fill: none; stroke: var(--road-edge); stroke-width: 32; stroke-linecap: round; }
+.vs-road { fill: none; stroke: var(--road); stroke-width: 26; stroke-linecap: round; }
+
+.vb { position: absolute; transform: translateX(-50%); display: grid; justify-items: center; gap: 0; padding: 0; border: 0; background: none; cursor: pointer; transition: transform 0.15s; }
+.vb:hover { transform: translateX(-50%) translateY(-3px); }
+.vb:active { transform: translateX(-50%) translateY(0) scale(0.97); }
+.vb.is-plot svg { opacity: 0.85; }
+.vb-label { margin-top: -2px; padding: 2px 9px; border-radius: var(--r-pill); background: var(--label); color: var(--label-ink); font-size: 11.5px; font-weight: 650; white-space: nowrap; backdrop-filter: blur(2px); }
+.vb-label i { margin-left: 5px; padding: 0 5px; border-radius: 8px; background: var(--amber); color: #3a2400; font-style: normal; font-size: 10.5px; font-weight: 800; }
+.vb-harvest { position: absolute; top: -6px; right: -4px; z-index: 2; padding: 2px 8px; border-radius: var(--r-pill); background: var(--amber); color: #3a2400; font-size: 12px; font-weight: 800; box-shadow: 0 2px 0 #b97f1a; animation: bob 1.6s ease-in-out infinite; }
+
+.village-kart { position: absolute; bottom: 10px; left: 6%; padding: 0; border: 0; background: none; cursor: pointer; animation: kart-walk 28s ease-in-out infinite alternate; filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.25)); }
+@keyframes kart-walk { from { left: 4%; } to { left: 78%; } }
+
+.vlist { display: grid; gap: 8px; margin-bottom: 8px; }
+.vlist-row { width: 100%; display: flex; align-items: center; gap: 12px; padding: 10px 12px; text-align: left; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--plum-1); color: var(--text); cursor: pointer; }
+.vlist-row:hover { border-color: var(--violet); background: var(--plum-2); }
+.vlist-art { flex-shrink: 0; width: 52px; height: 52px; display: grid; place-items: center; border-radius: var(--r-md); background: linear-gradient(180deg, #cfe8f7, #e9f5df); }
+.vlist-text { flex: 1; display: grid; gap: 2px; min-width: 0; }
+.vlist-text strong { font-size: 15px; }
+.vlist-status { font-size: 12.5px; color: var(--text-dim); }
+.vlist-status.is-amber { color: var(--amber); font-weight: 650; }
+.vlist-status.is-mint { color: var(--mint); }
+.vlist-level { font-size: 12px; font-weight: 700; color: var(--text-dim); }
+
+.building-stage { display: grid; place-items: center; height: 200px; margin-bottom: 12px; border-radius: var(--r-xl); background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bot) 70%); box-shadow: 0 0 0 1px var(--line); }
+.building-level { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 6px; font-size: 13px; font-weight: 650; color: var(--text-dim); }
+.building-role { margin-bottom: 18px; text-align: center; font-size: 14px; line-height: 1.5; color: var(--text-dim); }
+.upgrade-card { display: grid; gap: 10px; padding: 14px; }
+.upgrade-cost { display: flex; align-items: center; gap: 8px; color: var(--amber); }
+.upgrade-cost strong { font-family: var(--font-display); font-size: 20px; }
+.upgrade-cost span { color: var(--text-dim); font-size: 12.5px; }
+.upgrade-reason { margin: 0 4px; font-size: 13px; color: var(--text-dim); text-align: center; }

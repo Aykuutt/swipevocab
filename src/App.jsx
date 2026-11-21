@@ -9,13 +9,13 @@ import NewPassword from "./screens/onboarding/NewPassword";
 import Onboarding from "./screens/onboarding/Onboarding";
 import PathScreen from "./screens/path/PathScreen";
 import ProfileScreen from "./screens/profile/ProfileScreen";
-import StoreScreen from "./screens/StoreScreen";
+import VillageScreen from "./screens/village/VillageScreen";
 
 const SCREENS = {
   learn: LearnScreen,
   path: PathScreen,
   game: GameScreen,
-  store: StoreScreen,
+  village: VillageScreen,
   profile: ProfileScreen,
 };
 

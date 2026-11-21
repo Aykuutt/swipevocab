@@ -1,17 +1,20 @@
-// "Mağaza" sekmesi: puanla can yenileme ve 2 kat puan.
-import HeartTimer from "../components/HeartTimer";
-import Icon from "../components/Icon";
-import { Button, Group, Row } from "../components/ui";
-import { FEATURES, MAX_LIVES, PRICES } from "../config";
-import { useApp } from "../state/AppContext";
-import { hasUnlimitedLives } from "../state/selectors";
+// Pazar: puanla can yenileme ve 2 kat puan. Pazar büyüdükçe fiyatlar düşer.
+import HeartTimer from "../../components/HeartTimer";
+import { Button, Group, Row } from "../../components/ui";
+import { FEATURES, MAX_LIVES, PRICES } from "../../config";
+import { levelOf, marketPrice } from "../../data/village";
+import { useApp } from "../../state/AppContext";
+import { hasUnlimitedLives } from "../../state/selectors";
 
 const ActivePill = () => <span className="pill pill-mint">Aktif</span>;
 
-export default function StoreScreen() {
+export default function MarketPanel() {
   const { state, actions } = useApp();
-  const { xp, lives, isPro, xpBoost } = state;
+  const { xp, lives, isPro, xpBoost, village } = state;
   const unlimited = hasUnlimitedLives(state);
+  const heartsPrice = marketPrice(PRICES.heartsRefill, village);
+  const boostPrice = marketPrice(PRICES.xpBoost, village);
+  const discounted = levelOf(village, "market") > 1;
 
   const heartsDesc = unlimited ? (
     "Pro'dasın, canların zaten sınırsız."
@@ -24,22 +27,16 @@ export default function StoreScreen() {
   );
 
   return (
-    <div className="screen">
-      <div className="balance">
-        <Icon name="star" size={22} filled />
-        <strong>{xp}</strong>
-        <span>puanın var</span>
-      </div>
-
-      <Group title="Canlar">
+    <>
+      <Group title="Canlar" hint={discounted ? "Pazar seviyen sayesinde indirimli fiyatlar." : "Pazarı yükseltirsen fiyatlar düşer."}>
         <Row icon="heart" tone="coral" title="Canları yenile" desc={heartsDesc}>
           <Button
             size="sm"
             variant="secondary"
-            disabled={unlimited || lives >= MAX_LIVES || xp < PRICES.heartsRefill}
+            disabled={unlimited || lives >= MAX_LIVES || xp < heartsPrice}
             onClick={actions.buyHearts}
           >
-            {PRICES.heartsRefill} puan
+            {heartsPrice} puan
           </Button>
         </Row>
         {FEATURES.pro && (
@@ -69,12 +66,12 @@ export default function StoreScreen() {
           {xpBoost ? (
             <ActivePill />
           ) : (
-            <Button size="sm" variant="secondary" disabled={xp < PRICES.xpBoost} onClick={actions.buyBoost}>
-              {PRICES.xpBoost} puan
+            <Button size="sm" variant="secondary" disabled={xp < boostPrice} onClick={actions.buyBoost}>
+              {boostPrice} puan
             </Button>
           )}
         </Row>
       </Group>
-    </div>
+    </>
   );
 }

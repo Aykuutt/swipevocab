@@ -12,7 +12,7 @@ import { currentUnitIndex, hasUnlimitedLives } from "../../state/selectors";
 import PathMap from "./PathMap";
 
 export default function PathScreen() {
-  const { state, units, words, wordsById, actions, goTo } = useApp();
+  const { state, units, words, wordsById, actions, openVillage } = useApp();
   const [lesson, setLesson] = useState(null); // { unit }
   const [finished, setFinished] = useState(null); // { unit, next, firstTime }
   const [run, setRun] = useState(0);
@@ -83,8 +83,8 @@ export default function PathScreen() {
           <p>
             Canların bitti. Bir sonraki can <HeartTimer className="inline" /> sonra gelecek.
           </p>
-          <Button size="sm" variant="secondary" onClick={() => goTo("store")}>
-            Mağaza
+          <Button size="sm" variant="secondary" onClick={() => openVillage("market")}>
+            Pazar
           </Button>
         </div>
       )}

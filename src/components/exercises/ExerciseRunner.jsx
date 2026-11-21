@@ -2,6 +2,7 @@
 // eklenir; hepsi doğru bilinince `onComplete` çağrılır.
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FEATURES, PRICES } from "../../config";
+import { marketPrice } from "../../data/village";
 import { useValueDelta } from "../../hooks/useValueDelta";
 import { useApp } from "../../state/AppContext";
 import { hasUnlimitedLives } from "../../state/selectors";
@@ -15,8 +16,9 @@ import ListenExercise from "./ListenExercise";
 import MatchExercise from "./MatchExercise";
 
 function OutOfHearts({ onExit }) {
-  const { state, actions, goTo } = useApp();
-  const canBuy = state.xp >= PRICES.heartsRefill;
+  const { state, actions, openVillage } = useApp();
+  const price = marketPrice(PRICES.heartsRefill, state.village);
+  const canBuy = state.xp >= price;
   return (
     <EmptyState
       mascot="sad"
@@ -24,7 +26,7 @@ function OutOfHearts({ onExit }) {
       actions={
         <>
           <Button block disabled={!canBuy} onClick={actions.buyHearts}>
-            {PRICES.heartsRefill} puanla canları yenile
+            {price} puanla canları yenile
           </Button>
           {FEATURES.pro && (
             <Button block variant="pro" icon="crown" onClick={() => actions.setPro(true)}>
@@ -41,7 +43,7 @@ function OutOfHearts({ onExit }) {
         Bir sonraki can <HeartTimer className="inline" /> sonra gelecek.{" "}
         {canBuy
           ? "Beklemek istemezsen puanınla yenileyebilirsin."
-          : `Puanınla yenilemek için ${PRICES.heartsRefill} puan gerekiyor, şu an ${state.xp} puanın var.`}
+          : `Puanınla yenilemek için ${price} puan gerekiyor, şu an ${state.xp} puanın var.`}
       </p>
       <p className="empty-link-row">
         <button
@@ -49,10 +51,10 @@ function OutOfHearts({ onExit }) {
           className="link-btn"
           onClick={() => {
             onExit();
-            goTo("store");
+            openVillage("market");
           }}
         >
-          Mağazaya git
+          Pazara git
         </button>
       </p>
     </EmptyState>

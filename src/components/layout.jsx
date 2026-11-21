@@ -1,6 +1,7 @@
 // Uygulama iskeleti: arka plan, üst bilgi çubuğu, alt sekmeler, açılış ekranı.
 import { useEffect, useState } from "react";
 import { MAX_LIVES } from "../config";
+import { pendingHarvests } from "../data/village";
 import { useValueDelta } from "../hooks/useValueDelta";
 import { NO_VOICE_EVENT } from "../lib/speech";
 import { useApp, useLanguage } from "../state/AppContext";
@@ -64,12 +65,13 @@ const TABS = [
   { id: "learn", label: "Öğren", icon: "learn" },
   { id: "path", label: "Yol", icon: "path" },
   { id: "game", label: "Oyun", icon: "game" },
-  { id: "store", label: "Mağaza", icon: "store" },
+  { id: "village", label: "Köy", icon: "home" },
   { id: "profile", label: "Profil", icon: "user" },
 ];
 
 export function TabBar() {
-  const { tab, setTab, setProfileView } = useApp();
+  const { tab, setTab, setProfileView, state } = useApp();
+  const harvestReady = pendingHarvests(state).length > 0;
   return (
     <nav className="tabbar" aria-label="Ana menü">
       {TABS.map((t) => (
@@ -84,7 +86,10 @@ export function TabBar() {
             setTab(t.id);
           }}
         >
-          <Icon name={t.icon} size={22} />
+          <span className="tab-icon">
+            <Icon name={t.icon} size={22} />
+            {t.id === "village" && harvestReady && <i className="tab-dot" aria-label="Hasat bekliyor" />}
+          </span>
           <span>{t.label}</span>
         </button>
       ))}

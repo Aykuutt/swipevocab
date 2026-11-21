@@ -15,7 +15,7 @@ export function badgeValues(state) {
   const learned = [state.knownIds.length, ...Object.values(state.languages || {}).map((l) => l.knownIds?.length ?? 0)];
   return {
     streak: currentStreak(state),
-    xp: state.xp,
+    xp: state.xpTotal ?? state.xp,
     words: state.knownIds.length,
     units: state.completedUnits.length,
     languages: learned.filter((n) => n > 0).length,
