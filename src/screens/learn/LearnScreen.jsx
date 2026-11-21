@@ -185,7 +185,9 @@ function ReinforcePhase() {
   }, [open]);
 
   return (
-    <div className="screen screen-center">
+    <div className="screen screen-learn">
+      <TodayPanel />
+      <div className="learn-rest">
       <EmptyState
         mascot="think"
         title="Pekiştirme zamanı"
@@ -200,6 +202,7 @@ function ReinforcePhase() {
           karışacak.
         </p>
       </EmptyState>
+      </div>
       {open && (
         <Overlay label="Pekiştirme soruları">
           <ExerciseRunner exercises={lesson} onComplete={actions.finishReinforce} onExit={() => setOpen(false)} />
@@ -217,7 +220,9 @@ function DonePhase() {
   const canRaiseGoal = !FEATURES.pro && limit < Math.max(...DAILY_GOAL_OPTIONS);
 
   return (
-    <div className="screen screen-center">
+    <div className="screen screen-learn">
+      <TodayPanel />
+      <div className="learn-rest">
       <EmptyState
         celebrate
         mascot="cheer"
@@ -274,6 +279,7 @@ function DonePhase() {
           </p>
         )}
       </EmptyState>
+      </div>
     </div>
   );
 }

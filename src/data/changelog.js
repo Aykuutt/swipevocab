@@ -2,6 +2,10 @@
 // Yeni sürüm yayınlarken buraya kısa, kullanıcının anlayacağı maddeler ekle. config.js'teki APP_VERSION ile aynı sürüm.
 export const CHANGELOG = [
   {
+    version: "0.21.2",
+    items: ["Günün kartları bitince de Öğren ekranının üstündeki günlük hedef ve seri kutusu yerinde kalıyor."],
+  },
+  {
     version: "0.21.1",
     items: ["Yeni gelenlere yanlışlıkla çıkan \"Uygulama güncellendi\" kartı kaldırıldı."],
   },
