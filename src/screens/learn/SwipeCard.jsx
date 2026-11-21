@@ -50,7 +50,7 @@ function CardDecor({ topic }) {
   );
 }
 
-export default function SwipeCard({ word, isReview, isTop, exitDir, flipToken = 0, onDecide }) {
+export default function SwipeCard({ word, isReview, isTop, exitDir, flipToken = 0, onDecide, onFlip }) {
   const [drag, setDrag] = useState({ x: 0, y: 0, active: false });
   const [leaving, setLeaving] = useState(null);
   const [flipped, setFlipped] = useState(false);
@@ -77,6 +77,11 @@ export default function SwipeCard({ word, isReview, isTop, exitDir, flipToken = 
     lastFlipToken.current = flipToken;
     if (isTop) setFlipped((f) => !f);
   }, [flipToken, isTop]);
+
+  // Tanıtım: kart ilk kez çevrilince haber ver.
+  useEffect(() => {
+    if (flipped && isTop) onFlip?.();
+  }, [flipped, isTop, onFlip]);
 
   const onPointerDown = (e) => {
     if (!isTop || leaving) return;

@@ -345,6 +345,7 @@ export function AppProvider({ children }) {
       },
       /** Köy turu bitti ya da geçildi (bir daha kendiliğinden açılmaz). */
       finishVillageTour: () => dispatch({ type: "VILLAGE_TOUR_DONE" }),
+      finishLearnCoach: () => dispatch({ type: "LEARN_COACH_DONE" }),
       /** Kelime defterinden: bu kelimeyi yarınki kartlarda tekrar sor. */
       reviewAgain: (id) => dispatch({ type: "REVIEW_AGAIN", id }),
       /** Haftalık büyük siparişi teslim eder. */

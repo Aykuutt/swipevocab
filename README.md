@@ -49,6 +49,9 @@ npm run check    # üçü birden; GitHub Actions her gönderimde bunları çalı
 - **Arkadaşlar:** Profil → Arkadaşlarım. Hesabı olan herkesin 6 karakterlik arkadaş kodu var; kodla istek gönderilir, kabul
   edilince arkadaş olunur. Arkadaşın köyü salt görüntüleme olarak gezilir ve günde bir beğeni bırakılır (puan vermez).
   Arkadaşa yalnızca ad, köy haritası, köy seviyesi, seri ve dil görünür. Sunucu: supabase/friends.sql.
+- **İlk giriş tanıtımı:** Hiç puan kazanmamış yeni kullanıcıya Öğren ekranında bir kez Dilbaz'la uygulamalı tanıtım
+  (src/screens/learn/LearnCoach.jsx): kartı çevirir, gerçekten kaydırır, sonra günlük hedef halkası ve alt menü gösterilir.
+  Görülünce state.learnCoach = true.
 - **Haftalık lig ve davet:** Arkadaşlarım sayfasında bu takvim haftasında (Pazartesi başlangıçlı) kazanılan puanla
   sıralama. Lig puanı yalnızca öğrenmeden gelir (xpTotal farkı), harcamak düşürmez. Davet bağlantısı `?davet=KOD`:
   bağlantıyla gelen yeni hesap (son 3 gün) davet edenle doğrudan arkadaş olur, eski hesapsa istek gider.

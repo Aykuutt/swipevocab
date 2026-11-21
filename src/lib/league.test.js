@@ -43,4 +43,12 @@ describe("arkadaş ligi", () => {
     expect(buyBlock({ xp: 0, village: v, friendsCount: 2 }, "friendarch")).toBe("friends");
     expect(buyBlock({ xp: 0, village: v, friendsCount: 3 }, "friendarch")).toBeNull();
   });
+
+  it("ilk giriş tanıtımı bir kez görülür ve saklanır", () => {
+    expect(initialState.learnCoach).toBe(false);
+    const s = reducer(initialState, { type: "LEARN_COACH_DONE" });
+    expect(s.learnCoach).toBe(true);
+    expect(reducer(s, { type: "LEARN_COACH_DONE" })).toBe(s);
+    expect(hydrate(s).learnCoach).toBe(true);
+  });
 });

@@ -2,6 +2,10 @@
 // Yeni sürüm yayınlarken buraya kısa, kullanıcının anlayacağı maddeler ekle. config.js'teki APP_VERSION ile aynı sürüm.
 export const CHANGELOG = [
   {
+    version: "0.21.0",
+    items: ["Yeni gelenlere Dilbaz ilk kartta uygulamayı adım adım gösteriyor: dokun, kaydır, hedefini gör."],
+  },
+  {
     version: "0.20.0",
     items: ["Arkadaşlarla haftalık lig: bu hafta en çok puanı kim toplayacak? Her Pazartesi sıfırlanır.", "Davet bağlantısı: paylaş, bağlantıyla yeni gelen arkadaşınla otomatik arkadaş olun.", "Köye ücretsiz dostluk süsleri: 1 arkadaşla Dostluk ağacı, 3 arkadaşla Dostluk kemeri."],
   },

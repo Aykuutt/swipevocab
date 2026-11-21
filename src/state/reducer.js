@@ -86,6 +86,7 @@ export const initialState = {
   top3Finishes: 0,
   records: {}, // oyun rekorları: "timed:<dil>" -> en yüksek skor
   league: null, // arkadaş ligi: { week: "2026-W47", base: haftanın başındaki xpTotal }
+  learnCoach: false, // ilk girişteki kart tanıtımı görüldü mü
   friendsCount: 0, // arkadaş sayısı (dostluk süslerinin kilidi için; sunucudan gelir)
   xpTotal: 0, // ömür boyu kazanılan puan (harcamak bunu düşürmez; başarımlar bunu kullanır)
   counters: { cards: 0, correct: 0, learned: 0, units: 0 }, // ömür boyu sayaçlar (köylü siparişleri bunlarla ölçülür)
@@ -494,6 +495,9 @@ function baseReducer(state, action) {
 
     case "SET_FRIENDS_COUNT":
       return state.friendsCount === action.count ? state : { ...state, friendsCount: action.count };
+
+    case "LEARN_COACH_DONE":
+      return state.learnCoach ? state : { ...state, learnCoach: true };
 
     case "VILLAGE_TOUR_DONE":
       return state.village.tour ? state : { ...state, village: { ...state.village, tour: true } };

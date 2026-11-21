@@ -2,7 +2,7 @@
 //   swipe     -> kart destesi
 //   reinforce -> işaretlenen kelimeler için pekiştirme soruları
 //   done/limit-> günün özeti
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import AccountPrompt from "../../components/AccountPrompt";
 import ExerciseRunner from "../../components/exercises/ExerciseRunner";
 import Icon from "../../components/Icon";
@@ -11,6 +11,7 @@ import { DAILY_GOAL_OPTIONS, FEATURES } from "../../config";
 import { reinforceLesson } from "../../lib/exercises";
 import { useApp } from "../../state/AppContext";
 import { currentStreak, dailyCardLimit, weekStrip } from "../../state/selectors";
+import LearnCoach from "./LearnCoach";
 import SwipeCard from "./SwipeCard";
 
 /* ---------- Bugünkü durum paneli ---------- */
@@ -77,7 +78,7 @@ const DECK_BUTTONS = [
 ];
 const KEY_DIRS = { ArrowLeft: "discard", ArrowRight: "keep", ArrowUp: "unsure" };
 
-function Deck() {
+function Deck({ onFlip, onSwipe }) {
   const { state, wordsById, actions } = useApp();
   const [exitDir, setExitDir] = useState(null);
   const [flipToken, setFlipToken] = useState(0);
@@ -93,6 +94,7 @@ function Deck() {
 
   const onDecide = (dir) => {
     actions.swipe(dir);
+    onSwipe?.(dir);
     busy.current = false;
     setExitDir(null);
   };
@@ -125,6 +127,7 @@ function Deck() {
               exitDir={i === 0 ? exitDir : null}
               flipToken={flipToken}
               onDecide={onDecide}
+              onFlip={i === 0 ? onFlip : undefined}
             />
           ))
           .reverse()}
@@ -151,10 +154,21 @@ function Deck() {
 
 /* ---------- Aşamalar ---------- */
 function SwipePhase() {
+  const { state, actions } = useApp();
+  // Hiç puan kazanmamış yeni kullanıcıya bir kez; ilk kaydırmada puan gelse de tanıtım sürer.
+  const [coach, setCoach] = useState(() => (!state.learnCoach && state.xpTotal === 0 ? { step: 0, dir: null } : null));
+  const finish = () => {
+    setCoach(null);
+    actions.finishLearnCoach();
+  };
+  const onFlip = useCallback(() => setCoach((c) => (c?.step === 1 ? { ...c, step: 2 } : c)), []);
+  const onSwipe = useCallback((dir) => setCoach((c) => (c && c.step <= 2 ? { step: 3, dir } : c)), []);
+
   return (
     <div className="screen screen-learn">
       <TodayPanel />
-      <Deck />
+      <Deck onFlip={coach ? onFlip : undefined} onSwipe={coach ? onSwipe : undefined} />
+      {coach && <LearnCoach step={coach.step} lastDir={coach.dir} onNext={() => setCoach((c) => ({ ...c, step: c.step + 1 }))} onDone={finish} />}
     </div>
   );
 }
