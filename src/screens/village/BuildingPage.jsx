@@ -1,6 +1,8 @@
 // Bir binanın içi: seviye, etkisi, hasat, yükseltme (ve Pazar'da dükkân).
 import Icon from "../../components/Icon";
 import { Button, Group, Overlay, Row } from "../../components/ui";
+import { useState } from "react";
+import Notebook from "../notebook/Notebook";
 import {
   MAX_LEVEL,
   TYPES,
@@ -32,6 +34,7 @@ export function effectText(type, level) {
 export default function BuildingPage({ id, onClose }) {
   const { state, actions, goTo } = useApp();
   const tod = useTimeOfDay();
+  const [notebookOpen, setNotebookOpen] = useState(false);
   const item = itemById(state.village, id);
   if (!item) return null; // satıldıysa sayfa boş kalmasın
 
@@ -75,6 +78,16 @@ export default function BuildingPage({ id, onClose }) {
           <span>{`Seviye ${level} / ${MAX_LEVEL}`}</span>
         </div>
         <p className="building-role">{t.role}</p>
+
+        {item.type === "library" && (
+          <Group title="Kelime defteri">
+            <Row icon="book" tone="sky" title="Kelime defterim" desc="Mira öğrendiğin kelimeleri raflarda saklıyor. Ara, dinle, tekrar sor.">
+              <Button size="sm" onClick={() => setNotebookOpen(true)}>
+                Aç
+              </Button>
+            </Row>
+          </Group>
+        )}
 
         <Group title="Etki">
           <Row icon="check" tone="mint" title="Şu an" desc={effectText(item.type, level)} />
@@ -125,6 +138,19 @@ export default function BuildingPage({ id, onClose }) {
 
         {item.type === "market" && <MarketPanel />}
       </div>
+      {notebookOpen && (
+        <Overlay label="Kelime defterim">
+          <div className="screen">
+            <div className="settings-head">
+              <button type="button" className="icon-btn" aria-label="Kütüphaneye dön" onClick={() => setNotebookOpen(false)}>
+                <Icon name="chevronLeft" size={22} />
+              </button>
+              <h1 className="screen-title">Kelime defterim</h1>
+            </div>
+            <Notebook library />
+          </div>
+        </Overlay>
+      )}
     </Overlay>
   );
 }

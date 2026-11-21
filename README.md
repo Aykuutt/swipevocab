@@ -41,6 +41,10 @@ npm run check    # üçü birden; GitHub Actions her gönderimde bunları çalı
   tür günün tarihinden seçilir, hedef köy seviyesi ve öğrenilen kelimeyle büyür. İlerleme ömür boyu sayaçlardan
   (state.counters) ölçülür. Teslim puan ve arkadaşlık getirir. Ayrıca Dilbaz her hafta tek bir büyük sipariş verir
   (haftalık hedef, büyük ödül; tür haftaya göre döner, bitmeyen hafta sonunda yenilenir).
+- **Kelime defteri:** Profil'den ya da köyde Kütüphane'den açılır. Öğrenilen ve öğrenilmekte olan kelimeler ustalık
+  noktalarıyla listelenir; arama (Türkçesiyle de), filtre (öğreniyorum, tekrarı gelen, ustalaştım), dinleme, örnek cümle
+  ve "tekrar sor" (kelimeyi yarınki kartlara ekler). Puan vermez. Kütüphane'de Mira öğrenilen dilde karşılar; ustalaşılan
+  kelime sayısıyla (25/50/100/200) raflar dolar. Mantık src/lib/notebook.js'te.
 - **Yol:** üniteler konuya göre değişen bir manzara (ev, bulut, filiz, bina, yıldız...) içinde şeritli bir yolda.
 - **Dört dil:** kurulumda ve Ayarlar'da İngilizce, Almanca, İspanyolca ya da Fransızca seçilir. Bilinen
   kelimeler, üniteler ve günlük kartlar her dilde ayrı; XP, seri ve lig ortaktır. Okuma sesi, ses

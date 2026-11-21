@@ -316,6 +316,8 @@ export function AppProvider({ children }) {
         mascotSay(`${getVillager(id).name}: Teşekkürler! +${gained} puan`, { mood: "cheer" });
         return gained;
       },
+      /** Kelime defterinden: bu kelimeyi yarınki kartlarda tekrar sor. */
+      reviewAgain: (id) => dispatch({ type: "REVIEW_AGAIN", id }),
       /** Haftalık büyük siparişi teslim eder. */
       claimWeekly() {
         const w = stateRef.current.village.weekly;

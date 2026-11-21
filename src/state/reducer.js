@@ -328,6 +328,12 @@ function baseReducer(state, action) {
       return checkSwipePhase(s);
     }
 
+    case "REVIEW_AGAIN": {
+      // Kelime defterinden "tekrar sor": bilinen kelime yarınki kartlara tekrar olarak gelir (takvim baştan başlar).
+      if (!state.knownIds.includes(action.id)) return state;
+      return { ...state, schedule: { ...state.schedule, [action.id]: { stage: 0, due: state.day + 1 } } };
+    }
+
     case "REINFORCE_DONE": {
       const learned = state.learningIds.filter((id) => !state.knownIds.includes(id));
       const schedule = { ...state.schedule };
