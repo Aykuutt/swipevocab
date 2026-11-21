@@ -32,7 +32,8 @@ import {
   upgradeCost,
 } from "../data/village";
 import { claimReward, makeOrder, makeWeekly, needsNewOrder, needsNewWeekly, orderDone } from "../data/orders";
-import { availableVillagers, getVillager, isAvailable, talkReward, talkState } from "../data/villagers";
+import { availableVillagers, getVillager, heartsFor, isAvailable, talkReward, talkState } from "../data/villagers";
+import { storyChapter } from "../data/stories";
 import { leagueRank } from "../lib/league";
 import { unique } from "../lib/random";
 import { weekOfDay } from "../lib/time";
@@ -535,7 +536,18 @@ function baseReducer(state, action) {
         dailyXp: state.dailyXp + gained,
         village: {
           ...state.village,
-          villagers: { ...state.village.villagers, [villager.id]: { talks: cur.talks + 1, last: state.day } },
+          villagers: {
+            ...state.village.villagers,
+            [villager.id]: {
+              ...cur,
+              talks: cur.talks + 1,
+              last: state.day,
+              // Hikâye bölümü oynandıysa bir sonraki bölüme geç.
+              ...(action.story && storyChapter(state.village, villager.id, heartsFor(cur.talks)) !== null
+                ? { story: (cur.story ?? 0) + 1 }
+                : {}),
+            },
+          },
         },
       };
     }

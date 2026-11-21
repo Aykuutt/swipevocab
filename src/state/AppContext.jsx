@@ -296,11 +296,11 @@ export function AppProvider({ children }) {
         return true;
       },
       /** Köylüyle günlük sohbeti tamamlar: puan ve arkadaşlık. Verilen puanı döndürür (bugün zaten konuşulduysa 0). */
-      villagerTalk(id) {
+      villagerTalk(id, story = false) {
         const s = stateRef.current;
         if (!canTalkToday(s, id)) return 0;
         const gained = talkReward(talkState(s.village, id).talks);
-        dispatch({ type: "VILLAGER_TALK", id });
+        dispatch({ type: "VILLAGER_TALK", id, story });
         sfx("levelup");
         mascotSay(`${getVillager(id).name} ile sohbet güzeldi! +${gained} puan`, { mood: "cheer" });
         return gained;

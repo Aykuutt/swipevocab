@@ -6,6 +6,7 @@ import Icon from "../../components/Icon";
 import { Button, Overlay } from "../../components/ui";
 import { getLanguage } from "../../data/languages";
 import { dialogueFor, getVillager, heartsFor, pickTalkWord, talkReward, talkState } from "../../data/villagers";
+import { STORY_AT, nextStoryAt, storyChapter, storyFor } from "../../data/stories";
 import { fillBlankExercise } from "../../lib/exercises";
 import { shuffle } from "../../lib/random";
 import { speak, stopSpeaking } from "../../lib/speech";
@@ -44,7 +45,12 @@ export default function VillagerTalk({ id, onClose }) {
 
   // Sohbet açılırken bir kez belirlenir: ödül verilince sayaç değişse de ekran değişmesin.
   const [init] = useState(() => ({ talks: cur.talks, practice: cur.last === state.day }));
-  const [dialogue] = useState(() => dialogueFor(state.language, id, cur.talks));
+  // Açılmış bir hikâye bölümü varsa bugünkü sohbet o olur (alıştırma sohbetinde değil).
+  const [dialogue] = useState(() => {
+    const chapter = cur.last === state.day ? null : storyChapter(state.village, id, heartsFor(cur.talks));
+    return chapter === null ? dialogueFor(state.language, id, cur.talks) : storyFor(state.language, id, chapter);
+  });
+  const story = dialogue.chapter !== undefined;
   const [options] = useState(() => shuffle(dialogue.options));
   const [wordEx] = useState(() => {
     const w = pickTalkWord(state, words, villager);
@@ -96,7 +102,7 @@ export default function VillagerTalk({ id, onClose }) {
   };
 
   const finish = () => {
-    if (!practice) actions.villagerTalk(id);
+    if (!practice) actions.villagerTalk(id, story);
     setStep("done");
   };
 
@@ -129,6 +135,15 @@ export default function VillagerTalk({ id, onClose }) {
 
         <div className="vtalk-log" ref={log}>
           {practice && <p className="vtalk-note">Bugün zaten konuştunuz. Bu tekrar sohbeti puan vermez, alıştırma olarak kalır.</p>}
+          {story && (
+            <div className="vtalk-story">
+              <span>
+                <Icon name="book" size={14} /> Hikâye · Bölüm {dialogue.chapter + 1}/{STORY_AT.length}
+              </span>
+              <strong>{dialogue.title}</strong>
+              <p>{dialogue.intro}</p>
+            </div>
+          )}
 
           <Bubble from="npc" text={dialogue.say} tr={dialogue.tr} onSpeak={() => speak(dialogue.say)} />
 
@@ -160,6 +175,18 @@ export default function VillagerTalk({ id, onClose }) {
                 </p>
               )}
               {newHeart && <p className="vtalk-heart-note">{villager.name} ile arkadaşlığın güçlendi: {hearts}. kalp!</p>}
+              {story && !practice && (
+                <p className="vtalk-story-note">
+                  {dialogue.chapter + 1 < STORY_AT.length
+                    ? `"${dialogue.title}" bölümü bitti. Sonraki bölüm ${STORY_AT[dialogue.chapter + 1]} kalpte açılır.`
+                    : `${villager.name}'in hikâyesini bitirdin. Ne güzel bir arkadaşlık!`}
+                </p>
+              )}
+              {!story && !practice && nextStoryAt(state.village, id) !== null && (
+                <p className="vtalk-story-note">
+                  {villager.name}'in hikâyesinin sonraki bölümü {nextStoryAt(state.village, id)} kalpte açılır.
+                </p>
+              )}
               <p className="vtalk-words-title">Bu sohbetten kelimeler</p>
               <ul className="vtalk-words">
                 {dialogue.words.map(([w, tr]) => (

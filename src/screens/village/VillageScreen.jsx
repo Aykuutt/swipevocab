@@ -26,7 +26,8 @@ import { useTimeOfDay } from "../../hooks/useTimeOfDay";
 import { mascotSay } from "../../lib/mascot";
 import { useApp } from "../../state/AppContext";
 import { claimableOrders, weeklyClaimable } from "../../data/orders";
-import { availableVillagers, talkState } from "../../data/villagers";
+import { availableVillagers, heartsFor, talkState } from "../../data/villagers";
+import { storyChapter } from "../../data/stories";
 import BuildingPage, { effectText } from "./BuildingPage";
 import { ItemPreview } from "./isoArt";
 import OrdersSheet from "./OrdersSheet";
@@ -69,7 +70,11 @@ export default function VillageScreen() {
   const claimCount = claimable.size + (weeklyClaimable(state) ? 1 : 0);
   const alerts = new Map(
     availableVillagers(village).flatMap((v) =>
-      claimable.has(v.id) ? [[v.id, "order"]] : talkState(village, v.id).last !== state.day ? [[v.id, "talk"]] : []
+      claimable.has(v.id)
+        ? [[v.id, "order"]]
+        : talkState(village, v.id).last !== state.day
+          ? [[v.id, storyChapter(village, v.id, heartsFor(talkState(village, v.id).talks)) !== null ? "story" : "talk"]]
+          : []
     )
   );
 

@@ -58,6 +58,10 @@ function Hat({ id }) {
   );
 }
 
+// Balon renkleri: sohbet (beyaz), teslim edilecek sipariş (turuncu), yeni hikâye bölümü (mor).
+const ALERT_FILL = { talk: "#ffffff", order: "#ffb84d", story: "#6a5bf5" };
+const ALERT_STROKE = { talk: "#6a5bf5", order: "#b97f1a", story: "#4b3cc9" };
+
 export default function VillagerArt({ id, alert = false }) {
   const c = LOOK[id] ?? LOOK.merchant;
   return (
@@ -86,10 +90,12 @@ export default function VillagerArt({ id, alert = false }) {
       {alert && (
         <g transform="translate(0 -72)">
           <g className="iso-alert">
-            <rect x="-15" y="-11" width="30" height="21" rx="10" fill={alert === "order" ? "#ffb84d" : "#ffffff"} stroke={alert === "order" ? "#b97f1a" : "#6a5bf5"} strokeWidth="1.8" />
-            <polygon points="-4,10 4,10 0,17" fill={alert === "order" ? "#ffb84d" : "#ffffff"} stroke={alert === "order" ? "#b97f1a" : "#6a5bf5"} strokeWidth="1.8" strokeLinejoin="round" />
-            <rect x="-5" y="9" width="10" height="3" fill={alert === "order" ? "#ffb84d" : "#ffffff"} />
-            {alert === "order" ? (
+            <rect x="-15" y="-11" width="30" height="21" rx="10" fill={ALERT_FILL[alert]} stroke={ALERT_STROKE[alert]} strokeWidth="1.8" />
+            <polygon points="-4,10 4,10 0,17" fill={ALERT_FILL[alert]} stroke={ALERT_STROKE[alert]} strokeWidth="1.8" strokeLinejoin="round" />
+            <rect x="-5" y="9" width="10" height="3" fill={ALERT_FILL[alert]} />
+            {alert === "story" ? (
+              <polygon points="0,-7 2.1,-2.4 7,-2 3.3,1.2 4.4,6 0,3.5 -4.4,6 -3.3,1.2 -7,-2 -2.1,-2.4" fill="#ffd166" stroke="#ffffff" strokeWidth="0.8" />
+            ) : alert === "order" ? (
               <text x="0" y="5.5" textAnchor="middle" fontSize="16" fontWeight="900" fill="#3a2400">
                 !
               </text>

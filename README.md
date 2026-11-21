@@ -36,6 +36,8 @@ npm run check    # üçü birden; GitHub Actions her gönderimde bunları çalı
 - **Köylüler:** Pazar, Fırın, Bahçe, Han ve Kütüphane'nin köylüleri (Tomas, Lena, Oskar, Rafael, Mira) binaları kurulunca köyde belirir. Dokununca
   öğrenilen dilde kısa bir sohbet açılır (uygun cevabı seç), ardından o konudan bir kelime sorulur. Günde bir sohbet
   puan ve arkadaşlık (kalp) getirir. Sohbetler hazır yazılı, her dil için src/data/villagers.js'te.
+  Her köylünün 3 bölümlük bir hikâyesi var (src/data/stories.js): bölümler 2, 3 ve 5 kalpte açılır, o günün sohbetinin
+  yerine geçer (haritada mor yıldızlı balon) ve ilerledikçe cümleler zorlaşır. Hikâye ekstra puan vermez.
 - **Siparişler (sonsuz görev sistemi):** her köylü her gün öğrenmeyle ilgili bir şey ister (soru çöz, kart kaydır,
   kelime öğren, ünite bitir). Siparişler elle yazılmaz, src/data/orders.js'teki kurallardan kendiliğinden üretilir:
   tür günün tarihinden seçilir, hedef köy seviyesi ve öğrenilen kelimeyle büyür. İlerleme ömür boyu sayaçlardan
