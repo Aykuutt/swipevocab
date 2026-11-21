@@ -116,6 +116,9 @@ export const TYPES = {
   hedge: { id: "hedge", kind: "deco", name: "Çit", short: "Çit", w: 1, d: 1, max: 80, price: 15, shop: "decor" },
   bench: { id: "bench", kind: "deco", name: "Bank", short: "Bank", w: 1, d: 1, max: 40, price: 50, shop: "decor" },
   lamp: { id: "lamp", kind: "deco", name: "Sokak lambası", short: "Lamba", w: 1, d: 1, max: 40, price: 60, shop: "decor" },
+  // Dostluk süsleri: puanla değil arkadaşla açılır (davet ödülü), ücretsiz.
+  friendtree: { id: "friendtree", kind: "deco", name: "Dostluk ağacı", short: "Dostluk", w: 1, d: 1, max: 1, price: 0, needFriends: 1, shop: "decor" },
+  friendarch: { id: "friendarch", kind: "deco", name: "Dostluk kemeri", short: "Kemer", w: 1, d: 1, max: 1, price: 0, needFriends: 3, shop: "decor" },
   road: { id: "road", kind: "road", name: "Taş yol", short: "Yol", w: 1, d: 1, max: 300, price: 5, shop: "roads" },
 };
 
@@ -268,6 +271,7 @@ export function buyBlock(state, type) {
   if (!t?.shop) return "none";
   if (itemsOfType(state.village, type).length >= t.max) return "max";
   if (t.needHome && homeLevel(state.village) < t.needHome) return "home";
+  if (t.needFriends && (state.friendsCount ?? 0) < t.needFriends) return "friends";
   if (state.xp < buyPrice(type, state.village)) return "xp";
   return null;
 }

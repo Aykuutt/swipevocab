@@ -2,11 +2,11 @@
 // Uygulama açıkken bir dakikada bir ve uygulamaya geri dönülünce yenilenir.
 import { useCallback, useEffect, useState } from "react";
 import { FEATURES } from "../config";
-import { countIncoming } from "../lib/friends";
+import { countFriends, countIncoming } from "../lib/friends";
 
 const EVERY_MS = 60_000;
 
-export function useFriendRequests(state, active) {
+export function useFriendRequests(state, active, dispatch) {
   const [count, setCount] = useState(0);
   const user = state.user;
   const enabled = FEATURES.friends && active && !!user && !user.guest;
@@ -14,11 +14,13 @@ export function useFriendRequests(state, active) {
   const refresh = useCallback(async () => {
     if (!enabled) return;
     try {
-      setCount(await countIncoming());
+      const [incoming, friends] = await Promise.all([countIncoming(), countFriends()]);
+      setCount(incoming);
+      dispatch({ type: "SET_FRIENDS_COUNT", count: friends });
     } catch {
       // bağlantı yoksa bir sonraki denemede
     }
-  }, [enabled]);
+  }, [enabled, dispatch]);
 
   useEffect(() => {
     if (!enabled) return;

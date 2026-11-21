@@ -29,6 +29,22 @@ export function formatShort(ms) {
   return `${total}sn`;
 }
 
+/** Takvim haftası (Pazartesi başlangıçlı, ISO): "2026-W47". Arkadaş ligi bununla sayılır. */
+export function isoWeekKey(ms) {
+  const d = new Date(ms);
+  const day = (d.getDay() + 6) % 7; // Pazartesi = 0
+  // O haftanın Perşembesi hangi yıldaysa hafta o yılındır; yılın kaçıncı günü / 7 = hafta.
+  const thursday = Date.UTC(d.getFullYear(), d.getMonth(), d.getDate() - day + 3);
+  const year = new Date(thursday).getUTCFullYear();
+  const week = 1 + Math.floor((thursday - Date.UTC(year, 0, 1)) / 86_400_000 / 7);
+  return `${year}-W${String(week).padStart(2, "0")}`;
+}
+
+/** Ligin bitmesine (Pazartesi 00:00) kalan gün sayısı, bugün dahil. */
+export function daysLeftInWeek(ms) {
+  return 7 - ((new Date(ms).getDay() + 6) % 7);
+}
+
 /** Kalan süreyi "2s 15dk", "40dk" ya da "30sn" biçiminde yazar. */
 export function formatCountdown(ms) {
   const total = Math.max(0, Math.ceil(ms / 1000));

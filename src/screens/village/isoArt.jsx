@@ -647,6 +647,43 @@ function Library({ level, lit }) {
   );
 }
 
+
+/* ---------- Dostluk süsleri (davet ödülü) ---------- */
+function FriendTree() {
+  const [cx, cy] = p(0.5, 0.5, 0);
+  // Kalp biçimli pembe taç.
+  const heart = (x, y, s, fill) => (
+    <path d={`M${x} ${y + 9 * s} C${x - 14 * s} ${y - 1 * s} ${x - 9 * s} ${y - 12 * s} ${x} ${y - 5 * s} C${x + 9 * s} ${y - 12 * s} ${x + 14 * s} ${y - 1 * s} ${x} ${y + 9 * s} Z`} fill={fill} />
+  );
+  return (
+    <g>
+      <ellipse cx={cx} cy={cy + 4} rx="17" ry="8" fill="#1c2b14" opacity="0.22" />
+      <rect x={cx - 3} y={cy - 20} width="6" height="22" rx="2" fill="#7a5a40" />
+      {heart(cx, cy - 34, 1.9, "#e0567a")}
+      {heart(cx - 2, cy - 37, 1.35, "#f17c9a")}
+      {heart(cx - 5, cy - 41, 0.6, "#ffc2d1")}
+    </g>
+  );
+}
+
+function FriendArch() {
+  const [cx, cy] = p(0.5, 0.5, 0);
+  const flowers = [-15, -10, -4, 2, 8, 13];
+  return (
+    <g>
+      <ellipse cx={cx} cy={cy + 4} rx="18" ry="7" fill="#1c2b14" opacity="0.2" />
+      <rect x={cx - 17} y={cy - 30} width="4" height="32" rx="1.5" fill="#f4efe4" stroke="#c9c2b4" strokeWidth="0.8" />
+      <rect x={cx + 13} y={cy - 30} width="4" height="32" rx="1.5" fill="#f4efe4" stroke="#c9c2b4" strokeWidth="0.8" />
+      <path d={`M${cx - 15} ${cy - 29} Q${cx} ${cy - 52} ${cx + 15} ${cy - 29}`} fill="none" stroke="#f4efe4" strokeWidth="4" />
+      <path d={`M${cx - 15} ${cy - 29} Q${cx} ${cy - 52} ${cx + 15} ${cy - 29}`} fill="none" stroke="#6aa86a" strokeWidth="2" strokeDasharray="3 3" />
+      {flowers.map((dx, i) => {
+        const y = cy - 29 - 17 * (1 - (dx / 15) ** 2);
+        return <circle key={dx} cx={cx + dx} cy={y} r="2.6" fill={["#f17c9a", "#ffd166", "#ffffff"][i % 3]} />;
+      })}
+    </g>
+  );
+}
+
 /** Taş (haritanın yabani çevresi için). */
 export function Rock() {
   const [cx, cy] = p(0.5, 0.5, 0);
@@ -680,6 +717,10 @@ export function ItemArt({ type, level = 1, lit = false, variant = 0 }) {
       return <Bench />;
     case "lamp":
       return <Lamp lit={lit} />;
+    case "friendtree":
+      return <FriendTree />;
+    case "friendarch":
+      return <FriendArch />;
     case "road":
       return <Road />;
     default:

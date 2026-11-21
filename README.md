@@ -49,6 +49,10 @@ npm run check    # üçü birden; GitHub Actions her gönderimde bunları çalı
 - **Arkadaşlar:** Profil → Arkadaşlarım. Hesabı olan herkesin 6 karakterlik arkadaş kodu var; kodla istek gönderilir, kabul
   edilince arkadaş olunur. Arkadaşın köyü salt görüntüleme olarak gezilir ve günde bir beğeni bırakılır (puan vermez).
   Arkadaşa yalnızca ad, köy haritası, köy seviyesi, seri ve dil görünür. Sunucu: supabase/friends.sql.
+- **Haftalık lig ve davet:** Arkadaşlarım sayfasında bu takvim haftasında (Pazartesi başlangıçlı) kazanılan puanla
+  sıralama. Lig puanı yalnızca öğrenmeden gelir (xpTotal farkı), harcamak düşürmez. Davet bağlantısı `?davet=KOD`:
+  bağlantıyla gelen yeni hesap (son 3 gün) davet edenle doğrudan arkadaş olur, eski hesapsa istek gider.
+  1 arkadaşla Dostluk ağacı, 3 arkadaşla Dostluk kemeri ücretsiz açılır. Sunucu: supabase/league-invite.sql.
 - **Kelime defteri:** Profil'den ya da köyde Kütüphane'den açılır. Öğrenilen ve öğrenilmekte olan kelimeler ustalık
   noktalarıyla listelenir; arama (Türkçesiyle de), filtre (öğreniyorum, tekrarı gelen, ustalaştım), dinleme, örnek cümle
   ve "tekrar sor" (kelimeyi yarınki kartlara ekler). Puan vermez. Kütüphane'de Mira öğrenilen dilde karşılar; ustalaşılan
@@ -131,6 +135,7 @@ supabase/schema.sql          # ilerleme tablosu ve güvenlik kuralları
 supabase/talk.sql            # canlı konuşma: profiller, eşleştirme, görüşmeler, engelleme, şikayet
 supabase/delete-account.sql  # "hesabımı sil": kullanıcı kendi hesabını ve tüm verisini siler
 supabase/friends.sql         # arkadaşlar: köy vitrini, arkadaş kodu, istekler, beğeniler
+supabase/league-invite.sql   # haftalık lig puanı ve davet bağlantısı (friends.sql'den sonra)
 public/gizlilik.html         # gizlilik politikası (Google Play için)
 public/hesap-silme.html      # hesap silme adımları (Google Play için)
 api/livekit-token.js         # Vercel fonksiyonu: canlı konuşma odası için kısa ömürlü anahtar

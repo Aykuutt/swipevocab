@@ -6,6 +6,9 @@ import Icon from "../../components/Icon";
 import { Button, Field, Group, Row } from "../../components/ui";
 import { getLanguage } from "../../data/languages";
 import { loadFriends, removeFriend, respondFriendRequest, sendFriendRequest } from "../../lib/friends";
+import { inviteUrl } from "../../lib/invite";
+import { daysLeftInWeek, isoWeekKey } from "../../lib/time";
+import { leaguePoints } from "../../state/selectors";
 import { useApp } from "../../state/AppContext";
 import FriendVillage from "./FriendVillage";
 
@@ -27,33 +30,61 @@ function dayLabel(day) {
 }
 
 function MyCode({ code }) {
-  const [copied, setCopied] = useState(false);
-  const text = `SwipeVocab'da arkadaş olalım! Arkadaş kodum: ${code}`;
-  const copy = async () => {
+  const [copied, setCopied] = useState("");
+  const link = code ? inviteUrl(code) : "";
+  const text = `SwipeVocab'da birlikte kelime öğrenelim! Bu bağlantıyla katıl, otomatik arkadaş olalım:`;
+  const copy = async (value, what) => {
     try {
-      await navigator.clipboard.writeText(code);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1800);
+      await navigator.clipboard.writeText(value);
+      setCopied(what);
+      setTimeout(() => setCopied(""), 1800);
     } catch {
       // panoya yazılamadıysa kod zaten ekranda
     }
+  };
+  const share = () => {
+    if (navigator.share) navigator.share({ title: "SwipeVocab", text, url: link }).catch(() => {});
+    else copy(`${text} ${link}`, "link");
   };
   return (
     <div className="friend-code">
       <span>Arkadaş kodun</span>
       <strong>{code ?? "······"}</strong>
       <div className="friend-code-actions">
-        <Button size="sm" variant="secondary" disabled={!code} onClick={copy}>
-          {copied ? "Kopyalandı" : "Kopyala"}
+        <Button size="sm" variant="secondary" disabled={!code} onClick={() => copy(code, "code")}>
+          {copied === "code" ? "Kopyalandı" : "Kodu kopyala"}
         </Button>
-        {typeof navigator !== "undefined" && navigator.share && (
-          <Button size="sm" disabled={!code} onClick={() => navigator.share({ text }).catch(() => {})}>
-            Paylaş
-          </Button>
-        )}
+        <Button size="sm" icon="heart" disabled={!code} onClick={share}>
+          {copied === "link" ? "Bağlantı kopyalandı" : "Davet bağlantısı"}
+        </Button>
       </div>
-      <small>Kodu paylaştığın kişi seni ekleyebilir. Kod olmadan kimse seni bulamaz.</small>
+      <small>Davet bağlantısıyla yeni katılan arkadaşınla otomatik arkadaş olursunuz. İkinize de köy için Dostluk ağacı açılır. Kod olmadan kimse seni bulamaz.</small>
     </div>
+  );
+}
+
+/** Arkadaşlarla haftalık lig: bu takvim haftasında (Pazartesi-Pazar) kazanılan puanlar. */
+function League({ friends }) {
+  const { state } = useApp();
+  const now = Date.now();
+  const week = isoWeekKey(now);
+  const rows = [
+    { id: "me", name: state.user?.name || "Sen", points: leaguePoints(state, week), me: true },
+    ...friends.map((f) => ({ id: f.user_id, name: f.display_name, points: f.week_key === week ? f.weekly_points : 0 })),
+  ].sort((a, b) => b.points - a.points || (a.me ? -1 : b.me ? 1 : 0));
+  const left = daysLeftInWeek(now);
+  return (
+    <Group title="Bu haftanın ligi" hint={`Pazartesi sıfırlanır · ${left === 1 ? "bugün son gün" : `${left} gün kaldı`}. Kelime öğrendikçe puan kazanırsın.`}>
+      {rows.map((r, i) => (
+        <li key={r.id} className={`league-row ${r.me ? "is-me" : ""}`}>
+          <span className={`league-rank rank-${i + 1}`}>{i === 0 && r.points > 0 ? <Icon name="crown" size={16} /> : i + 1}</span>
+          <strong>{r.me ? `${r.name} (sen)` : r.name}</strong>
+          <span className="league-points">
+            <Icon name="star" size={13} filled /> {r.points}
+          </span>
+        </li>
+      ))}
+    </Group>
   );
 }
 
@@ -160,6 +191,8 @@ export default function FriendsPage() {
       </Group>
 
       {error && <p className="friend-error">{error}</p>}
+
+      {data && data.friends.length > 0 && <League friends={data.friends} />}
 
       {data?.incoming.length > 0 && (
         <Group title="Gelen istekler">

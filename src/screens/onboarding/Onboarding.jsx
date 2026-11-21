@@ -1,4 +1,5 @@
 // İlk açılış akışı: karşılama -> dil -> amaç -> seviye testi -> hesap.
+import { pendingInvite } from "../../lib/invite";
 import { useMemo, useState } from "react";
 import Feedback from "../../components/exercises/Feedback";
 import { FillBlankExercise, TranslateExercise } from "../../components/exercises/ChoiceExercises";
@@ -160,6 +161,9 @@ export default function Onboarding() {
   if (step === "welcome") {
     return (
       <div className="onboarding">
+        {pendingInvite.get() && (
+          <p className="invite-note">Bir arkadaşın seni davet etti! Hesap açınca otomatik arkadaş olacaksınız.</p>
+        )}
         <Welcome onStart={() => setStep("language")} onHaveAccount={() => setStep("signin")} />
       </div>
     );

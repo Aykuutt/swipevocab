@@ -24,6 +24,9 @@ export const wordPool = (s, words) => {
 };
 
 /** Bugün itibarıyla geçerli seri (kaçırılan gün varsa sıfır). */
+/** Bu takvim haftasında kazanılan puan (arkadaş ligi). */
+export const leaguePoints = (s, week) => (s.league?.week === week ? Math.max(0, (s.xpTotal ?? 0) - s.league.base) : 0);
+
 export function currentStreak(s) {
   if (s.lastCompletedDay === 0) return 0;
   const missed = s.day - s.lastCompletedDay - 1;

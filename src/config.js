@@ -1,7 +1,7 @@
 // Uygulama genelindeki sabitler ve özellik anahtarları.
 
 export const APP_NAME = "SwipeVocab";
-export const APP_VERSION = "0.19.1";
+export const APP_VERSION = "0.20.0";
 
 // Özellik anahtarları: kapalı olanlar arayüzde hiç görünmez.
 export const FEATURES = {

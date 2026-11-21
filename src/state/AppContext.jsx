@@ -13,7 +13,9 @@ import { localCache } from "../lib/progress";
 import { playSfx } from "../lib/sfx";
 import { setPreferredVoice, setSpeechLanguage } from "../lib/speech";
 import { applyTheme } from "../lib/theme";
-import { localDayIndex, msUntilMidnight } from "../lib/time";
+import { isoWeekKey, localDayIndex, msUntilMidnight } from "../lib/time";
+import { acceptInvite } from "../lib/friends";
+import { pendingInvite } from "../lib/invite";
 import { buildUnits } from "../lib/units";
 import { loadWords } from "../lib/words";
 import { initialState, reducer } from "./reducer";
@@ -188,7 +190,27 @@ export function AppProvider({ children }) {
   const flushProgress = useProgressSave(state, inApp, dispatch);
   // Hesaplı kullanıcının köyü arkadaşlarına görünsün diye vitrin kopyası güncel tutulur.
   const friendCode = useVillagePublish(state, active, currentStreak(state));
-  const friendRequests = useFriendRequests(state, active);
+  const friendRequests = useFriendRequests(state, active, dispatch);
+
+  /* ---------- Arkadaş ligi: yeni takvim haftası ---------- */
+  useEffect(() => {
+    if (active) dispatch({ type: "LEAGUE_SYNC", week: isoWeekKey(getNow()) });
+  }, [active, state.day, getNow]);
+
+  /* ---------- Davet bağlantısı: giriş yapınca davet edenle arkadaş ol ---------- */
+  const refreshFriends = friendRequests.refreshIncoming;
+  useEffect(() => {
+    const code = pendingInvite.get();
+    if (!code || !friendCode || !state.user || state.user.guest) return;
+    pendingInvite.clear();
+    acceptInvite(code)
+      .then((r) => {
+        if (r === "accepted") mascotSay("Davet tamam: artık arkadaşsınız! Profil → Arkadaşlarım'a bak.", { mood: "cheer", duration: 6000 });
+        else if (r === "sent") mascotSay("Davet edene arkadaşlık isteği gönderdim. Kabul edince arkadaş olursunuz.", { mood: "happy", duration: 6000 });
+        refreshFriends();
+      })
+      .catch(() => {});
+  }, [friendCode, state.user, refreshFriends]);
 
   /* ---------- Tema ---------- */
   const theme = state.settings.theme;

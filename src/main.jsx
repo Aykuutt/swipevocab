@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import { registerServiceWorker } from "./lib/pwa";
+import { captureInvite } from "./lib/invite";
 import { applySavedTheme } from "./lib/theme";
 // Yazı tipleri uygulamayla birlikte sunulur (Google'a istek gitmez, internetsiz de çalışır).
 import "@fontsource-variable/inter";
@@ -16,6 +17,7 @@ document.documentElement.classList.add("standalone");
 
 applySavedTheme(); // kayıt yüklenmeden önce: renkler yanıp sönmesin
 registerServiceWorker();
+captureInvite(); // ?davet=KOD bağlantısı
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

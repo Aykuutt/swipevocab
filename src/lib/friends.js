@@ -2,6 +2,8 @@
 // Yalnızca hesabı olanlar içindir. Arkadaşlara görünen: ad, köy haritası, köy seviyesi, seri ve dil.
 // E-posta ve kelimeler paylaşılmaz.
 import { villageLevel } from "../data/village";
+import { leaguePoints } from "../state/selectors";
+import { isoWeekKey } from "./time";
 import { supabase } from "./supabase";
 
 export class FriendsError extends Error {}
@@ -24,8 +26,11 @@ export function villageSnapshot(village) {
 }
 
 /** Vitrin için özet: değişince yeniden gönderilir. */
-export function publicInfo(state, streak) {
+export function publicInfo(state, streak, now = Date.now()) {
+  const week = isoWeekKey(now);
   return {
+    p_weekly: leaguePoints(state, week),
+    p_week: week,
     p_name: state.user?.name || "Oyuncu",
     p_snapshot: villageSnapshot(state.village),
     p_level: villageLevel(state.village),
@@ -60,6 +65,20 @@ export async function removeFriend(otherId) {
   if (error) throw fail(error);
 }
 
+/** Arkadaş sayısı (dostluk süsleri için). */
+export async function countFriends() {
+  const { count, error } = await supabase.from("friendships").select("a", { count: "exact", head: true });
+  if (error) throw fail(error);
+  return count ?? 0;
+}
+
+/** Davet bağlantısıyla gelen kodu kabul et: accepted | sent | already | self | not_found | limit */
+export async function acceptInvite(code) {
+  const { data, error } = await supabase.rpc("friend_invite", { p_code: code });
+  if (error) throw fail(error);
+  return data;
+}
+
 /** Gelen arkadaşlık isteği sayısı (bildirim noktası için). */
 export async function countIncoming() {
   const { data, error } = await supabase.rpc("friend_incoming");
@@ -70,7 +89,7 @@ export async function countIncoming() {
 /** Arkadaşlar, gelen ve gönderilen istekler, bugün beğenilenler ve son gelen beğeniler. */
 export async function loadFriends(userId) {
   const [friends, incoming, outgoing, likes] = await Promise.all([
-    supabase.from("village_public").select("user_id, display_name, level, streak, language, updated_at").neq("user_id", userId),
+    supabase.from("village_public").select("user_id, display_name, level, streak, language, updated_at, weekly_points, week_key").neq("user_id", userId),
     supabase.rpc("friend_incoming"),
     supabase.from("friend_requests").select("to_id").eq("from_id", userId),
     supabase.from("village_likes").select("from_id, to_id, day, created_at").order("created_at", { ascending: false }).limit(60),

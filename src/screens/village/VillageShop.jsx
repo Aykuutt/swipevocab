@@ -6,6 +6,7 @@ import { ItemPreview } from "./isoArt";
 
 function effect(t) {
   if (t.harvest) return `Çalıştığın gün ${t.harvest[0]} puan`;
+  if (t.needFriends) return `${t.needFriends} arkadaşla açılır`;
   if (t.kind === "road") return "Yürüyüş yolu";
   return "Süs";
 }
@@ -56,6 +57,13 @@ export default function VillageShop({ state, onPick, onClose }) {
                 <span className={`vshop-price ${block === "xp" ? "is-short" : ""}`}>
                   {block === "max" ? (
                     `Tamam (${owned}/${t.max})`
+                  ) : block === "friends" ? (
+                    <>
+                      <Icon name="lock" size={13} />
+                      {t.needFriends} arkadaş
+                    </>
+                  ) : price === 0 ? (
+                    "Ücretsiz"
                   ) : block === "home" ? (
                     <>
                       <Icon name="lock" size={13} />

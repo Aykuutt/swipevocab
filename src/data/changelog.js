@@ -2,6 +2,10 @@
 // Yeni sürüm yayınlarken buraya kısa, kullanıcının anlayacağı maddeler ekle. config.js'teki APP_VERSION ile aynı sürüm.
 export const CHANGELOG = [
   {
+    version: "0.20.0",
+    items: ["Arkadaşlarla haftalık lig: bu hafta en çok puanı kim toplayacak? Her Pazartesi sıfırlanır.", "Davet bağlantısı: paylaş, bağlantıyla yeni gelen arkadaşınla otomatik arkadaş olun.", "Köye ücretsiz dostluk süsleri: 1 arkadaşla Dostluk ağacı, 3 arkadaşla Dostluk kemeri."],
+  },
+  {
     version: "0.19.1",
     items: ["Güncelleme gelince artık bu kartla haber veriyoruz.", "Uygulama açılır açılmaz yeni sürümü kontrol ediyor."],
   },
