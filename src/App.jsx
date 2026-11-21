@@ -1,4 +1,5 @@
 // Uygulamanın kökü: yükleme -> kurulum (giriş yoksa) -> sekmeli ana ekran.
+import UpdateNotice from "./components/UpdateNotice";
 import { AppShell, Header, Splash, TabBar, VoiceNotice } from "./components/layout";
 import MascotBuddy from "./components/MascotBuddy";
 import { useMascotMoments } from "./hooks/useMascotMoments";
@@ -31,6 +32,7 @@ function MainLayout() {
       </main>
       <TabBar />
       <MascotBuddy />
+      <UpdateNotice />
     </>
   );
 }

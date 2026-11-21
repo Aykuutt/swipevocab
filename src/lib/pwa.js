@@ -14,6 +14,7 @@ export function registerServiceWorker() {
       const check = () => {
         if (navigator.onLine !== false) registration.update().catch(() => {});
       };
+      check(); // açılır açılmaz da bak: yeni sürüm varsa hemen inip sayfa yenilenir
       setInterval(check, CHECK_EVERY_MS);
       document.addEventListener("visibilitychange", () => {
         if (document.visibilityState === "visible") check();
