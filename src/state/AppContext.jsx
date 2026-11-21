@@ -1,7 +1,8 @@
 // Uygulama durumu, kelime listesi ve sekme gezgini için tek bağlam.
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { getLanguage } from "../data/languages";
-import { canTalkToday, getVillager, talkReward, talkState } from "../data/villagers";
+import { claimReward } from "../data/orders";
+import { availableVillagers, canTalkToday, getVillager, talkReward, talkState } from "../data/villagers";
 import { TYPES, buyBlock, canPlace, canSell, expandBlock, itemById, pendingHarvests, upgradeBlock } from "../data/village";
 import { useAccount } from "../hooks/useAccount";
 import { useProgressSave } from "../hooks/useProgressSave";
@@ -83,6 +84,15 @@ export function AppProvider({ children }) {
   // Hesaplı ya da misafir: uygulama kullanımda.
   const inApp = account.status === "signedIn" || account.status === "guest";
   const active = wordsStatus === "ready" && inApp && !!state.user;
+
+  /* ---------- Köylü siparişleri ---------- */
+  // Gün değişince ya da yeni köylü (bina) gelince günün siparişleri oluşturulur.
+  const villagerKey = availableVillagers(state.village)
+    .map((v) => v.id)
+    .join(",");
+  useEffect(() => {
+    if (active) dispatch({ type: "ORDERS_SYNC" });
+  }, [active, state.day, villagerKey]);
 
   /* ---------- Gün geçişi ---------- */
   useEffect(() => {
@@ -246,6 +256,17 @@ export function AppProvider({ children }) {
         dispatch({ type: "VILLAGER_TALK", id });
         sfx("levelup");
         mascotSay(`${getVillager(id).name} ile sohbet güzeldi! +${gained} puan`, { mood: "cheer" });
+        return gained;
+      },
+      /** Bitmiş siparişi teslim eder; verilen puanı döndürür (teslim edilemiyorsa 0). */
+      claimOrder(id) {
+        const s = stateRef.current;
+        const order = s.village.orders?.[id];
+        if (!order || order.claimed) return 0;
+        const gained = claimReward(s, id, order);
+        dispatch({ type: "ORDER_CLAIM", id });
+        sfx("levelup");
+        mascotSay(`${getVillager(id).name}: Teşekkürler! +${gained} puan`, { mood: "cheer" });
         return gained;
       },
       /** Bugünkü hasadı toplar (id yoksa hepsini). Toplanan puanı döndürür. */

@@ -1,6 +1,7 @@
 // Uygulama iskeleti: arka plan, üst bilgi çubuğu, alt sekmeler, açılış ekranı.
 import { useEffect, useState } from "react";
 import { MAX_LIVES } from "../config";
+import { claimableOrders } from "../data/orders";
 import { pendingHarvests } from "../data/village";
 import { useValueDelta } from "../hooks/useValueDelta";
 import { NO_VOICE_EVENT } from "../lib/speech";
@@ -71,7 +72,8 @@ const TABS = [
 
 export function TabBar() {
   const { tab, setTab, setProfileView, state } = useApp();
-  const harvestReady = pendingHarvests(state).length > 0;
+  // Köy sekmesindeki nokta: toplanacak hasat ya da teslim edilecek sipariş var.
+  const harvestReady = pendingHarvests(state).length > 0 || claimableOrders(state).length > 0;
   return (
     <nav className="tabbar" aria-label="Ana menü">
       {TABS.map((t) => (
@@ -88,7 +90,7 @@ export function TabBar() {
         >
           <span className="tab-icon">
             <Icon name={t.icon} size={22} />
-            {t.id === "village" && harvestReady && <i className="tab-dot" aria-label="Hasat bekliyor" />}
+            {t.id === "village" && harvestReady && <i className="tab-dot" aria-label="Köyde seni bekleyen bir şey var" />}
           </span>
           <span>{t.label}</span>
         </button>

@@ -17,11 +17,16 @@ export const HEART_BONUS = [0, 10, 15, 25, 40, 60]; // kalp kazanılınca verile
 
 export const heartsFor = (talks) => HEART_AT.filter((n) => talks >= n).length;
 
-/** Bu sohbetin getireceği puan (yeni bir kalp kazanılıyorsa bonusuyla). */
-export function talkReward(talks) {
+/** Bir sohbet ya da sipariş sayısı artınca yeni kalp kazanılıyorsa bonusu. */
+export function heartBonus(talks) {
   const before = heartsFor(talks);
   const after = heartsFor(talks + 1);
-  return TALK_REWARD + (after > before ? HEART_BONUS[after] : 0);
+  return after > before ? HEART_BONUS[after] : 0;
+}
+
+/** Bu sohbetin getireceği puan (yeni bir kalp kazanılıyorsa bonusuyla). */
+export function talkReward(talks) {
+  return TALK_REWARD + heartBonus(talks);
 }
 
 export const talkState = (village, id) => village?.villagers?.[id] ?? { talks: 0, last: 0 };

@@ -31,7 +31,8 @@ import {
   upgradeBlock,
   upgradeCost,
 } from "../data/village";
-import { getVillager, isAvailable, talkReward, talkState } from "../data/villagers";
+import { claimReward, needsNewOrder, makeOrder, orderDone } from "../data/orders";
+import { availableVillagers, getVillager, isAvailable, talkReward, talkState } from "../data/villagers";
 import { leagueRank } from "../lib/league";
 import { unique } from "../lib/random";
 import { weekOfDay } from "../lib/time";
@@ -84,6 +85,7 @@ export const initialState = {
   top3Finishes: 0,
   records: {}, // oyun rekorları: "timed:<dil>" -> en yüksek skor
   xpTotal: 0, // ömür boyu kazanılan puan (harcamak bunu düşürmez; başarımlar bunu kullanır)
+  counters: { cards: 0, correct: 0, learned: 0, units: 0 }, // ömür boyu sayaçlar (köylü siparişleri bunlarla ölçülür)
   village: initialVillage(), // Kart'ın köyü: bina seviyeleri ve son hasat günleri
 };
 
@@ -101,6 +103,7 @@ export function hydrate(saved) {
     settings,
     languages: rest.languages || {},
     xpTotal: Math.max(rest.xpTotal ?? 0, rest.xp ?? 0),
+    counters: { ...initialState.counters, ...rest.counters },
     village: migrateVillage(rest.village),
   };
   if (!LANGUAGES[s.language]) s = { ...s, language: DEFAULT_LANGUAGE };
@@ -222,7 +225,7 @@ function regenLives(s, now) {
   return lives === s.lives && regenAt === s.regenAt ? s : { ...s, lives, regenAt };
 }
 
-export function reducer(state, action) {
+function baseReducer(state, action) {
   switch (action.type) {
     case "HYDRATE":
       // Kayıt, sınır uygulanmadan önce oluşmuş olabilir: yüklerken de denetle.
@@ -461,6 +464,40 @@ export function reducer(state, action) {
       };
     }
 
+    case "ORDERS_SYNC": {
+      // Her köylü için günün siparişini oluşturur (gün değişince ya da yeni köylü gelince).
+      const orders = { ...state.village.orders };
+      let changed = false;
+      for (const v of availableVillagers(state.village)) {
+        if (needsNewOrder(state, orders[v.id])) {
+          orders[v.id] = makeOrder(state, v);
+          changed = true;
+        }
+      }
+      return changed ? { ...state, village: { ...state.village, orders } } : state;
+    }
+
+    case "ORDER_CLAIM": {
+      // Bitmiş siparişi teslim eder: puan, arkadaşlık sayacı ve gerekirse yeni kalp bonusu. Boost katlamaz.
+      const order = state.village.orders?.[action.id];
+      const villager = getVillager(action.id);
+      if (!order || !villager || order.claimed || !orderDone(state, order)) return state;
+      const gained = claimReward(state, villager.id, order);
+      const cur = talkState(state.village, villager.id);
+      return {
+        ...state,
+        xp: state.xp + gained,
+        xpTotal: (state.xpTotal ?? 0) + gained,
+        weeklyXp: state.weeklyXp + gained,
+        dailyXp: state.dailyXp + gained,
+        village: {
+          ...state.village,
+          orders: { ...state.village.orders, [villager.id]: { ...order, claimed: true } },
+          villagers: { ...state.village.villagers, [villager.id]: { ...cur, talks: cur.talks + 1 } },
+        },
+      };
+    }
+
     case "VILLAGER_TALK": {
       // Günde bir köylü başına bir sohbet ödülü; yeni kalp kazanılırsa bonus. Boost katlamaz.
       const villager = getVillager(action.id);
@@ -538,4 +575,21 @@ export function reducer(state, action) {
     default:
       return state;
   }
+}
+
+// Ömür boyu sayaçlar: köylü siparişlerinin ilerlemesi buradan ölçülür.
+const COUNTED = new Set(["SWIPE", "REINFORCE_DONE", "COMPLETE_UNIT", "CORRECT"]);
+
+function trackCounters(prev, next, action) {
+  if (prev === next || !COUNTED.has(action.type)) return next;
+  const c = { ...initialState.counters, ...next.counters };
+  if (action.type === "SWIPE") c.cards += 1;
+  if (action.type === "CORRECT") c.correct += 1;
+  if (action.type === "COMPLETE_UNIT") c.units += 1;
+  if (action.type !== "CORRECT") c.learned += Math.max(0, next.knownIds.length - prev.knownIds.length);
+  return { ...next, counters: c };
+}
+
+export function reducer(state, action) {
+  return trackCounters(state, baseReducer(state, action), action);
 }

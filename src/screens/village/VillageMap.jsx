@@ -425,7 +425,7 @@ const VillageMap = forwardRef(function VillageMap(
             e.type === "villager" ? (
               <g key={e.key} transform={at(e.x + 0.5, e.y + 0.5)} data-villager={e.villager}>
                 <rect x="-16" y="-70" width="32" height="76" fill="transparent" />
-                <VillagerArt id={e.villager} alert={!!alerts?.has(e.villager)} />
+                <VillagerArt id={e.villager} alert={alerts?.get(e.villager) ?? false} />
               </g>
             ) : e.type === "kart" ? (
               <g key="kart" transform={at(e.x + 0.5, e.y + 0.5)} data-kart="1">

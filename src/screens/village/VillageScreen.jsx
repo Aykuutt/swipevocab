@@ -24,9 +24,11 @@ import {
 import { useTimeOfDay } from "../../hooks/useTimeOfDay";
 import { mascotSay } from "../../lib/mascot";
 import { useApp } from "../../state/AppContext";
+import { claimableOrders } from "../../data/orders";
 import { availableVillagers, talkState } from "../../data/villagers";
 import BuildingPage, { effectText } from "./BuildingPage";
 import { ItemPreview } from "./isoArt";
+import OrdersSheet from "./OrdersSheet";
 import VillageMap from "./VillageMap";
 import VillageShop from "./VillageShop";
 import VillagerTalk from "./VillagerTalk";
@@ -50,6 +52,7 @@ export default function VillageScreen() {
   const [confirmSell, setConfirmSell] = useState(false);
   const [talkId, setTalkId] = useState(null);
   const [expandSide, setExpandSide] = useState(null);
+  const [ordersOpen, setOrdersOpen] = useState(false);
 
   const { village } = state;
   const pending = pendingHarvests(state);
@@ -57,7 +60,13 @@ export default function VillageScreen() {
   const pendingMap = Object.fromEntries(pending.map((h) => [h.id, h.amount]));
 
   // Bugün henüz konuşulmamış köylüler: başlarında sohbet balonu çıkar.
-  const alerts = new Set(availableVillagers(village).filter((v) => talkState(village, v.id).last !== state.day).map((v) => v.id));
+  const claimable = new Set(claimableOrders(state).map((x) => x.villager.id));
+  const claimCount = claimable.size;
+  const alerts = new Map(
+    availableVillagers(village).flatMap((v) =>
+      claimable.has(v.id) ? [[v.id, "order"]] : talkState(village, v.id).last !== state.day ? [[v.id, "talk"]] : []
+    )
+  );
 
   // Arazi genişletme işaretleri: her kenar için bedel ve engel.
   const expansions = village.expansions ?? 0;
@@ -278,12 +287,17 @@ export default function VillageScreen() {
         </div>
       ) : (
         <div className="vbar vbar-main">
+          <Button size="lg" variant="secondary" icon="check" onClick={() => setOrdersOpen(true)}>
+            Siparişler
+            {claimCount > 0 && <span className="vbtn-badge">{claimCount}</span>}
+          </Button>
           <Button size="lg" icon="store" onClick={() => setShopOpen(true)}>
             Dükkân
           </Button>
         </div>
       )}
 
+      {ordersOpen && <OrdersSheet onClose={() => setOrdersOpen(false)} />}
       {shopOpen && <VillageShop state={state} onPick={startPlacing} onClose={() => setShopOpen(false)} />}
       {talkId && <VillagerTalk key={talkId} id={talkId} onClose={() => setTalkId(null)} />}
       {pageItem && <BuildingPage id={pageItem.id} onClose={closePage} />}

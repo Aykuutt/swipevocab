@@ -334,3 +334,45 @@ describe("arazi genişletme (durum)", () => {
     expect(placed.village.items.some((i) => i.x === 17 && i.y === 8)).toBe(true);
   });
 });
+
+describe("sayaçlar ve siparişler (durum)", () => {
+  it("kart, doğru cevap, kelime ve ünite sayaçları artar", () => {
+    let s = newUser(5);
+    expect(s.counters).toEqual({ cards: 0, correct: 0, learned: 0, units: 0 });
+    s = reducer(s, { type: "SWIPE", dir: "keep" });
+    expect(s.counters.cards).toBe(1);
+    expect(s.counters.learned).toBe(1);
+    s = reducer(s, { type: "SWIPE", dir: "discard" });
+    expect(s.counters.cards).toBe(2);
+    expect(s.counters.learned).toBe(1); // bilmediği kelime öğrenilmiş sayılmaz
+    s = reducer(s, { type: "CORRECT" });
+    expect(s.counters.correct).toBe(1);
+    s = reducer(s, { type: "COMPLETE_UNIT", unitId: "daily-1", wordIds: [1, 2, 3] });
+    expect(s.counters.units).toBe(1);
+    expect(s.counters.learned).toBeGreaterThanOrEqual(3);
+  });
+
+  it("günün siparişleri oluşur, gün değişince yenilenir; aynı gün ikinci kez oluşmaz", () => {
+    let s = reducer(newUser(5), { type: "ORDERS_SYNC" });
+    expect(Object.keys(s.village.orders)).toEqual(["merchant"]);
+    expect(reducer(s, { type: "ORDERS_SYNC" })).toBe(s);
+    const first = s.village.orders.merchant;
+    s = reducer(s, { type: "SYNC_DAY", day: s.day + 1, deck: [] });
+    s = reducer(s, { type: "ORDERS_SYNC" });
+    expect(s.village.orders.merchant.day).toBe(s.day);
+    expect(s.village.orders.merchant).not.toBe(first);
+  });
+
+  it("bitmeyen sipariş teslim edilemez; bitince puan ve arkadaşlık sayacı verir", () => {
+    let s = reducer(newUser(5), { type: "ORDERS_SYNC" });
+    expect(reducer(s, { type: "ORDER_CLAIM", id: "merchant" })).toBe(s);
+    const order = s.village.orders.merchant;
+    s = { ...s, counters: { ...s.counters, [order.kind]: s.counters[order.kind] + order.target } };
+    const before = s.xp;
+    s = reducer(s, { type: "ORDER_CLAIM", id: "merchant" });
+    expect(s.xp).toBe(before + order.reward + 10); // ilk kalp bonusu
+    expect(s.village.villagers.merchant.talks).toBe(1);
+    expect(s.village.orders.merchant.claimed).toBe(true);
+    expect(reducer(s, { type: "ORDER_CLAIM", id: "merchant" })).toBe(s); // ikinci kez olmaz
+  });
+});

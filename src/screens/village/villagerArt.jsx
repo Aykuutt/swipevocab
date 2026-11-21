@@ -1,5 +1,5 @@
 // Köylü karakterleri: ayakları (0,0)'da duran küçük çizimler. Her birinin kıyafeti mesleğine göre değişir.
-// `alert`: bugün konuşulmadıysa başının üstünde sohbet balonu çıkar.
+// `alert`: "talk" bugün konuşulmadıysa sohbet balonu, "order" teslim edilecek sipariş varsa turuncu ünlem.
 
 const LOOK = {
   merchant: { skin: "#f0c9a0", body: "#4a7bd0", pants: "#3d3a52", hair: "#5a3e2b" },
@@ -61,12 +61,20 @@ export default function VillagerArt({ id, alert = false }) {
       {alert && (
         <g transform="translate(0 -72)">
           <g className="iso-alert">
-            <rect x="-15" y="-11" width="30" height="21" rx="10" fill="#ffffff" stroke="#6a5bf5" strokeWidth="1.8" />
-            <polygon points="-4,10 4,10 0,17" fill="#ffffff" stroke="#6a5bf5" strokeWidth="1.8" strokeLinejoin="round" />
-            <rect x="-5" y="9" width="10" height="3" fill="#ffffff" />
-            <circle cx="-6" cy="0" r="2.2" fill="#6a5bf5" />
-            <circle cx="0" cy="0" r="2.2" fill="#6a5bf5" />
-            <circle cx="6" cy="0" r="2.2" fill="#6a5bf5" />
+            <rect x="-15" y="-11" width="30" height="21" rx="10" fill={alert === "order" ? "#ffb84d" : "#ffffff"} stroke={alert === "order" ? "#b97f1a" : "#6a5bf5"} strokeWidth="1.8" />
+            <polygon points="-4,10 4,10 0,17" fill={alert === "order" ? "#ffb84d" : "#ffffff"} stroke={alert === "order" ? "#b97f1a" : "#6a5bf5"} strokeWidth="1.8" strokeLinejoin="round" />
+            <rect x="-5" y="9" width="10" height="3" fill={alert === "order" ? "#ffb84d" : "#ffffff"} />
+            {alert === "order" ? (
+              <text x="0" y="5.5" textAnchor="middle" fontSize="16" fontWeight="900" fill="#3a2400">
+                !
+              </text>
+            ) : (
+              <>
+                <circle cx="-6" cy="0" r="2.2" fill="#6a5bf5" />
+                <circle cx="0" cy="0" r="2.2" fill="#6a5bf5" />
+                <circle cx="6" cy="0" r="2.2" fill="#6a5bf5" />
+              </>
+            )}
           </g>
         </g>
       )}
