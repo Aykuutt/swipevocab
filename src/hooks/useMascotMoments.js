@@ -1,4 +1,4 @@
-// Kart'ın kendiliğinden konuştuğu anlar: selamlama, yarı yol, seri rekoru, canların bitmesi.
+// Dilbaz'ın kendiliğinden konuştuğu anlar: selamlama, yarı yol, seri rekoru, canların bitmesi.
 import { useEffect, useRef } from "react";
 import { STORAGE_PREFIX } from "../config";
 import { mascotSay } from "../lib/mascot";
@@ -11,12 +11,14 @@ const GREET_DELAY_MS = 900;
 
 function greeting(state, limit) {
   const name = state.user?.name ? `, ${state.user.name}` : "";
+  // İlk günlerde kendini tanıtır.
+  const hello = state.knownIds.length === 0 ? `Merhaba${name}, ben Dilbaz!` : `Merhaba${name}!`;
   const away = state.lastCompletedDay > 0 ? state.day - state.lastCompletedDay : 0;
   if (away >= 3) return { text: `Seni özledim${name}! Kaldığımız yerden devam edelim mi?`, mood: "wave" };
   if (state.phase === "swipe" && state.swipedToday === 0 && limit) {
     const streak = currentStreak(state);
     return {
-      text: streak > 0 ? `Merhaba${name}! ${streak} günlük serini sürdürmek için ${limit} kart seni bekliyor.` : `Merhaba${name}! Bugün ${limit} kart seni bekliyor.`,
+      text: streak > 0 ? `${hello} ${streak} günlük serini sürdürmek için ${limit} kart seni bekliyor.` : `${hello} Bugün ${limit} kart seni bekliyor.`,
       mood: "wave",
     };
   }

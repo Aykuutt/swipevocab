@@ -26,7 +26,7 @@ npm run check    # üçü birden; GitHub Actions her gönderimde bunları çalı
   yeni tema için oraya bir blok, src/data/themes.js'e bir kayıt eklemek yeterli.
 - **Oyunlar:** Zamana karşı (60 sn, kombo çarpanı, rekor), Dinle ve yaz (kelimeyi duyup yazma; aksan farkı hata
   sayılmaz), Boşluğu doldur, Eşleştir. Rekorlar dil başına hesapta saklanır.
-- **Kart'ın köyü:** Township tarzı, tam ekran izometrik köy (Köy sekmesi; eski Mağaza artık Pazar binası). Puan köyün
+- **Dilbaz'ın köyü:** Township tarzı, tam ekran izometrik köy (Köy sekmesi; eski Mağaza artık Pazar binası). Puan köyün
   parasıdır: dükkândan bina, süs ve yol alınır, ızgara üzerinde sürükleyerek yerleştirilir, taşınır, satılır; binalara
   girilip yükseltilir. Ev, Pazar, Fırın, Bahçe, Çeşme; evin seviyesi diğer binaların sınırını belirler, hasatlı binalar
   günde bir puan verir (balona dokun), Pazar büyüdükçe fiyatlar düşer. Sahne saate göre gündüz/akşam/gece olur.
@@ -48,7 +48,7 @@ npm run check    # üçü birden; GitHub Actions her gönderimde bunları çalı
   sonradan hesap açılınca hesaba taşınır.
 - **PWA:** telefona uygulama gibi yüklenir (Ayarlar > Telefona yükle), internetsizken de açılır.
   İkonlar `node scripts/generate-icons.mjs` ile üretilir.
-- **Maskot Kart:** önemli anlarda sağ üstten konuşma balonuyla belirir (src/hooks/useMascotMoments.js);
+- **Maskot Dilbaz:** önemli anlarda sağ üstten konuşma balonuyla belirir (src/hooks/useMascotMoments.js);
   uygulamanın her yerinden `mascotSay("...")` ile konuşturulabilir.
 - **Günlük sınır:** Öğren ekranında günde en fazla Ayarlar'daki günlük hedef kadar kart çıkar.
 - **Yazı tipleri** uygulamayla birlikte sunulur (@fontsource), dışarıya istek gitmez.

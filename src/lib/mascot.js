@@ -1,4 +1,4 @@
-// Maskot Kart'ın ekranın köşesinden konuşma balonuyla belirmesi.
+// Maskot Dilbaz'ın ekranın köşesinden konuşma balonuyla belirmesi.
 // Uygulamanın herhangi bir yerinden: mascotSay("Harika!", { mood: "cheer" })
 
 export const MASCOT_EVENT = "sv:mascot";

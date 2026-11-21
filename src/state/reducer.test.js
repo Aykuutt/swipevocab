@@ -204,7 +204,7 @@ describe("oyun rekorları", () => {
   });
 });
 
-describe("Kart'ın köyü", () => {
+describe("Dilbaz'ın köyü", () => {
   const rich = (xp = 400) => reducer(newUser(5), { type: "AWARD_XP", xp });
   const place = (s, itemType, x, y) => reducer(s, { type: "VILLAGE_PLACE", itemType, x, y });
   const first = (s, type) => s.village.items.find((i) => i.type === type);

@@ -1,4 +1,4 @@
-// Kart'ın köyü: haritaya yerleştirilen bina ve süsler. Puan köyün parasıdır.
+// Dilbaz'ın köyü: haritaya yerleştirilen bina ve süsler. Puan köyün parasıdır.
 // Kurallar saf fonksiyonlardır (test edilebilir); durum state.village içinde tutulur:
 //   { v: 2, items: [{ id, type, x, y, level }], nextId, land: { x0, y0, x1, y1 }, collected: { itemId: gün },
 //     villagers: { köylüId: { talks, last } }, orders: { köylüId: sipariş } }
@@ -21,7 +21,7 @@ export const TYPES = {
   home: {
     id: "home",
     kind: "building",
-    name: "Kart'ın evi",
+    name: "Dilbaz'ın evi",
     short: "Ev",
     role: "Köyün merkezi. Evin seviyesi, diğer binaların en fazla kaçıncı seviyeye çıkabileceğini belirler.",
     w: 2,

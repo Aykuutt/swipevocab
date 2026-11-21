@@ -86,7 +86,7 @@ export const initialState = {
   records: {}, // oyun rekorları: "timed:<dil>" -> en yüksek skor
   xpTotal: 0, // ömür boyu kazanılan puan (harcamak bunu düşürmez; başarımlar bunu kullanır)
   counters: { cards: 0, correct: 0, learned: 0, units: 0 }, // ömür boyu sayaçlar (köylü siparişleri bunlarla ölçülür)
-  village: initialVillage(), // Kart'ın köyü: bina seviyeleri ve son hasat günleri
+  village: initialVillage(), // Dilbaz'ın köyü: bina seviyeleri ve son hasat günleri
 };
 
 /** Kayıttan gelen durumu eksik alanları tamamlayarak açar. */

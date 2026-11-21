@@ -1,4 +1,4 @@
-// Kart'ın sağ alttan konuşma balonuyla belirdiği köşe. Dokununca kapanır.
+// Dilbaz'ın sağ alttan konuşma balonuyla belirdiği köşe. Dokununca kapanır.
 import { useEffect, useRef, useState } from "react";
 import { MASCOT_EVENT } from "../lib/mascot";
 import Mascot from "./Mascot";
@@ -30,7 +30,7 @@ export default function MascotBuddy() {
       onClick={() => setVisible(false)}
       aria-hidden={!visible}
       tabIndex={visible ? 0 : -1}
-      aria-label={`Kart: ${msg.text}. Kapatmak için dokun.`}
+      aria-label={`Dilbaz: ${msg.text}. Kapatmak için dokun.`}
     >
       <span className="buddy-bubble" role="status" aria-live="polite">
         {msg.text}

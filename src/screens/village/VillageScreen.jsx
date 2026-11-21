@@ -1,4 +1,4 @@
-// "Köy" sekmesi: Kart'ın köyü, tam ekran. Haritada bina, süs ve yol yerleştirilir, taşınır, satılır;
+// "Köy" sekmesi: Dilbaz'ın köyü, tam ekran. Haritada bina, süs ve yol yerleştirilir, taşınır, satılır;
 // binalara girilip yükseltme ve hasat yönetilir. Pazar eski Mağaza'nın yerini alır.
 import { useRef, useState } from "react";
 import Icon from "../../components/Icon";
@@ -171,7 +171,7 @@ export default function VillageScreen() {
           <Icon name="close" size={22} />
         </button>
         <div className="vhud-title">
-          <strong>Kart'ın köyü</strong>
+          <strong>Dilbaz'ın köyü</strong>
           <span>Köy seviyesi {villageLevel(village)}</span>
         </div>
         <div className="vhud-balance" aria-label={`${state.xp} puan`}>

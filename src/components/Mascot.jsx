@@ -1,4 +1,4 @@
-// "Kart" maskotu: defter kağıdı biçiminde bir karakter.
+// "Dilbaz" maskotu: defter kağıdı biçiminde bir karakter.
 // mood: happy | cheer | sad | wave | think
 
 const ARMS = {

@@ -963,7 +963,7 @@ strong, b { font-weight: 650; }
 .goal-compact { padding: 10px 14px; }
 .goal-compact .goal-text strong { font-size: 14.5px; }
 
-/* ---------- Maskot Kart: sağ üstten (başlığın altından) beliren konuşma balonu ----------
+/* ---------- Maskot Dilbaz: sağ üstten (başlığın altından) beliren konuşma balonu ----------
    Balon tıklamaları geçirir (alttaki düğmeler çalışmaya devam eder); maskota dokununca kapanır. */
 .buddy {
   position: absolute; top: 60px; right: 6px; z-index: 20;
@@ -982,7 +982,7 @@ strong, b { font-weight: 650; }
 .buddy-mascot { flex-shrink: 0; filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.45)); }
 @keyframes buddy-hop { 0% { transform: translateY(-10px) rotate(-6deg); } 60% { transform: translateY(3px); } 100% { transform: none; } }
 
-/* İlerleme ekranında Kart'ın yorumu */
+/* İlerleme ekranında Dilbaz'ın yorumu */
 .coach { display: flex; align-items: flex-end; gap: 10px; margin: 2px 0 16px; }
 .coach-bubble {
   flex: 1; margin-bottom: 26px; padding: 11px 14px; border-radius: 16px 16px 16px 4px;

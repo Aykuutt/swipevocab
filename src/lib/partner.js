@@ -41,7 +41,7 @@ export function usedPracticeWords(userTexts, practiceWords) {
 function systemPrompt({ scenario, level, practiceWords, language }) {
   const list = practiceWords.map((w) => w.word).join(", ");
   const lang = getLanguage(language).english;
-  return `You are "Kart", a friendly ${lang} conversation partner inside a vocabulary-learning app for Turkish speakers.
+  return `You are "Dilbaz", a friendly ${lang} conversation partner inside a vocabulary-learning app for Turkish speakers.
 
 Scenario: ${scenario.role}
 Learner level (CEFR): ${level}. Match it: simple everyday words and short sentences.

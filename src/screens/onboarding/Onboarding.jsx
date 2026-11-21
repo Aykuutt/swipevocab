@@ -35,8 +35,8 @@ function Welcome({ onStart, onHaveAccount }) {
         <Brand as="h1" className="welcome-brand" />
         <p className="welcome-title">Kelimeleri kaydır, öğren.</p>
         <p className="welcome-sub">
-          Her gün birkaç dakikada İngilizce, Almanca, İspanyolca ya da Fransızca kelime hazneni büyüt. Bildiğini
-          sağa, bilmediğini sola at.
+          Ben Dilbaz! Her gün birkaç dakikada İngilizce, Almanca, İspanyolca ya da Fransızca kelime hazneni
+          büyütmene yardım ederim. Bildiğini sağa, bilmediğini sola at.
         </p>
       </div>
       <div className="welcome-actions">

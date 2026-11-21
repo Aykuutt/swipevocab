@@ -25,7 +25,7 @@ export default function PartnerSetup({ level, onStart, onClose }) {
       <div className="partner-scroll">
         <div className="partner-hero">
           <Mascot mood="wave" size={84} />
-          <p>Kart'la {language.name} sohbet et. Yazarak ya da konuşarak cevap ver, hata yaparsan kısa bir ipucu alırsın.</p>
+          <p>Dilbaz'la {language.name} sohbet et. Yazarak ya da konuşarak cevap ver, hata yaparsan kısa bir ipucu alırsın.</p>
         </div>
 
         <p className="partner-notice">

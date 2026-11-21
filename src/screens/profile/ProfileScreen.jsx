@@ -34,7 +34,7 @@ function ProfileHero() {
   );
 }
 
-/** Kart'ın ilerlemeye göre kısa yorumu. */
+/** Dilbaz'ın ilerlemeye göre kısa yorumu. */
 function coachLine(state) {
   const streak = currentStreak(state);
   const known = state.knownIds.length;
