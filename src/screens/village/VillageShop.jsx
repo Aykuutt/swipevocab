@@ -5,7 +5,7 @@ import { SHOP_TABS, TYPES, buyBlock, buyPrice, itemsOfType } from "../../data/vi
 import { ItemPreview } from "./isoArt";
 
 function effect(t) {
-  if (t.harvest) return `Günde ${t.harvest[0]} puan hasat`;
+  if (t.harvest) return `Çalıştığın gün ${t.harvest[0]} puan`;
   if (t.kind === "road") return "Yürüyüş yolu";
   return "Süs";
 }

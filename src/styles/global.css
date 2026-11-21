@@ -1186,3 +1186,6 @@ strong, b { font-weight: 650; }
 .delete-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .legal-links { text-align: center; font-size: 13px; color: var(--text-faint); margin: 12px 0 4px; }
 .legal-links a { color: var(--text-dim); }
+
+/* Hasat kilitli: günün kartları bitmemiş */
+.vhud-harvest.is-locked { background: #f3efe6; color: #4a3f2a; box-shadow: 0 3px 0 #b8ad96; animation: none; font-size: 13px; max-width: calc(100% - 32px); white-space: nowrap; }

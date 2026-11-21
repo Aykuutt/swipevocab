@@ -225,13 +225,25 @@ export function upgradeBlock(state, id) {
 
 export const harvestAmount = (item) => TYPES[item?.type]?.harvest?.[item.level - 1] ?? 0;
 
-/** Bugün toplanmayı bekleyen hasatlar: [{ id, amount }] */
-export function pendingHarvests(state) {
+/**
+ * Bugün çalıştı mı: günün kart hedefi bitti mi (seri de bununla sayılır).
+ * Köyde puan yalnızca öğrenerek kazanılsın diye hasat buna bağlıdır: çalışılmayan gün binalar ürün vermez.
+ */
+export const studiedToday = (state) => state.lastCompletedDay === state.day;
+
+/** Bugün henüz toplanmamış hasatlar (çalışılıp çalışılmadığına bakmadan). */
+function todaysHarvests(state) {
   const { items, collected } = state.village;
   return items
     .map((i) => ({ id: i.id, amount: harvestAmount(i) }))
     .filter((h) => h.amount > 0 && collected[h.id] !== state.day);
 }
+
+/** Bugün toplanmayı bekleyen hasatlar: [{ id, amount }]. Günün kartları bitmeden boştur. */
+export const pendingHarvests = (state) => (studiedToday(state) ? todaysHarvests(state) : []);
+
+/** Günün kartları bitmediği için kilitli duran hasatlar. */
+export const lockedHarvests = (state) => (studiedToday(state) ? [] : todaysHarvests(state));
 
 /** Pazar indirimiyle fiyat. */
 export function marketPrice(base, village) {

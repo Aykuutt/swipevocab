@@ -17,6 +17,7 @@ import {
   homeLevel,
   isBuilding,
   itemById,
+  lockedHarvests,
   pendingHarvests,
   sellValue,
   villageLevel,
@@ -42,7 +43,7 @@ const KART_LINES = [
 ];
 
 export default function VillageScreen() {
-  const { state, actions, leaveVillage, villageTarget, setVillageTarget } = useApp();
+  const { state, actions, goTo, leaveVillage, villageTarget, setVillageTarget } = useApp();
   const mapRef = useRef(null);
   const tod = useTimeOfDay();
   const [selectedId, setSelectedId] = useState(null);
@@ -58,6 +59,10 @@ export default function VillageScreen() {
   const pending = pendingHarvests(state);
   const pendingTotal = pending.reduce((n, h) => n + h.amount, 0);
   const pendingMap = Object.fromEntries(pending.map((h) => [h.id, h.amount]));
+  // Çalışılmadıysa hasat kilitli: günün kart hedefini bitirmesi gerekir.
+  const locked = lockedHarvests(state);
+  const lockedTotal = locked.reduce((n, h) => n + h.amount, 0);
+  const goal = state.settings.dailyGoal;
 
   // Bugün henüz konuşulmamış köylüler: başlarında sohbet balonu çıkar.
   const claimable = new Set(claimableOrders(state).map((x) => x.villager.id));
@@ -123,6 +128,10 @@ export default function VillageScreen() {
   };
 
   const kartSays = () => {
+    if (lockedTotal > 0) {
+      mascotSay("Bugün çalışmadın, fırınlar soğuk! Kartlarını bitir, hasat açılsın.", { mood: "think" });
+      return;
+    }
     const text = pendingTotal > 0 ? "Hasat zamanı! Bekleyen puanlar var." : KART_LINES[Math.floor(Math.random() * KART_LINES.length)];
     mascotSay(text, { mood: pendingTotal > 0 ? "cheer" : "happy" });
   };
@@ -181,6 +190,13 @@ export default function VillageScreen() {
         <button type="button" className="vhud-harvest" onClick={() => actions.harvest()}>
           <Icon name="star" size={16} filled />
           Hepsini topla (+{pendingTotal})
+        </button>
+      )}
+
+      {lockedTotal > 0 && !placing && (
+        <button type="button" className="vhud-harvest is-locked" onClick={() => goTo("learn")}>
+          <Icon name="lock" size={15} />
+          Hasat için bugünkü kartları bitir ({Math.min(state.swipedToday, goal)}/{goal})
         </button>
       )}
 

@@ -29,7 +29,7 @@ npm run check    # üçü birden; GitHub Actions her gönderimde bunları çalı
 - **Dilbaz'ın köyü:** Township tarzı, tam ekran izometrik köy (Köy sekmesi; eski Mağaza artık Pazar binası). Puan köyün
   parasıdır: dükkândan bina, süs ve yol alınır, ızgara üzerinde sürükleyerek yerleştirilir, taşınır, satılır; binalara
   girilip yükseltilir. Ev, Pazar, Fırın, Bahçe, Çeşme, Gezgin hanı (ev 2. seviye ister), Kütüphane (ev 3. seviye ister); evin seviyesi diğer binaların sınırını belirler, hasatlı binalar
-  günde bir puan verir (balona dokun), Pazar büyüdükçe fiyatlar düşer. Sahne saate göre gündüz/akşam/gece olur.
+  yalnızca o günün kart hedefi bitince puan verir (balona dokun; çalışılmayan gün hasat kilitli), Pazar büyüdükçe fiyatlar düşer. Sahne saate göre gündüz/akşam/gece olur.
   Arazi puanla dört kenardan 2'şer sıra genişletilir (haritadaki yeşil işaretlere dokun; ormanın ağaçları temizlenir,
   bedel her genişletmede artar, ev seviyesi şart koşulur).
   Kurallar src/data/village.js'te, çizimler src/screens/village/isoArt.jsx'te.

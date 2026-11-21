@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { LIFE_REGEN_MS, MAX_LIVES } from "../config";
 import { WORDS } from "../data/langs/en";
 import { WORDS as DE_WORDS } from "../data/langs/de";
-import { itemById, pendingHarvests } from "../data/village";
+import { itemById, lockedHarvests, pendingHarvests } from "../data/village";
 import { buildDeck, topUpCards } from "../lib/deck";
 import { hydrate, initialState, reducer } from "./reducer";
 import { dailyCardLimit } from "./selectors";
@@ -266,6 +266,12 @@ describe("Dilbaz'ın köyü", () => {
     const id = first(s, "bakery").id;
     s = { ...s, xpBoost: true };
     const before = s.xp;
+    // Çalışmadan hasat yok: günün kartları bitmeden kilitli.
+    expect(pendingHarvests({ ...s, lastCompletedDay: s.day - 1 })).toEqual([]);
+    expect(lockedHarvests({ ...s, lastCompletedDay: s.day - 1 })).toEqual([{ id, amount: 2 }]);
+    expect(reducer({ ...s, lastCompletedDay: s.day - 1 }, { type: "VILLAGE_HARVEST" }).xp).toBe(before);
+    s = { ...s, lastCompletedDay: s.day };
+    expect(lockedHarvests(s)).toEqual([]);
     expect(pendingHarvests(s)).toEqual([{ id, amount: 2 }]);
     s = reducer(s, { type: "VILLAGE_HARVEST" });
     expect(s.xp).toBe(before + 2);
@@ -273,6 +279,8 @@ describe("Dilbaz'ın köyü", () => {
     expect(pendingHarvests(s)).toEqual([]);
     expect(reducer(s, { type: "VILLAGE_HARVEST" })).toBe(s);
     s = reducer(s, { type: "SYNC_DAY", day: s.day + 1, deck: [] });
+    expect(pendingHarvests(s)).toHaveLength(0); // yeni gün: önce çalış
+    s = { ...s, lastCompletedDay: s.day };
     expect(pendingHarvests(s)).toHaveLength(1);
   });
 

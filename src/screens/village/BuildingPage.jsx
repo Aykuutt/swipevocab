@@ -7,6 +7,7 @@ import {
   harvestAmount,
   homeLevel,
   itemById,
+  lockedHarvests,
   pendingHarvests,
   upgradeBlock,
   upgradeCost,
@@ -25,11 +26,11 @@ export function effectText(type, level) {
     const d = Math.round((t.discount[level - 1] ?? 0) * 100);
     return d > 0 ? `Pazar fiyatlarında %${d} indirim.` : "Henüz indirim yok.";
   }
-  return `Günde ${t.harvest[level - 1]} puan hasat edilir.`;
+  return `Çalıştığın her gün ${t.harvest[level - 1]} puan hasat edilir.`;
 }
 
 export default function BuildingPage({ id, onClose }) {
-  const { state, actions } = useApp();
+  const { state, actions, goTo } = useApp();
   const tod = useTimeOfDay();
   const item = itemById(state.village, id);
   if (!item) return null; // satıldıysa sayfa boş kalmasın
@@ -39,6 +40,7 @@ export default function BuildingPage({ id, onClose }) {
   const block = upgradeBlock(state, id);
   const cost = upgradeCost(item);
   const ready = pendingHarvests(state).find((h) => h.id === id);
+  const locked = lockedHarvests(state).some((h) => h.id === id);
   const hasHarvest = !!t.harvest;
 
   const reason =
@@ -86,12 +88,20 @@ export default function BuildingPage({ id, onClose }) {
             <Row
               icon="star"
               tone="amber"
-              title={ready ? `Bugünkü hasat: +${harvestAmount(item)} puan` : "Bugünkü hasat alındı"}
-              desc={ready ? "Hazır, topla." : "Yarın yeniden hazır olur."}
+              title={
+                ready ? `Bugünkü hasat: +${harvestAmount(item)} puan` : locked ? "Hasat kilitli" : "Bugünkü hasat alındı"
+              }
+              desc={ready ? "Hazır, topla." : locked ? "Bugünkü kart hedefini bitirince açılır." : "Yarın yeniden hazır olur."}
             >
-              <Button size="sm" disabled={!ready} onClick={() => actions.harvest(id)}>
-                Topla
-              </Button>
+              {locked ? (
+                <Button size="sm" variant="secondary" onClick={() => goTo("learn")}>
+                  Öğren'e git
+                </Button>
+              ) : (
+                <Button size="sm" disabled={!ready} onClick={() => actions.harvest(id)}>
+                  Topla
+                </Button>
+              )}
             </Row>
           </Group>
         )}
