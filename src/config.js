@@ -1,7 +1,7 @@
 // Uygulama genelindeki sabitler ve özellik anahtarları.
 
 export const APP_NAME = "SwipeVocab";
-export const APP_VERSION = "0.17.0";
+export const APP_VERSION = "0.18.0";
 
 // Özellik anahtarları: kapalı olanlar arayüzde hiç görünmez.
 export const FEATURES = {
@@ -11,6 +11,7 @@ export const FEATURES = {
   passwordReset: true,
   reminders: false,
   aiPartner: true,
+  friends: true, // arkadaş ekleme ve köy ziyareti (supabase/friends.sql)
   liveTalk: false, // canlı sesli konuşma: kod hazır, şimdilik "Yakında" (LiveKit + supabase/talk.sql)
 };
 

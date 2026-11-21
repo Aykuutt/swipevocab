@@ -1,5 +1,6 @@
 // "Profil" sekmesi: profil, istatistikler, başarımlar, görevler, haftalık özet, seviyeler ve ayarlar listesi.
 import Notebook from "../notebook/Notebook";
+import FriendsPage from "../friends/FriendsPage";
 import { useMemo } from "react";
 import Icon from "../../components/Icon";
 import Mascot from "../../components/Mascot";
@@ -300,6 +301,7 @@ function Achievements() {
 /* ---------- Ayarlar listesi ve alt sayfalar ---------- */
 const PAGES = {
   notebook: { title: "Kelime defterim", Page: Notebook },
+  friends: { title: "Arkadaşlarım", Page: FriendsPage },
   account: { title: "Hesap", Page: AccountPage },
   language: { title: "Öğrendiğin dil", Page: LanguagePage },
   learning: { title: "Öğrenme", Page: LearningPage },
@@ -316,6 +318,9 @@ function NotebookLink() {
     <section className="group">
       <ul className="group-list">
         <NavRow icon="book" tone="sky" title="Kelime defterim" summary={`${count} kelime`} onClick={() => setProfileView("notebook")} />
+        {FEATURES.friends && (
+          <NavRow icon="user" tone="rose" title="Arkadaşlarım" summary="Köylerini gez, beğeni bırak" onClick={() => setProfileView("friends")} />
+        )}
       </ul>
     </section>
   );

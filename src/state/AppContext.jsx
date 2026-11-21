@@ -17,7 +17,8 @@ import { localDayIndex, msUntilMidnight } from "../lib/time";
 import { buildUnits } from "../lib/units";
 import { loadWords } from "../lib/words";
 import { initialState, reducer } from "./reducer";
-import { activeLevels, dailyCardLimit, wordPool } from "./selectors";
+import { activeLevels, currentStreak, dailyCardLimit, wordPool } from "./selectors";
+import { useVillagePublish } from "../hooks/useVillagePublish";
 
 const AppContext = createContext(null);
 
@@ -184,6 +185,8 @@ export function AppProvider({ children }) {
 
   /* ---------- Kaydetme (tarayıcı önbelleği + Supabase) ---------- */
   const flushProgress = useProgressSave(state, inApp, dispatch);
+  // Hesaplı kullanıcının köyü arkadaşlarına görünsün diye vitrin kopyası güncel tutulur.
+  const friendCode = useVillagePublish(state, active, currentStreak(state));
 
   /* ---------- Tema ---------- */
   const theme = state.settings.theme;
@@ -369,6 +372,7 @@ export function AppProvider({ children }) {
       wordsStatus,
       reloadWords,
       account,
+      friendCode,
       pool: wordPool(state, words),
       tab,
       setTab,
@@ -383,7 +387,7 @@ export function AppProvider({ children }) {
       getNow,
       sfx,
     }),
-    [state, actions, words, wordsById, units, wordsStatus, reloadWords, account, tab, profileView, openProfile, villageTarget, openVillage, leaveVillage, getNow, sfx]
+    [state, actions, words, wordsById, units, wordsStatus, reloadWords, account, friendCode, tab, profileView, openProfile, villageTarget, openVillage, leaveVillage, getNow, sfx]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

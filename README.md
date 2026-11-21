@@ -43,6 +43,9 @@ npm run check    # üçü birden; GitHub Actions her gönderimde bunları çalı
   tür günün tarihinden seçilir, hedef köy seviyesi ve öğrenilen kelimeyle büyür. İlerleme ömür boyu sayaçlardan
   (state.counters) ölçülür. Teslim puan ve arkadaşlık getirir. Ayrıca Dilbaz her hafta tek bir büyük sipariş verir
   (haftalık hedef, büyük ödül; tür haftaya göre döner, bitmeyen hafta sonunda yenilenir).
+- **Arkadaşlar:** Profil → Arkadaşlarım. Hesabı olan herkesin 6 karakterlik arkadaş kodu var; kodla istek gönderilir, kabul
+  edilince arkadaş olunur. Arkadaşın köyü salt görüntüleme olarak gezilir ve günde bir beğeni bırakılır (puan vermez).
+  Arkadaşa yalnızca ad, köy haritası, köy seviyesi, seri ve dil görünür. Sunucu: supabase/friends.sql.
 - **Kelime defteri:** Profil'den ya da köyde Kütüphane'den açılır. Öğrenilen ve öğrenilmekte olan kelimeler ustalık
   noktalarıyla listelenir; arama (Türkçesiyle de), filtre (öğreniyorum, tekrarı gelen, ustalaştım), dinleme, örnek cümle
   ve "tekrar sor" (kelimeyi yarınki kartlara ekler). Puan vermez. Kütüphane'de Mira öğrenilen dilde karşılar; ustalaşılan
@@ -74,7 +77,7 @@ npm run check    # üçü birden; GitHub Actions her gönderimde bunları çalı
 ### Supabase kurulumu (bir kez)
 
 1. supabase.com'da bir proje oluştur.
-2. **SQL Editor**'da önce `supabase/schema.sql`, sonra `supabase/talk.sql`, sonra `supabase/delete-account.sql` dosyasının içeriğini çalıştır.
+2. **SQL Editor**'da önce `supabase/schema.sql`, sonra `supabase/talk.sql`, sonra `supabase/delete-account.sql` ve `supabase/friends.sql` dosyalarının içeriğini çalıştır.
 3. **Authentication > URL Configuration**:
    - Site URL: `https://swipevocab.vercel.app`
    - Redirect URLs: `https://swipevocab.vercel.app/**` ve `http://127.0.0.1:5173/**`
@@ -124,6 +127,7 @@ public/audio/s/<id>.mp3      # örnek cümle kayıtları (1-90)
 supabase/schema.sql          # ilerleme tablosu ve güvenlik kuralları
 supabase/talk.sql            # canlı konuşma: profiller, eşleştirme, görüşmeler, engelleme, şikayet
 supabase/delete-account.sql  # "hesabımı sil": kullanıcı kendi hesabını ve tüm verisini siler
+supabase/friends.sql         # arkadaşlar: köy vitrini, arkadaş kodu, istekler, beğeniler
 public/gizlilik.html         # gizlilik politikası (Google Play için)
 public/hesap-silme.html      # hesap silme adımları (Google Play için)
 api/livekit-token.js         # Vercel fonksiyonu: canlı konuşma odası için kısa ömürlü anahtar
