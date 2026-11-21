@@ -1,6 +1,7 @@
 // Ünitelerin, konuya göre değişen bir manzara içinde zikzak çizen bir yol üzerinde gösterimi.
 import { useEffect, useRef } from "react";
 import Icon from "../../components/Icon";
+import Mascot from "../../components/Mascot";
 import { TOPICS } from "../../data/topics";
 import { prefersReducedMotion } from "../../lib/random";
 import { currentUnitIndex, unitStatus } from "../../state/selectors";
@@ -113,7 +114,7 @@ export default function PathMap({ units, completed, onStart, celebrate }) {
             className={`path-node-wrap ${anim}`}
             style={{ left: cx - NODE_SIZE / 2, top: y, "--topic": t.color, "--i": Math.min(i, 10) }}
           >
-            {status === "current" && <span className="path-bubble">Başla</span>}
+            {status === "current" && <Mascot mood="happy" size={48} className="path-dilbaz" />}
             <button
               type="button"
               className={`path-node is-${status}`}

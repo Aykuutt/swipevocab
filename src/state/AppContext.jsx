@@ -41,6 +41,11 @@ export function AppProvider({ children }) {
   stateRef.current = state;
 
   const [tab, setTab] = useState("learn");
+  // Köy tam ekran olduğu için çıkarken geldiğin sekmeye dönülür (her zaman Öğren'e atmaz).
+  const lastTab = useRef("learn");
+  useEffect(() => {
+    if (tab !== "village") lastTab.current = tab;
+  }, [tab]);
   // Profil sekmesinde açık olan ayar sayfası (null: ana profil sayfası).
   const [profileView, setProfileView] = useState(null);
   const openProfile = useCallback((view = null) => {
@@ -52,6 +57,10 @@ export function AppProvider({ children }) {
   const openVillage = useCallback((buildingId = null) => {
     setVillageTarget(buildingId);
     setTab("village");
+  }, []);
+  const leaveVillage = useCallback(() => {
+    setVillageTarget(null);
+    setTab(lastTab.current);
   }, []);
 
   /* ---------- Kelime listesi (öğrenilen dile göre) ---------- */
@@ -321,10 +330,11 @@ export function AppProvider({ children }) {
       villageTarget,
       setVillageTarget,
       openVillage,
+      leaveVillage,
       getNow,
       sfx,
     }),
-    [state, actions, words, wordsById, units, wordsStatus, reloadWords, account, tab, profileView, openProfile, villageTarget, openVillage, getNow, sfx]
+    [state, actions, words, wordsById, units, wordsStatus, reloadWords, account, tab, profileView, openProfile, villageTarget, openVillage, leaveVillage, getNow, sfx]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

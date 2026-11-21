@@ -19,6 +19,16 @@ export function weekOfDay(day) {
   return Math.floor((day - 1) / 7) + 1;
 }
 
+/** Çok kısa süre gösterimi (üst çubuktaki canlar için): "45sn", "36dk", "1s12". */
+export function formatShort(ms) {
+  const total = Math.max(0, Math.ceil(ms / 1000));
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  if (h > 0) return `${h}s${String(m).padStart(2, "0")}`;
+  if (m > 0) return `${m}dk`;
+  return `${total}sn`;
+}
+
 /** Kalan süreyi "2s 15dk", "40dk" ya da "30sn" biçiminde yazar. */
 export function formatCountdown(ms) {
   const total = Math.max(0, Math.ceil(ms / 1000));

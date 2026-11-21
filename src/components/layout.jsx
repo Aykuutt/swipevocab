@@ -1,13 +1,13 @@
 // Uygulama iskeleti: arka plan, üst bilgi çubuğu, alt sekmeler, açılış ekranı.
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { MAX_LIVES } from "../config";
 import { claimableOrders } from "../data/orders";
 import { pendingHarvests } from "../data/village";
 import { useValueDelta } from "../hooks/useValueDelta";
 import { NO_VOICE_EVENT } from "../lib/speech";
+import { formatShort } from "../lib/time";
 import { useApp, useLanguage } from "../state/AppContext";
 import { currentStreak, hasUnlimitedLives } from "../state/selectors";
-import HeartTimer from "./HeartTimer";
 import Icon from "./Icon";
 import Mascot from "./Mascot";
 import { Brand, Button } from "./ui";
@@ -36,25 +36,51 @@ function Stat({ className, icon, value, raw, label, showDelta = false, children 
   );
 }
 
+/** Üst çubuktaki canlar: tek kalp ve sayı; can eksikse yanında yalnızca sıradaki canın dolmasına kalan süre yazar. */
+function LivesStat() {
+  const { state, getNow } = useApp();
+  const unlimited = hasUnlimitedLives(state);
+  const delta = useValueDelta(unlimited ? 0 : state.lives);
+  const [, rerender] = useReducer((n) => n + 1, 0);
+  const regenerating = !unlimited && state.lives < MAX_LIVES && state.regenAt !== null;
+
+  useEffect(() => {
+    if (!regenerating) return;
+    const timer = setInterval(rerender, 1000);
+    return () => clearInterval(timer);
+  }, [regenerating]);
+
+  if (unlimited) {
+    return (
+      <li className="stat stat-heart" aria-label="Sınırsız can">
+        <Icon name="heart" size={18} filled />
+        <span className="stat-value">∞</span>
+      </li>
+    );
+  }
+
+  const next = regenerating ? Math.max(0, state.regenAt - getNow()) : 0;
+  return (
+    <li
+      className={`stat stat-heart ${delta ? `is-${delta.dir}` : ""}`}
+      aria-label={regenerating ? `${state.lives} / ${MAX_LIVES} can, sıradaki ${formatShort(next)} sonra` : `${state.lives} can`}
+    >
+      <Icon name="heart" size={18} filled />
+      <span className="stat-value">{state.lives}</span>
+      {regenerating && <span className="life-time">{formatShort(next)}</span>}
+    </li>
+  );
+}
+
 export function Header() {
   const { state } = useApp();
   const streak = currentStreak(state);
-  const unlimited = hasUnlimitedLives(state);
-  const regenerating = !unlimited && state.lives < MAX_LIVES;
 
   return (
     <header className="app-header">
       <Brand />
       <ul className="stats" aria-label="Durumun">
-        <Stat
-          className="stat-heart"
-          icon="heart"
-          raw={unlimited ? 0 : state.lives}
-          value={unlimited ? "∞" : state.lives}
-          label={unlimited ? "Sınırsız can" : `${state.lives} can`}
-        >
-          {regenerating && <HeartTimer />}
-        </Stat>
+        <LivesStat />
         <Stat className="stat-streak" icon="flame" raw={streak} value={streak} label={`${streak} günlük seri`} />
         <Stat className="stat-xp" icon="star" raw={state.xp} value={state.xp} label={`${state.xp} puan`} showDelta />
       </ul>

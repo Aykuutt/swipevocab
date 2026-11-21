@@ -614,13 +614,6 @@ strong, b { font-weight: 650; }
   .path-node.is-current { box-shadow: 0 6px 0 color-mix(in srgb, var(--topic) 55%, black), 0 0 0 6px color-mix(in srgb, var(--topic) 22%, transparent); }
 }
 .path-node-label { position: relative; margin-top: 12px; width: max-content; max-width: 120px; text-align: center; font-size: 12px; font-weight: 600; color: var(--text-dim); line-height: 1.25; padding: 2px 8px; border-radius: 8px; background: color-mix(in srgb, var(--night) 82%, transparent); }
-.path-bubble {
-  position: absolute; top: -40px; padding: 5px 12px; border-radius: var(--r-md);
-  background: #fff; color: var(--ink); font-size: 13px; font-weight: 700;
-  animation: bob 1.8s ease-in-out infinite;
-}
-.path-bubble::after { content: ""; position: absolute; left: 50%; bottom: -5px; width: 10px; height: 10px; background: #fff; transform: translateX(-50%) rotate(45deg); border-radius: 2px; }
-@keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
 
 /* ---------- Öğren: bitiş ekranı ---------- */
 .done-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; width: 100%; margin: 4px 0 6px; }
@@ -1169,3 +1162,12 @@ strong, b { font-weight: 650; }
 .vorder-hearts { display: inline-flex; gap: 1px; color: var(--heart); }
 .vorder-side { display: grid; justify-items: end; gap: 6px; flex-shrink: 0; }
 .vorder-reward { display: inline-flex; align-items: center; gap: 4px; color: var(--amber); font-weight: 800; font-size: 14px; }
+
+/* ---------- Can sayacı (üst çubuk) ve Yol'da zıplayan Dilbaz ---------- */
+.stat-heart .life-time { margin-left: 2px; font-size: 11px; font-weight: 700; color: var(--text-faint); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.path-dilbaz { position: absolute; left: 50%; top: -58px; margin-left: -24px; z-index: 3; pointer-events: none; animation: dilbaz-hop 1.1s ease-in-out infinite; filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.3)); }
+@keyframes dilbaz-hop { 0%, 100% { transform: translateY(0) scaleY(0.94); } 45% { transform: translateY(-16px) scaleY(1.04); } 70% { transform: translateY(0) scaleY(0.94); } }
+
+.stats { gap: 10px; }
+.app-header .brand { font-size: 16px; }

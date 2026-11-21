@@ -42,7 +42,7 @@ const KART_LINES = [
 ];
 
 export default function VillageScreen() {
-  const { state, actions, goTo, villageTarget, setVillageTarget } = useApp();
+  const { state, actions, leaveVillage, villageTarget, setVillageTarget } = useApp();
   const mapRef = useRef(null);
   const tod = useTimeOfDay();
   const [selectedId, setSelectedId] = useState(null);
@@ -127,10 +127,7 @@ export default function VillageScreen() {
     mascotSay(text, { mood: pendingTotal > 0 ? "cheer" : "happy" });
   };
 
-  const exit = () => {
-    setVillageTarget(null);
-    goTo("learn");
-  };
+  const exit = leaveVillage;
 
   const selType = selected && TYPES[selected.type];
   const placeType = placing && TYPES[placing.type];
