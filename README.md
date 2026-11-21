@@ -31,6 +31,9 @@ npm run check    # üçü birden; GitHub Actions her gönderimde bunları çalı
   girilip yükseltilir. Ev, Pazar, Fırın, Bahçe, Çeşme; evin seviyesi diğer binaların sınırını belirler, hasatlı binalar
   günde bir puan verir (balona dokun), Pazar büyüdükçe fiyatlar düşer. Sahne saate göre gündüz/akşam/gece olur.
   Kurallar src/data/village.js'te, çizimler src/screens/village/isoArt.jsx'te.
+- **Köylüler:** Pazar, Fırın ve Bahçe'nin köylüleri (Tomas, Lena, Oskar) binaları kurulunca köyde belirir. Dokununca
+  öğrenilen dilde kısa bir sohbet açılır (uygun cevabı seç), ardından o konudan bir kelime sorulur. Günde bir sohbet
+  puan ve arkadaşlık (kalp) getirir. Sohbetler hazır yazılı, her dil için src/data/villagers.js'te.
 - **Yol:** üniteler konuya göre değişen bir manzara (ev, bulut, filiz, bina, yıldız...) içinde şeritli bir yolda.
 - **Dört dil:** kurulumda ve Ayarlar'da İngilizce, Almanca, İspanyolca ya da Fransızca seçilir. Bilinen
   kelimeler, üniteler ve günlük kartlar her dilde ayrı; XP, seri ve lig ortaktır. Okuma sesi, ses

@@ -28,6 +28,7 @@ import {
   upgradeBlock,
   upgradeCost,
 } from "../data/village";
+import { getVillager, isAvailable, talkReward, talkState } from "../data/villagers";
 import { leagueRank } from "../lib/league";
 import { unique } from "../lib/random";
 import { weekOfDay } from "../lib/time";
@@ -443,6 +444,26 @@ export function reducer(state, action) {
         weeklyXp: state.weeklyXp + gained,
         dailyXp: state.dailyXp + gained,
         village: { ...state.village, collected },
+      };
+    }
+
+    case "VILLAGER_TALK": {
+      // Günde bir köylü başına bir sohbet ödülü; yeni kalp kazanılırsa bonus. Boost katlamaz.
+      const villager = getVillager(action.id);
+      if (!villager || !isAvailable(state.village, villager)) return state;
+      const cur = talkState(state.village, villager.id);
+      if (cur.last === state.day) return state;
+      const gained = talkReward(cur.talks);
+      return {
+        ...state,
+        xp: state.xp + gained,
+        xpTotal: (state.xpTotal ?? 0) + gained,
+        weeklyXp: state.weeklyXp + gained,
+        dailyXp: state.dailyXp + gained,
+        village: {
+          ...state.village,
+          villagers: { ...state.village.villagers, [villager.id]: { talks: cur.talks + 1, last: state.day } },
+        },
       };
     }
 

@@ -18,10 +18,12 @@ import {
 import { useTimeOfDay } from "../../hooks/useTimeOfDay";
 import { mascotSay } from "../../lib/mascot";
 import { useApp } from "../../state/AppContext";
+import { availableVillagers, talkState } from "../../data/villagers";
 import BuildingPage, { effectText } from "./BuildingPage";
 import { ItemPreview } from "./isoArt";
 import VillageMap from "./VillageMap";
 import VillageShop from "./VillageShop";
+import VillagerTalk from "./VillagerTalk";
 
 const KART_LINES = [
   "Köyümüz her gün biraz daha güzelleşiyor.",
@@ -40,11 +42,15 @@ export default function VillageScreen() {
   const [shopOpen, setShopOpen] = useState(false);
   const [pageId, setPageId] = useState(null);
   const [confirmSell, setConfirmSell] = useState(false);
+  const [talkId, setTalkId] = useState(null);
 
   const { village } = state;
   const pending = pendingHarvests(state);
   const pendingTotal = pending.reduce((n, h) => n + h.amount, 0);
   const pendingMap = Object.fromEntries(pending.map((h) => [h.id, h.amount]));
+
+  // Bugün henüz konuşulmamış köylüler: başlarında sohbet balonu çıkar.
+  const alerts = new Set(availableVillagers(village).filter((v) => talkState(village, v.id).last !== state.day).map((v) => v.id));
 
   const selected = selectedId ? itemById(village, selectedId) : null;
   const pageItem = itemById(village, pageId ?? villageTarget);
@@ -113,6 +119,7 @@ export default function VillageScreen() {
         village={village}
         tod={tod}
         pending={pendingMap}
+        alerts={alerts}
         selectedId={selectedId}
         placing={placing}
         onSelect={(id) => {
@@ -122,6 +129,10 @@ export default function VillageScreen() {
         onGhost={(pos) => setPlacing((p) => (p ? { ...p, ...pos } : p))}
         onHarvest={(id) => actions.harvest(id)}
         onKart={kartSays}
+        onVillager={(vid) => {
+          setSelectedId(null);
+          setTalkId(vid);
+        }}
       />
 
       <div className="vhud-top">
@@ -225,6 +236,7 @@ export default function VillageScreen() {
       )}
 
       {shopOpen && <VillageShop state={state} onPick={startPlacing} onClose={() => setShopOpen(false)} />}
+      {talkId && <VillagerTalk key={talkId} id={talkId} onClose={() => setTalkId(null)} />}
       {pageItem && <BuildingPage id={pageItem.id} onClose={closePage} />}
     </div>
   );

@@ -283,3 +283,25 @@ describe("Kart'ın köyü", () => {
     expect(first(hydrate({ ...old, xp: 0 }), "home").level).toBe(1);
   });
 });
+
+describe("köylü sohbetleri (durum)", () => {
+  it("günde bir sohbet ödülü verir, arkadaşlık sayısı artar, ertesi gün yeniden konuşulur", () => {
+    let s = newUser(5);
+    const before = s.xp;
+    s = reducer(s, { type: "VILLAGER_TALK", id: "merchant" });
+    expect(s.xp).toBe(before + 16);
+    expect(s.xpTotal).toBe(16);
+    expect(s.village.villagers.merchant).toEqual({ talks: 1, last: s.day });
+    expect(reducer(s, { type: "VILLAGER_TALK", id: "merchant" })).toBe(s);
+    s = reducer(s, { type: "SYNC_DAY", day: s.day + 1, deck: [] });
+    s = reducer(s, { type: "VILLAGER_TALK", id: "merchant" });
+    expect(s.village.villagers.merchant.talks).toBe(2);
+    expect(s.xp).toBe(before + 16 + 6);
+  });
+
+  it("binası olmayan köylüyle ya da bilinmeyen köylüyle sohbet olmaz", () => {
+    const s = newUser(5);
+    expect(reducer(s, { type: "VILLAGER_TALK", id: "baker" })).toBe(s);
+    expect(reducer(s, { type: "VILLAGER_TALK", id: "yok" })).toBe(s);
+  });
+});

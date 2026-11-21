@@ -1,6 +1,7 @@
 // Kart'ın köyü: haritaya yerleştirilen bina ve süsler. Puan köyün parasıdır.
 // Kurallar saf fonksiyonlardır (test edilebilir); durum state.village içinde tutulur:
-//   { v: 2, items: [{ id, type, x, y, level }], nextId, land: { x0, y0, x1, y1 }, collected: { itemId: gün } }
+//   { v: 2, items: [{ id, type, x, y, level }], nextId, land: { x0, y0, x1, y1 }, collected: { itemId: gün },
+//     villagers: { köylüId: { talks, last } } }
 // Harita MAP_SIZE x MAP_SIZE karedir; yalnızca `land` içindeki kareler kullanılabilir (araziyi sonra genişletiriz).
 
 export const MAX_LEVEL = 3;
@@ -122,6 +123,7 @@ export const initialVillage = () => ({
   nextId: 1,
   land: { ...DEFAULT_LAND },
   collected: {},
+  villagers: {}, // köylü id -> { talks: sohbet sayısı, last: son sohbet günü }
 });
 
 /** Kayıtlı köyü açar: yeni biçim olduğu gibi, eski biçim (sabit bina seviyeleri) haritaya taşınır. */
@@ -133,6 +135,7 @@ export function migrateVillage(saved) {
       nextId: saved.nextId ?? saved.items.length + 1,
       land: { ...DEFAULT_LAND, ...saved.land },
       collected: { ...saved.collected },
+      villagers: { ...saved.villagers },
     };
   }
   const village = initialVillage();

@@ -3,7 +3,9 @@
 import { forwardRef, memo, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef } from "react";
 import Mascot from "../../components/Mascot";
 import { MAP_SIZE, TYPES, canPlace } from "../../data/village";
+import { availableVillagers } from "../../data/villagers";
 import { Flat, ItemArt, Rock, TH, TW, isFlat, p } from "./isoArt";
+import VillagerArt from "./villagerArt";
 
 const N = MAP_SIZE;
 const WORLD_W = N * TW;
@@ -85,17 +87,45 @@ const KART_SPOTS = [
   [10, 9],
 ];
 
+/** Her köylünün bulunduğu kare: kendi binasının yanında, boş bir yerde. */
+function villagerSpots(village, kart) {
+  const standing = village.items.filter((i) => !isFlat(i.type));
+  const { x0, y0, x1, y1 } = village.land;
+  const covered = (x, y) => standing.some((i) => x >= i.x && x < i.x + TYPES[i.type].w && y >= i.y && y < i.y + TYPES[i.type].d);
+  const used = new Set(kart ? [kart.join(",")] : []);
+  const spots = {};
+  for (const v of availableVillagers(village)) {
+    const b = village.items.find((i) => i.type === v.building);
+    if (!b) continue;
+    const t = TYPES[b.type];
+    const around = [
+      [b.x + t.w, b.y + t.d - 1],
+      [b.x + t.w, b.y],
+      [b.x - 1, b.y + t.d - 1],
+      [b.x + t.w - 1, b.y + t.d],
+      [b.x, b.y + t.d],
+      [b.x - 1, b.y],
+    ];
+    const spot = around.find(([x, y]) => x >= x0 && x < x1 && y >= y0 && y < y1 && !covered(x, y) && !used.has(`${x},${y}`));
+    if (spot) {
+      spots[v.id] = spot;
+      used.add(spot.join(","));
+    }
+  }
+  return spots;
+}
+
 const BUBBLE_Y = { home: 112, market: 96, bakery: 108, garden: 66, fountain: 96 };
 
 const VillageMap = forwardRef(function VillageMap(
-  { village, tod, pending, selectedId, placing, onSelect, onGhost, onHarvest, onKart },
+  { village, tod, pending, alerts, selectedId, placing, onSelect, onGhost, onHarvest, onKart, onVillager },
   ref
 ) {
   const box = useRef(null);
   const world = useRef(null);
   const cam = useRef({ x: 0, y: 0, k: 0.5 });
   const latest = useRef({});
-  latest.current = { village, placing, onSelect, onGhost, onHarvest, onKart };
+  latest.current = { village, placing, onSelect, onGhost, onHarvest, onKart, onVillager };
 
   const lit = tod === "night";
 
@@ -108,6 +138,8 @@ const VillageMap = forwardRef(function VillageMap(
     );
   }, [village.items]);
 
+  const spots = useMemo(() => villagerSpots(village, kart), [village, kart]);
+
   const { flat, standing } = useMemo(() => {
     const movingId = placing?.moveId;
     const items = village.items
@@ -118,9 +150,12 @@ const VillageMap = forwardRef(function VillageMap(
     const flatList = all.filter((e) => isFlat(e.type));
     const standList = all.filter((e) => !isFlat(e.type));
     if (kart) standList.push({ key: "kart", id: "kart", type: "kart", x: kart[0], y: kart[1], w: 1, d: 1 });
+    for (const [vid, [vx, vy]] of Object.entries(spots)) {
+      standList.push({ key: `v-${vid}`, id: `v-${vid}`, type: "villager", villager: vid, x: vx, y: vy, w: 1, d: 1 });
+    }
     standList.sort((a, b) => depth(a) - depth(b) || a.y - b.y);
     return { flat: flatList, standing: standList };
-  }, [village.items, wild, placing?.moveId, kart]);
+  }, [village.items, wild, placing?.moveId, kart, spots]);
 
   /* ---------- kamera ---------- */
   const apply = useCallback(() => {
@@ -246,6 +281,8 @@ const VillageMap = forwardRef(function VillageMap(
       const bubble = target.closest?.("[data-harvest]");
       if (bubble) return L.onHarvest(bubble.dataset.harvest);
       if (target.closest?.("[data-kart]")) return L.onKart();
+      const vil = target.closest?.("[data-villager]");
+      if (vil && !L.placing) return L.onVillager(vil.dataset.villager);
       if (L.placing) return ghostAt(e.clientX, e.clientY, false);
       const hit = target.closest?.("[data-item]");
       if (hit && !hit.dataset.item.startsWith("w-")) return L.onSelect(hit.dataset.item);
@@ -368,7 +405,12 @@ const VillageMap = forwardRef(function VillageMap(
           )}
 
           {standing.map((e) =>
-            e.type === "kart" ? (
+            e.type === "villager" ? (
+              <g key={e.key} transform={at(e.x + 0.5, e.y + 0.5)} data-villager={e.villager}>
+                <rect x="-16" y="-70" width="32" height="76" fill="transparent" />
+                <VillagerArt id={e.villager} alert={!!alerts?.has(e.villager)} />
+              </g>
+            ) : e.type === "kart" ? (
               <g key="kart" transform={at(e.x + 0.5, e.y + 0.5)} data-kart="1">
                 <ellipse cx="0" cy="4" rx="14" ry="6" fill="#1c2b14" opacity="0.25" />
                 <g className="iso-kart" transform="translate(-26 -52)">

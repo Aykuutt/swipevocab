@@ -1,6 +1,7 @@
 // Uygulama durumu, kelime listesi ve sekme gezgini için tek bağlam.
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { getLanguage } from "../data/languages";
+import { canTalkToday, getVillager, talkReward, talkState } from "../data/villagers";
 import { TYPES, buyBlock, canPlace, canSell, itemById, pendingHarvests, upgradeBlock } from "../data/village";
 import { useAccount } from "../hooks/useAccount";
 import { useProgressSave } from "../hooks/useProgressSave";
@@ -228,6 +229,16 @@ export function AppProvider({ children }) {
         sfx("levelup");
         mascotSay(`${TYPES[item.type].name} ${item.level + 1}. seviyeye çıktı!`, { mood: "cheer" });
         return true;
+      },
+      /** Köylüyle günlük sohbeti tamamlar: puan ve arkadaşlık. Verilen puanı döndürür (bugün zaten konuşulduysa 0). */
+      villagerTalk(id) {
+        const s = stateRef.current;
+        if (!canTalkToday(s, id)) return 0;
+        const gained = talkReward(talkState(s.village, id).talks);
+        dispatch({ type: "VILLAGER_TALK", id });
+        sfx("levelup");
+        mascotSay(`${getVillager(id).name} ile sohbet güzeldi! +${gained} puan`, { mood: "cheer" });
+        return gained;
       },
       /** Bugünkü hasadı toplar (id yoksa hepsini). Toplanan puanı döndürür. */
       harvest(id) {
