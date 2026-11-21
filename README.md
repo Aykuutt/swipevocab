@@ -68,7 +68,7 @@ npm run check    # üçü birden; GitHub Actions her gönderimde bunları çalı
 ### Supabase kurulumu (bir kez)
 
 1. supabase.com'da bir proje oluştur.
-2. **SQL Editor**'da önce `supabase/schema.sql`, sonra `supabase/talk.sql` dosyasının içeriğini çalıştır.
+2. **SQL Editor**'da önce `supabase/schema.sql`, sonra `supabase/talk.sql`, sonra `supabase/delete-account.sql` dosyasının içeriğini çalıştır.
 3. **Authentication > URL Configuration**:
    - Site URL: `https://swipevocab.vercel.app`
    - Redirect URLs: `https://swipevocab.vercel.app/**` ve `http://127.0.0.1:5173/**`
@@ -117,6 +117,9 @@ public/audio/w/<id>.mp3      # kelime kayıtları (1-90)
 public/audio/s/<id>.mp3      # örnek cümle kayıtları (1-90)
 supabase/schema.sql          # ilerleme tablosu ve güvenlik kuralları
 supabase/talk.sql            # canlı konuşma: profiller, eşleştirme, görüşmeler, engelleme, şikayet
+supabase/delete-account.sql  # "hesabımı sil": kullanıcı kendi hesabını ve tüm verisini siler
+public/gizlilik.html         # gizlilik politikası (Google Play için)
+public/hesap-silme.html      # hesap silme adımları (Google Play için)
 api/livekit-token.js         # Vercel fonksiyonu: canlı konuşma odası için kısa ömürlü anahtar
 ```
 

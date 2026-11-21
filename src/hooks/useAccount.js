@@ -126,11 +126,19 @@ export function useAccount({ dispatch, getNow }) {
     [dispatch, getNow]
   );
 
+  /** Misafir: bu cihazdaki ilerlemeyi siler ve başlangıç ekranına döner. */
+  const leaveGuest = useCallback(() => {
+    forgetGuest();
+    loadedFor.current = null;
+    dispatch({ type: "SIGN_OUT" });
+    setStatus("signedOut");
+  }, [dispatch]);
+
   const retry = useCallback(() => handleSession(lastSession.current), [handleSession]);
   const finishRecovery = useCallback(() => setRecovery(false), []);
 
   return useMemo(
-    () => ({ status, recovery, retry, finishRecovery, startGuest }),
-    [status, recovery, retry, finishRecovery, startGuest]
+    () => ({ status, recovery, retry, finishRecovery, startGuest, leaveGuest }),
+    [status, recovery, retry, finishRecovery, startGuest, leaveGuest]
   );
 }

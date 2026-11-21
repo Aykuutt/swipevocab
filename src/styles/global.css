@@ -1178,3 +1178,11 @@ strong, b { font-weight: 650; }
 .vweekly .vorder-body > span, .vweekly .vorder-bar small { color: #3a2a10; }
 .vweekly.is-ready { border-color: #3fbf7f; box-shadow: 0 0 0 3px rgba(63, 191, 127, 0.25); }
 .vweekly.is-claimed { opacity: 0.7; }
+
+/* ---------- Hesap silme ve yasal bağlantılar ---------- */
+.delete-confirm { display: grid; gap: 8px; padding: 14px; border: 1.5px solid var(--coral); border-radius: var(--r-lg); background: var(--plum-2); }
+.delete-confirm p { margin: 0; font-size: 14px; line-height: 1.45; color: var(--text-dim); }
+.delete-confirm .delete-error { color: var(--coral); font-weight: 600; }
+.delete-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.legal-links { text-align: center; font-size: 13px; color: var(--text-faint); margin: 12px 0 4px; }
+.legal-links a { color: var(--text-dim); }

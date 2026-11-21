@@ -33,7 +33,7 @@ export default defineConfig({
         globPatterns: ["**/*.{js,css,html,svg,png}", "**/*-latin-*.woff2"],
         globIgnores: ["**/Talk-*.js", "audio/**"],
         navigateFallback: "/index.html",
-        navigateFallbackDenylist: [/^\/api\//],
+        navigateFallbackDenylist: [/^\/api\//, /^\/(gizlilik|hesap-silme)/],
         runtimeCaching: [
           {
             urlPattern: ({ url }) => url.pathname.endsWith(".woff2"),

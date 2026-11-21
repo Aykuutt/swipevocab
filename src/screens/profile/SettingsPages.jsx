@@ -20,6 +20,7 @@ import { useInstallPrompt } from "../../hooks/useInstallPrompt";
 import { useVoiceInfo } from "../../hooks/useVoiceInfo";
 import { speak } from "../../lib/speech";
 import { useApp, useLanguage } from "../../state/AppContext";
+import { useState } from "react";
 import { activeLevels, hasFullAccess, hasUnlimitedLives } from "../../state/selectors";
 
 const voiceHint = (name, hasClips) =>
@@ -218,7 +219,78 @@ export function AccountPage() {
             </>
           )}
         </Group>
+        <DeleteAccount guest={!!user?.guest} />
+        <PrivacyLinks />
     </>
+  );
+}
+
+/** Hesabı (misafirde bu cihazdaki ilerlemeyi) kalıcı olarak silme: iki adımlı onay. */
+function DeleteAccount({ guest }) {
+  const { actions } = useApp();
+  const [step, setStep] = useState("idle"); // idle | confirm | busy
+  const [error, setError] = useState("");
+
+  const run = async () => {
+    setStep("busy");
+    setError("");
+    try {
+      await actions.deleteAccount();
+    } catch (err) {
+      setError(err?.message || "Bir şeyler ters gitti, tekrar dene.");
+      setStep("confirm");
+    }
+  };
+
+  const title = guest ? "Bu cihazdaki ilerlemeyi sil" : "Hesabımı sil";
+  return (
+    <Group title="Verilerim">
+      {step === "idle" ? (
+        <Row
+          icon="close"
+          tone="coral"
+          title={title}
+          desc={guest ? "Kelimelerin, puanların ve köyün bu cihazdan silinir." : "Hesabın ve bütün ilerlemen kalıcı olarak silinir."}
+        >
+          <Button size="sm" variant="danger" onClick={() => setStep("confirm")}>
+            Sil
+          </Button>
+        </Row>
+      ) : (
+        <div className="delete-confirm" role="alertdialog" aria-label={title}>
+          <strong>Emin misin?</strong>
+          <p>
+            {guest
+              ? "Bu cihazdaki kelimelerin, serin, puanların ve köyün silinir. Bu işlem geri alınamaz."
+              : "Hesabın, e-posta adresin, kelimelerin, serin, puanların ve köyün sunucudan kalıcı olarak silinir. Bu işlem geri alınamaz ve aynı ilerlemeyi bir daha geri getiremeyiz."}
+          </p>
+          {error && <p className="delete-error">{error}</p>}
+          <div className="delete-actions">
+            <Button variant="danger" disabled={step === "busy"} onClick={run}>
+              {step === "busy" ? "Siliniyor..." : "Evet, kalıcı olarak sil"}
+            </Button>
+            <Button variant="secondary" disabled={step === "busy"} onClick={() => setStep("idle")}>
+              Vazgeç
+            </Button>
+          </div>
+        </div>
+      )}
+    </Group>
+  );
+}
+
+/** Gizlilik politikası ve hesap silme sayfalarının bağlantıları. */
+function PrivacyLinks() {
+  return (
+    <p className="legal-links">
+      <a href="/gizlilik.html" target="_blank" rel="noopener">
+        Gizlilik politikası
+      </a>
+      <span aria-hidden="true"> · </span>
+      <a href="/hesap-silme.html" target="_blank" rel="noopener">
+        Hesap silme
+      </a>
+    </p>
   );
 }
 
@@ -327,6 +399,8 @@ export function AppPage() {
         )}
 
       {isDevMode() && <DevTools />}
+
+      <PrivacyLinks />
 
       <p className="app-version">
         {APP_NAME} {APP_VERSION}

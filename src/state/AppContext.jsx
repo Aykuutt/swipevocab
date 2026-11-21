@@ -6,7 +6,7 @@ import { availableVillagers, canTalkToday, getVillager, talkReward, talkState } 
 import { TYPES, buyBlock, canPlace, canSell, expandBlock, itemById, pendingHarvests, upgradeBlock } from "../data/village";
 import { useAccount } from "../hooks/useAccount";
 import { useProgressSave } from "../hooks/useProgressSave";
-import { signOut as authSignOut } from "../lib/auth";
+import { deleteAccount as authDeleteAccount, signOut as authSignOut } from "../lib/auth";
 import { buildDeck, topUpCards } from "../lib/deck";
 import { mascotSay } from "../lib/mascot";
 import { localCache } from "../lib/progress";
@@ -90,6 +90,7 @@ export function AppProvider({ children }) {
 
   /* ---------- Oturum (Supabase) ---------- */
   const account = useAccount({ dispatch, getNow });
+  const { leaveGuest } = account;
   // Hesaplı ya da misafir: uygulama kullanımda.
   const inApp = account.status === "signedIn" || account.status === "guest";
   const active = wordsStatus === "ready" && inApp && !!state.user;
@@ -222,6 +223,24 @@ export function AppProvider({ children }) {
         setTab("learn");
         setProfileView(null);
       },
+      /**
+       * Hesabı ve tüm ilerlemeyi kalıcı olarak siler. Misafirde bu cihazdaki ilerleme silinir.
+       * Hata olursa (AuthError) fırlatır; hiçbir şey silinmemiş olur.
+       */
+      async deleteAccount() {
+        const s = stateRef.current;
+        if (!s.user) return;
+        if (s.user.guest) {
+          leaveGuest();
+        } else {
+          await authDeleteAccount();
+          // Kullanıcıyı hemen boşalt: kayıt kancası silinen hesabın ilerlemesini geri yazmasın.
+          dispatch({ type: "SIGN_OUT" });
+          localCache.remove(s.user.id);
+        }
+        setTab("learn");
+        setProfileView(null);
+      },
       setOnboarding: (goal, level, language) => dispatch({ type: "SET_ONBOARDING", goal, level, language }),
       setLanguage: (language) => dispatch({ type: "SET_LANGUAGE", language }),
       setVoice: (uri) => {
@@ -334,7 +353,7 @@ export function AppProvider({ children }) {
           now: getNow(),
         }),
     }),
-    [words, getNow, flushProgress, sfx]
+    [words, getNow, flushProgress, sfx, leaveGuest]
   );
 
   const value = useMemo(

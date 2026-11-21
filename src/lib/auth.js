@@ -99,3 +99,19 @@ export async function updatePassword(password) {
 export async function signOut() {
   await supabase.auth.signOut();
 }
+
+/**
+ * Giriş yapmış kullanıcının hesabını ve tüm verisini kalıcı olarak siler (supabase/delete-account.sql).
+ * Sonra bu cihazdaki oturumu kapatır.
+ */
+export async function deleteAccount() {
+  const { error } = await supabase.rpc("delete_my_account");
+  if (error) {
+    if (error.code === "PGRST202" || /delete_my_account/.test(error.message || "")) {
+      throw new AuthError("Hesap silme şu an kullanılamıyor. Biraz sonra tekrar dene.");
+    }
+    throw toAuthError(error);
+  }
+  // Hesap artık yok: sunucuya çıkış isteği hata verebilir, yalnızca bu cihazdaki oturumu temizle.
+  await supabase.auth.signOut({ scope: "local" }).catch(() => {});
+}

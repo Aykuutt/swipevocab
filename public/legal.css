@@ -1,0 +1,47 @@
+/* Gizlilik ve hesap silme sayfaları: uygulamadan bağımsız, sade okunabilir sayfa. */
+:root {
+  --bg: #f7f4ff;
+  --card: #ffffff;
+  --text: #24203a;
+  --dim: #5d5878;
+  --accent: #6a5bf5;
+  --line: #e3def5;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #17142a;
+    --card: #211d38;
+    --text: #f1eefc;
+    --dim: #b3add0;
+    --accent: #a99cff;
+    --line: #36305a;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+.legal {
+  max-width: 720px;
+  margin: 24px auto;
+  padding: 24px 20px 40px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+}
+@media (max-width: 760px) {
+  .legal { margin: 0; border-radius: 0; border: 0; padding: 20px 16px 40px; }
+}
+h1 { font-size: 26px; line-height: 1.25; margin: 12px 0 4px; }
+h2 { font-size: 19px; margin: 28px 0 8px; }
+h3 { font-size: 16px; margin: 16px 0 4px; }
+p, li { color: var(--text); }
+ul, ol { padding-left: 22px; }
+li { margin: 4px 0; }
+a { color: var(--accent); }
+.back { text-decoration: none; font-weight: 600; font-size: 14px; }
+.updated { color: var(--dim); font-size: 14px; margin-top: 0; }
