@@ -10,6 +10,7 @@ import {
   REVIEW_INTERVALS,
   STATE_VERSION,
   XP,
+  POINTS_RESET_ID,
 } from "../config";
 import { DEFAULT_GOAL } from "../data/goals";
 import { DEFAULT_LANGUAGE, LANGUAGES } from "../data/languages";
@@ -86,6 +87,7 @@ export const initialState = {
   top3Finishes: 0,
   records: {}, // oyun rekorları: "timed:<dil>" -> en yüksek skor
   league: null, // arkadaş ligi: { week: "2026-W47", base: haftanın başındaki xpTotal }
+  pointsReset: POINTS_RESET_ID, // yeni kullanıcı sıfırlamadan etkilenmez
   learnCoach: false, // ilk girişteki kart tanıtımı görüldü mü
   friendsCount: 0, // arkadaş sayısı (dostluk süslerinin kilidi için; sunucudan gelir)
   xpTotal: 0, // ömür boyu kazanılan puan (harcamak bunu düşürmez; başarımlar bunu kullanır)
@@ -94,6 +96,17 @@ export const initialState = {
 };
 
 /** Kayıttan gelen durumu eksik alanları tamamlayarak açar. */
+/**
+ * Kayıtlı hesapların puanını bir kez sıfırlar (POINTS_RESET_ID değişince). Köy, kelimeler, seri ve arkadaşlar kalır.
+ * Misafirler etkilenmez. Eski bir cihazdaki önbellek de yüklenirken sıfırlanır, eski puan geri gelmez.
+ */
+export function resetPoints(s) {
+  if (s.pointsReset === POINTS_RESET_ID) return s;
+  // Misafir sonradan hesap açarsa o gün puanı sıfırlanmasın: işaretle, dokunma.
+  if (!s.user || s.user.guest) return { ...s, pointsReset: POINTS_RESET_ID };
+  return { ...s, xp: 0, xpTotal: 0, weeklyXp: 0, dailyXp: 0, league: null, xpBoost: false, learnCoach: true, pointsReset: POINTS_RESET_ID };
+}
+
 export function hydrate(saved) {
   const { profileId, ...rest } = saved; // eski SQL eşitlemesinden kalan alan
   const settings = { ...initialState.settings, ...rest.settings };
@@ -111,6 +124,7 @@ export function hydrate(saved) {
     village: migrateVillage(rest.village),
   };
   if (!LANGUAGES[s.language]) s = { ...s, language: DEFAULT_LANGUAGE };
+  s = resetPoints({ ...s, pointsReset: rest.pointsReset }); // kayıtta yoksa eski kayıttır
   return FEATURES.pro ? s : { ...s, isPro: false, freezes: 0 };
 }
 

@@ -1,7 +1,10 @@
 // Uygulama genelindeki sabitler ve özellik anahtarları.
 
 export const APP_NAME = "SwipeVocab";
-export const APP_VERSION = "0.22.0";
+// Herkesin puanını bir kez sıfırlamak için bu kimliği değiştir (kayıtlı hesaplar bir sonraki açılışta 0'dan başlar).
+export const POINTS_RESET_ID = "2026-11-22";
+
+export const APP_VERSION = "0.22.1";
 
 // Özellik anahtarları: kapalı olanlar arayüzde hiç görünmez.
 export const FEATURES = {

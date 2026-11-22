@@ -2,6 +2,10 @@
 // Yeni sürüm yayınlarken buraya kısa, kullanıcının anlayacağı maddeler ekle. config.js'teki APP_VERSION ile aynı sürüm.
 export const CHANGELOG = [
   {
+    version: "0.22.1",
+    items: ["Yeni dönem başladı: herkesin puanı sıfırlandı, herkes eşit başlıyor! Köyün, öğrendiğin kelimeler ve serin yerinde duruyor."],
+  },
+  {
     version: "0.22.0",
     items: ["Dinle ve yaz: 3 hakkın var. Yakın yazınca \"Yaklaştın!\" der, 2. yanlıştan sonra ilk harf ipucu gelir, 3. yanlışta doğru cevap gösterilir.", "Telefonda ana ekrandan açınca ekranın kayması ve yazı kutusunda yakınlaşma düzeltildi.", "Canlar artık puanla alınmıyor, zamanla kendiliğinden doluyor."],
   },

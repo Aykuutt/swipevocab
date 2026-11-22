@@ -51,4 +51,18 @@ describe("arkadaş ligi", () => {
     expect(reducer(s, { type: "LEARN_COACH_DONE" })).toBe(s);
     expect(hydrate(s).learnCoach).toBe(true);
   });
+
+  it("puan sıfırlaması kayıtlı hesaplara bir kez uygulanır, köy ve kelimeler kalır", () => {
+    const { pointsReset: _drop, ...base } = initialState; // eski kayıtlarda bu alan hiç yok
+    const old = { ...base, user: { name: "Ada" }, xp: 900, xpTotal: 5000, weeklyXp: 300, knownIds: ["a", "b"] };
+    const s = hydrate(old);
+    expect(s).toMatchObject({ xp: 0, xpTotal: 0, weeklyXp: 0, league: null, learnCoach: true });
+    expect(s.knownIds).toEqual(["a", "b"]);
+    expect(s.village).toEqual(hydrate(old).village);
+    const later = hydrate({ ...s, xp: 40, xpTotal: 40 });
+    expect(later.xp).toBe(40); // ikinci yüklemede tekrar sıfırlanmaz
+    const guest = hydrate({ ...old, user: { name: "Misafir", guest: true } });
+    expect(guest.xp).toBe(900);
+    expect(hydrate({ ...guest, user: { name: "Ada" } }).xp).toBe(900); // misafir sonra hesap açınca da puanı kalır
+  });
 });
