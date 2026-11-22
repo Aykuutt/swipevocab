@@ -1,8 +1,7 @@
 // Bir alıştırma dizisini sırayla oynatır. Yanlış cevaplanan soru sona
 // eklenir; hepsi doğru bilinince `onComplete` çağrılır.
 import { useCallback, useEffect, useRef, useState } from "react";
-import { FEATURES, PRICES } from "../../config";
-import { marketPrice } from "../../data/village";
+import { FEATURES } from "../../config";
 import { useValueDelta } from "../../hooks/useValueDelta";
 import { useApp } from "../../state/AppContext";
 import { hasUnlimitedLives } from "../../state/selectors";
@@ -16,18 +15,13 @@ import ListenExercise from "./ListenExercise";
 import MatchExercise from "./MatchExercise";
 
 function OutOfHearts({ onExit }) {
-  const { state, actions, openVillage } = useApp();
-  const price = marketPrice(PRICES.heartsRefill, state.village);
-  const canBuy = state.xp >= price;
+  const { actions } = useApp();
   return (
     <EmptyState
       mascot="sad"
       title="Canların bitti"
       actions={
         <>
-          <Button block disabled={!canBuy} onClick={actions.buyHearts}>
-            {price} puanla canları yenile
-          </Button>
           {FEATURES.pro && (
             <Button block variant="pro" icon="crown" onClick={() => actions.setPro(true)}>
               Pro'ya geç, sınırsız can
@@ -40,22 +34,8 @@ function OutOfHearts({ onExit }) {
       }
     >
       <p>
-        Bir sonraki can <HeartTimer className="inline" /> sonra gelecek.{" "}
-        {canBuy
-          ? "Beklemek istemezsen puanınla yenileyebilirsin."
-          : `Puanınla yenilemek için ${price} puan gerekiyor, şu an ${state.xp} puanın var.`}
-      </p>
-      <p className="empty-link-row">
-        <button
-          type="button"
-          className="link-btn"
-          onClick={() => {
-            onExit();
-            openVillage("market");
-          }}
-        >
-          Pazara git
-        </button>
+        Bir sonraki can <HeartTimer className="inline" /> sonra gelecek. Bu arada kart kaydırabilir ya da köyünle
+        ilgilenebilirsin.
       </p>
     </EmptyState>
   );

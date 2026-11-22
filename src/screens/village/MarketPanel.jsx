@@ -1,4 +1,4 @@
-// Pazar: puanla can yenileme ve 2 kat puan. Pazar büyüdükçe fiyatlar düşer.
+// Pazar: 2 kat puan satılır (Pazar büyüdükçe ucuzlar). Canlar puanla alınmaz, zamanla dolar.
 import HeartTimer from "../../components/HeartTimer";
 import { Button, Group, Row } from "../../components/ui";
 import { FEATURES, MAX_LIVES, PRICES } from "../../config";
@@ -12,7 +12,6 @@ export default function MarketPanel() {
   const { state, actions } = useApp();
   const { xp, lives, isPro, xpBoost, village } = state;
   const unlimited = hasUnlimitedLives(state);
-  const heartsPrice = marketPrice(PRICES.heartsRefill, village);
   const boostPrice = marketPrice(PRICES.xpBoost, village);
   const discounted = marketLevel(village) > 1;
 
@@ -28,17 +27,8 @@ export default function MarketPanel() {
 
   return (
     <>
-      <Group title="Canlar" hint={discounted ? "Pazar seviyen sayesinde indirimli fiyatlar." : "Pazarı yükseltirsen fiyatlar düşer."}>
-        <Row icon="heart" tone="coral" title="Canları yenile" desc={heartsDesc}>
-          <Button
-            size="sm"
-            variant="secondary"
-            disabled={unlimited || lives >= MAX_LIVES || xp < heartsPrice}
-            onClick={actions.buyHearts}
-          >
-            {heartsPrice} puan
-          </Button>
-        </Row>
+      <Group title="Canlar" hint="Canlar puanla alınmaz, zamanla kendiliğinden dolar.">
+        <Row icon="heart" tone="coral" title="Canların" desc={heartsDesc} />
         {FEATURES.pro && (
           <Row icon="crown" tone="amber" title="Sınırsız can" desc="Pro planla gelir, dersler hiç durmaz.">
             {isPro ? (
@@ -52,7 +42,10 @@ export default function MarketPanel() {
         )}
       </Group>
 
-      <Group title="Güçlendiriciler" hint="Puanları kart kaydırarak ve soru çözerek kazanırsın.">
+      <Group
+        title="Güçlendiriciler"
+        hint={discounted ? "Pazar seviyen sayesinde indirimli fiyat." : "Pazarı yükseltirsen fiyat düşer."}
+      >
         <Row
           icon="bolt"
           tone="amber"

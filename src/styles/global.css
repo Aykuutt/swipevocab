@@ -1342,3 +1342,28 @@ strong, b { font-weight: 650; }
 
 /* Öğren: kartlar bitince de üstte günlük panel kalır, altı ortalanır */
 .learn-rest { flex: 1; display: flex; flex-direction: column; justify-content: center; padding-top: 8px; }
+
+/* Telefonda (ana ekrana eklenmiş uygulama dahil) sayfa kaymasın:
+   - sayfa lastik gibi esneyip kaymasın, yalnızca ekranın içi kaysın
+   - iPhone yazı kutusuna dokununca yakınlaştırmasın (16px altı yazıda yakınlaştırıp kaydırıyor)
+   - çift dokunuşta yakınlaşma olmasın */
+html { touch-action: manipulation; }
+.standalone, .standalone body { overscroll-behavior: none; }
+.screen { overscroll-behavior: contain; }
+@media (pointer: coarse) {
+  .field input, .composer-input, .nb-search input, textarea, select { font-size: 16px; }
+}
+@media (max-width: 480px) {
+  .standalone, .standalone body, .standalone #root { height: 100%; overflow: hidden; }
+  .standalone .app-bg { min-height: 0; height: 100%; }
+  .standalone .app-shell { height: 100dvh; }
+}
+
+/* Dinle-yaz: yanlış denemede uyarı ve harf ipucu */
+.dictation-input.is-near { border-color: var(--amber); }
+.dictation-input.is-miss { border-color: var(--coral); }
+.dictation-note { margin-top: -6px; font-size: 14px; font-weight: 650; text-align: center; animation: dictation-shake 0.35s ease; }
+.dictation-note.is-near { color: var(--amber); }
+.dictation-note.is-miss { color: var(--coral); }
+.dictation-letters { font-family: var(--font-mono, ui-monospace, monospace); font-size: 20px; font-weight: 700; letter-spacing: 0.08em; color: var(--violet-strong); }
+@keyframes dictation-shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }

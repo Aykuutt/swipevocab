@@ -35,7 +35,7 @@ export const TYPES = {
     kind: "building",
     name: "Pazar",
     short: "Pazar",
-    role: "Can yenileme ve 2 kat puan burada satılır. Pazar büyüdükçe fiyatlar düşer.",
+    role: "2 kat puan burada satılır. Pazar büyüdükçe fiyatı düşer.",
     w: 2,
     d: 2,
     max: 1,

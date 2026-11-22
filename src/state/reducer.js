@@ -377,12 +377,6 @@ function baseReducer(state, action) {
     case "HEARTS_TICK":
       return regenLives(state, action.now);
 
-    case "BUY_HEARTS": {
-      const price = marketPrice(PRICES.heartsRefill, state.village); // Pazar büyüdükçe ucuzlar
-      if (state.xp < price || state.lives >= MAX_LIVES) return state;
-      return { ...state, xp: state.xp - price, lives: MAX_LIVES, regenAt: null };
-    }
-
     case "BUY_BOOST": {
       const price = marketPrice(PRICES.xpBoost, state.village);
       if (state.xp < price || state.xpBoost) return state;

@@ -370,7 +370,6 @@ export function AppProvider({ children }) {
       },
       loseLife: () => dispatch({ type: "LOSE_LIFE", now: getNow() }),
       completeUnit: (unitId, wordIds) => dispatch({ type: "COMPLETE_UNIT", unitId, wordIds }),
-      buyHearts: () => dispatch({ type: "BUY_HEARTS" }),
       buyBoost: () => dispatch({ type: "BUY_BOOST" }),
       setPro: (value) => dispatch({ type: "SET_PRO", value }),
       setSetting: (key, value) => dispatch({ type: "SET_SETTING", key, value }),

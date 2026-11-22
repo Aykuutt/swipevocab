@@ -131,12 +131,11 @@ describe("canlar", () => {
     expect(s.lives).toBe(MAX_LIVES);
   });
 
-  it("puan yetmiyorsa can satın alınamaz", () => {
+  it("canlar puanla alınmaz", () => {
     let s = newUser();
     s = reducer(s, { type: "LOSE_LIFE", now: 0 });
-    const before = s.lives;
-    s = reducer({ ...s, xp: 0 }, { type: "BUY_HEARTS" });
-    expect(s.lives).toBe(before);
+    const before = { ...s, xp: 500 };
+    expect(reducer(before, { type: "BUY_HEARTS" })).toBe(before);
   });
 });
 
@@ -284,12 +283,12 @@ describe("Dilbaz'ın köyü", () => {
     expect(pendingHarvests(s)).toHaveLength(1);
   });
 
-  it("Pazar büyüyünce can yenileme ucuzlar", () => {
+  it("Pazar büyüyünce 2 kat puan ucuzlar", () => {
     let s = rich();
     s = reducer(s, { type: "VILLAGE_UPGRADE", id: "market" }); // 2. seviye: %10 indirim
-    s = { ...s, lives: 1, xp: 27 };
-    s = reducer(s, { type: "BUY_HEARTS" });
-    expect(s.lives).toBe(MAX_LIVES);
+    s = { ...s, xp: 45, xpBoost: false };
+    s = reducer(s, { type: "BUY_BOOST" });
+    expect(s.xpBoost).toBe(true);
     expect(s.xp).toBe(0);
   });
 
