@@ -13,6 +13,7 @@ import DictationExercise from "./DictationExercise";
 import Feedback from "./Feedback";
 import ListenExercise from "./ListenExercise";
 import MatchExercise from "./MatchExercise";
+import SentenceExercise from "./SentenceExercise";
 
 function OutOfHearts({ onExit }) {
   const { actions } = useApp();
@@ -50,6 +51,7 @@ const EXERCISES = {
   listen_along: ListenExercise,
   match: MatchExercise,
   dictation: DictationExercise,
+  build_sentence: SentenceExercise,
 };
 
 export default function ExerciseRunner({ exercises, onComplete, onExit, costsHearts = true }) {

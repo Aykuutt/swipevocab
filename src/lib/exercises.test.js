@@ -1,18 +1,62 @@
 import { describe, expect, it } from "vitest";
 import { displayWord } from "../data/languages";
-import { WORDS } from "../data/langs/en";
+import { WORDS as RAW_WORDS } from "../data/langs/en";
+import { EXAMPLE_TR } from "../data/sentences/en";
 import { sameWord, exactWord } from "./typing";
 import {
   dictationGame,
   fillBlankExercise,
   placementLevel,
   placementTest,
+  sentenceDistance,
+  sentenceExercise,
+  sentenceTiles,
   timedQuestion,
   translateExercise,
   unitLesson,
 } from "./exercises";
 import { cardsForCall } from "./talk";
 import { buildUnits } from "./units";
+
+const WORDS = RAW_WORDS.map((w) => ({ ...w, exampleTr: EXAMPLE_TR[w.id] }));
+
+describe("cümleyi kur", () => {
+  it("her İngilizce örnek cümlenin Türkçesi var", () => {
+    for (const w of RAW_WORDS) expect(EXAMPLE_TR[w.id], w.word).toBeTruthy();
+  });
+
+  it("kutucuklar noktalamasız, cümle başı küçük harf, özel isimler büyük kalır", () => {
+    expect(sentenceTiles("Bugün hava güzel.")).toEqual(["bugün", "hava", "güzel"]);
+    expect(sentenceTiles("İstanbul çok büyük bir şehir.")[0]).toBe("İstanbul");
+    expect(sentenceTiles("Senin adın ne?")).toEqual(["senin", "adın", "ne"]);
+  });
+
+  it("kutucuklarda cevabın bütün kelimeleri ve birkaç fazlası var", () => {
+    for (const w of WORDS.slice(0, 60)) {
+      const ex = sentenceExercise(w, WORDS);
+      const texts = ex.tiles.map((t) => t.text);
+      for (const a of ex.answer) expect(texts).toContain(a);
+      expect(texts.length).toBeGreaterThan(ex.answer.length);
+      expect(sentenceDistance(ex.answer, ex.answer)).toBe(0);
+    }
+  });
+
+  it("tek kelime farkı 1, yer değiştiren iki komşu kelime de 1 sayılır", () => {
+    const answer = ["bugün", "hava", "güzel"];
+    expect(sentenceDistance(["bugün", "hava", "kötü"], answer)).toBe(1);
+    expect(sentenceDistance(["hava", "bugün", "güzel"], answer)).toBe(1);
+    expect(sentenceDistance(["bugün", "hava"], answer)).toBe(1);
+    expect(sentenceDistance(["güzel", "hava", "bugün"], answer)).toBe(2);
+    expect(sentenceDistance(["Bugün", "hava", "güzel"], answer)).toBe(0);
+  });
+
+  it("derste en fazla 2 cümle kurma sorusu çıkar", () => {
+    const lesson = unitLesson(WORDS.slice(20, 26), WORDS);
+    const builds = lesson.filter((e) => e.type === "build_sentence");
+    expect(builds.length).toBeGreaterThan(0);
+    expect(builds.length).toBeLessThanOrEqual(2);
+  });
+});
 
 describe("sorular", () => {
   it("çeviri sorusunda doğru cevap şıklar arasında ve şıklar tekrar etmiyor", () => {

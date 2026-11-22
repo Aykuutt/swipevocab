@@ -90,10 +90,74 @@ export function dictationGame(pool, count = 8) {
   return sample(pool, Math.min(count, pool.length)).map(dictationExercise);
 }
 
+// Cümle başında da büyük harfle kalması gereken özel isimler.
+const PROPER_START = /^(İstanbul|Ankara|Roma|İspanya|İngiliz)/;
+
+/** Türkçe çeviriyi kutucuk kelimelerine böler: noktalama atılır, cümle başı küçük harfe iner. */
+export function sentenceTiles(text) {
+  const tokens = text
+    .split(/\s+/)
+    .map((t) => t.replace(/^[.,!?;:"«»()]+|[.,!?;:"«»()]+$/g, ""))
+    .filter(Boolean);
+  if (tokens[0] && !PROPER_START.test(tokens[0])) tokens[0] = tokens[0].toLocaleLowerCase("tr");
+  return tokens;
+}
+
+const SENTENCE_MIN = 3;
+const SENTENCE_MAX = 8;
+const canBuildSentence = (w) => {
+  if (!w.exampleTr) return false;
+  const n = sentenceTiles(w.exampleTr).length;
+  return n >= SENTENCE_MIN && n <= SENTENCE_MAX;
+};
+
+const tileKey = (t) => t.toLocaleLowerCase("tr");
+
+/**
+ * "Cümleyi kur": Dilbaz örnek cümleyi okur, öğrenci Türkçesini kutucuklardan sıralar.
+ * Kutucuklar arasında başka cümlelerden birkaç şaşırtmaca kelime de olur.
+ */
+export function sentenceExercise(word, words) {
+  const answer = sentenceTiles(word.exampleTr);
+  const used = new Set(answer.map(tileKey));
+  const extraCount = answer.length >= 7 ? 2 : 3;
+  const extras = [];
+  for (const other of shuffle(words.filter((w) => w.id !== word.id && w.exampleTr))) {
+    for (const t of shuffle(sentenceTiles(other.exampleTr))) {
+      if (extras.length >= extraCount) break;
+      if (used.has(tileKey(t)) || /^\d/.test(t)) continue;
+      used.add(tileKey(t));
+      extras.push(t);
+    }
+    if (extras.length >= extraCount) break;
+  }
+  const tiles = shuffle([...answer, ...extras]).map((text, i) => ({ id: i, text }));
+  return { key: nextKey("build"), type: "build_sentence", word, answer, tiles };
+}
+
+/**
+ * Kurulan cümle doğrudan kaç kelime uzak: kelime düzeyinde düzenleme mesafesi
+ * (eksik, fazla, yanlış kelime ya da yer değiştirmiş iki komşu kelime 1 sayılır).
+ */
+export function sentenceDistance(picked, answer) {
+  const a = picked.map(tileKey);
+  const b = answer.map(tileKey);
+  const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
+  for (let j = 1; j <= b.length; j++) d[0][j] = j;
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + cost);
+      if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);
+    }
+  }
+  return d[a.length][b.length];
+}
+
 const listenExercise = (word) => ({ key: nextKey("listen"), type: "listen_along", word });
 const matchExercise = (words) => ({ key: nextKey("match"), type: "match", words });
 
-/** Bir ünitenin dersi: her kelime için çeviri ve boşluk, birkaç dinleme, iki eşleştirme. */
+/** Bir ünitenin dersi: her kelime için çeviri ve boşluk, birkaç dinleme, cümle kurma, iki eşleştirme. */
 export function unitLesson(unitWords, allWords) {
   const list = shuffle(unitWords);
   const matchSize = Math.min(4, list.length);
@@ -101,6 +165,7 @@ export function unitLesson(unitWords, allWords) {
     ...list.map((w) => translateExercise(w, allWords)),
     ...list.map((w) => fillBlankExercise(w, allWords)),
     ...sample(list, Math.min(4, list.length)).map(listenExercise),
+    ...sample(list.filter(canBuildSentence), 2).map((w) => sentenceExercise(w, allWords)),
     matchExercise(sample(list, matchSize)),
     matchExercise(sample(list, matchSize)),
   ]);
