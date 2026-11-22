@@ -1,6 +1,7 @@
 // "Profil" sekmesi: profil, istatistikler, başarımlar, görevler, haftalık özet, seviyeler ve ayarlar listesi.
 import Notebook from "../notebook/Notebook";
 import FriendsPage from "../friends/FriendsPage";
+import LeaderboardPage from "../friends/LeaderboardPage";
 import { useMemo } from "react";
 import Icon from "../../components/Icon";
 import Mascot from "../../components/Mascot";
@@ -302,6 +303,7 @@ function Achievements() {
 const PAGES = {
   notebook: { title: "Kelime defterim", Page: Notebook },
   friends: { title: "Arkadaşlarım", Page: FriendsPage },
+  leaderboard: { title: "Sıralama", Page: LeaderboardPage },
   account: { title: "Hesap", Page: AccountPage },
   language: { title: "Öğrendiğin dil", Page: LanguagePage },
   learning: { title: "Öğrenme", Page: LearningPage },
@@ -327,6 +329,15 @@ function NotebookLink() {
             summary={incoming > 0 ? `${incoming} yeni arkadaşlık isteği!` : "Köylerini gez, beğeni bırak"}
             badge={incoming}
             onClick={() => setProfileView("friends")}
+          />
+        )}
+        {FEATURES.friends && (
+          <NavRow
+            icon="trophy"
+            tone="amber"
+            title="Sıralama"
+            summary="Herkes arasında ve arkadaşların arasında kaçıncısın?"
+            onClick={() => setProfileView("leaderboard")}
           />
         )}
       </ul>

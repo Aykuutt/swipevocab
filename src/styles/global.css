@@ -1386,3 +1386,11 @@ html { touch-action: manipulation; }
 .build-tile.is-slot { display: inline-grid; place-items: center; border-color: transparent; background: var(--plum-2); color: transparent; cursor: default; }
 .build-tile.is-dragging { opacity: 0.3; }
 .build-tile.is-ghost { position: fixed; z-index: 1000; display: grid; place-items: center; pointer-events: none; border-color: var(--violet); box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45); transform: rotate(-3deg) scale(1.05); cursor: grabbing; }
+
+/* Sıralama sayfası */
+.leader-tabs { margin-bottom: 14px; }
+.leader-summary { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; padding: 14px 16px; border-radius: var(--r-lg); background: var(--amber-soft); color: var(--text); font-size: 14px; line-height: 1.4; }
+.leader-rank-big { font-family: var(--font-display); font-size: 30px; font-weight: 800; color: var(--amber); font-variant-numeric: tabular-nums; }
+.league-tag { margin-left: 8px; padding: 2px 7px; border-radius: 999px; background: var(--violet-soft); color: var(--violet); font-size: 11px; font-weight: 700; vertical-align: 2px; }
+.league-gap { list-style: none; padding: 2px 12px; text-align: center; color: var(--text-dim); letter-spacing: 4px; }
+.leader-note { margin-top: 12px; font-size: 12.5px; color: var(--text-dim); line-height: 1.45; }

@@ -137,3 +137,17 @@ export function snapshotToVillage(snapshot) {
     orders: {},
   };
 }
+
+/**
+ * Herkesin göründüğü haftalık genel sıralama (sunucu: supabase/leaderboard.sql).
+ * Dönen: { total, top: [{ rank, name, points, level, me, friend }], me: { rank, points } | null }
+ */
+export async function loadLeaderboard(week, limit = 50) {
+  const { data, error } = await supabase.rpc("leaderboard", { p_week: week, p_limit: limit });
+  if (error) {
+    const err = fail(error);
+    if (error.code === "PGRST202") err.message = "Genel sıralama şu an kullanılamıyor. Biraz sonra tekrar dene.";
+    throw err;
+  }
+  return { total: data?.total ?? 0, top: data?.top ?? [], me: data?.me ?? null };
+}

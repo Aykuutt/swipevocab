@@ -64,7 +64,7 @@ function MyCode({ code }) {
 }
 
 /** Arkadaşlarla haftalık lig: bu takvim haftasında (Pazartesi-Pazar) kazanılan puanlar. */
-function League({ friends }) {
+export function League({ friends, title = "Bu haftanın ligi" }) {
   const { state } = useApp();
   const now = Date.now();
   const week = isoWeekKey(now);
@@ -74,7 +74,7 @@ function League({ friends }) {
   ].sort((a, b) => b.points - a.points || (a.me ? -1 : b.me ? 1 : 0));
   const left = daysLeftInWeek(now);
   return (
-    <Group title="Bu haftanın ligi" hint={`Pazartesi sıfırlanır · ${left === 1 ? "bugün son gün" : `${left} gün kaldı`}. Kelime öğrendikçe puan kazanırsın.`}>
+    <Group title={title} hint={`Pazartesi sıfırlanır · ${left === 1 ? "bugün son gün" : `${left} gün kaldı`}. Kelime öğrendikçe puan kazanırsın.`}>
       {rows.map((r, i) => (
         <li key={r.id} className={`league-row ${r.me ? "is-me" : ""}`}>
           <span className={`league-rank rank-${i + 1}`}>{i === 0 && r.points > 0 ? <Icon name="crown" size={16} /> : i + 1}</span>
