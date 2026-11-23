@@ -1,10 +1,10 @@
 // Uygulama genelindeki sabitler ve özellik anahtarları.
 
-export const APP_NAME = "SwipeVocab";
+export const APP_NAME = "Kelimanya";
 // Herkesin puanını bir kez sıfırlamak için bu kimliği değiştir (kayıtlı hesaplar bir sonraki açılışta 0'dan başlar).
 export const POINTS_RESET_ID = "2026-11-22";
 
-export const APP_VERSION = "0.24.0";
+export const APP_VERSION = "0.25.0";
 
 // Özellik anahtarları: kapalı olanlar arayüzde hiç görünmez.
 export const FEATURES = {
@@ -16,6 +16,15 @@ export const FEATURES = {
   aiPartner: true,
   friends: true, // arkadaş ekleme ve köy ziyareti (supabase/friends.sql)
   liveTalk: false, // canlı sesli konuşma: kod hazır, şimdilik "Yakında" (LiveKit + supabase/talk.sql)
+};
+
+// Google AdSense: .env'de VITE_ADSENSE_CLIENT ve birim kimliği yoksa reklam gösterilmez (bkz. vite.config.js).
+const ADSENSE_CLIENT = import.meta.env.VITE_ADSENSE_CLIENT || "";
+export const ADS = {
+  client: /^ca-pub-\d{10,20}$/.test(ADSENSE_CLIENT) ? ADSENSE_CLIENT : "",
+  slots: {
+    lessonEnd: import.meta.env.VITE_ADSENSE_SLOT_LESSON_END || "", // ünite bitiş ekranı
+  },
 };
 
 // Adresin sonunda ?dev ya da #dev varsa test araçları açılır.

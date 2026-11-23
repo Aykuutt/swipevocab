@@ -32,7 +32,7 @@ function dayLabel(day) {
 function MyCode({ code }) {
   const [copied, setCopied] = useState("");
   const link = code ? inviteUrl(code) : "";
-  const text = `SwipeVocab'da birlikte kelime öğrenelim! Bu bağlantıyla katıl, otomatik arkadaş olalım:`;
+  const text = `Kelimanya'da birlikte kelime öğrenelim! Bu bağlantıyla katıl, otomatik arkadaş olalım:`;
   const copy = async (value, what) => {
     try {
       await navigator.clipboard.writeText(value);
@@ -43,7 +43,7 @@ function MyCode({ code }) {
     }
   };
   const share = () => {
-    if (navigator.share) navigator.share({ title: "SwipeVocab", text, url: link }).catch(() => {});
+    if (navigator.share) navigator.share({ title: "Kelimanya", text, url: link }).catch(() => {});
     else copy(`${text} ${link}`, "link");
   };
   return (

@@ -1,4 +1,4 @@
--- SwipeVocab: Supabase veritabanı şeması.
+-- Kelimanya: Supabase veritabanı şeması.
 -- Supabase panelinde SQL Editor'a yapıştırıp bir kez çalıştır. Tekrar çalıştırmak güvenlidir.
 --
 -- Hesaplar ve şifreler Supabase Auth'ta (auth.users) tutulur; bu tabloda yalnızca

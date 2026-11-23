@@ -1,4 +1,4 @@
--- SwipeVocab: kullanıcının kendi hesabını kalıcı olarak silmesi (Google Play'in istediği "hesabımı sil").
+-- Kelimanya: kullanıcının kendi hesabını kalıcı olarak silmesi (Google Play'in istediği "hesabımı sil").
 -- Supabase panelinde SQL Editor'a yapıştırıp bir kez çalıştır. Tekrar çalıştırmak güvenlidir.
 --
 -- Uygulama bu fonksiyonu giriş yapmış kullanıcının oturumuyla çağırır (supabase.rpc("delete_my_account")).

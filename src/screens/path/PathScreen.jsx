@@ -1,5 +1,6 @@
 // "Yol" sekmesi: üniteler sırayla açılır, her ünite kısa bir derstir.
 import { useMemo, useState } from "react";
+import AdSlot from "../../components/AdSlot";
 import ExerciseRunner from "../../components/exercises/ExerciseRunner";
 import HeartTimer from "../../components/HeartTimer";
 import Icon from "../../components/Icon";
@@ -131,6 +132,7 @@ export default function PathScreen() {
                   Sıradaki ünite açıldı: <strong>{finished.next.title}</strong>
                 </p>
               )}
+              <AdSlot slot="lessonEnd" />
             </EmptyState>
           </div>
         </Overlay>

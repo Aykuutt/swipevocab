@@ -1,18 +1,44 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
-export default defineConfig({
+// Google AdSense: VITE_ADSENSE_CLIENT (ca-pub-...) yazılıysa site doğrulama etiketi ve reklam betiği sayfaya,
+// /ads.txt dosyası da derlemeye eklenir. Boşsa hiçbir reklam kodu yüklenmez.
+function adsense(client) {
+  const valid = /^ca-pub-\d{10,20}$/.test(client || "");
+  return {
+    name: "kelimanya-adsense",
+    transformIndexHtml() {
+      if (!valid) return [];
+      return [
+        { tag: "meta", attrs: { name: "google-adsense-account", content: client }, injectTo: "head" },
+        {
+          tag: "script",
+          attrs: { async: true, src: `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}`, crossorigin: "anonymous" },
+          injectTo: "head",
+        },
+      ];
+    },
+    generateBundle() {
+      if (!valid) return;
+      const pub = client.replace(/^ca-/, "");
+      this.emitFile({ type: "asset", fileName: "ads.txt", source: `google.com, ${pub}, DIRECT, f08c47fec0942fa0\n` });
+    },
+  };
+}
+
+export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
+    adsense(loadEnv(mode, process.cwd(), "VITE_").VITE_ADSENSE_CLIENT),
     // PWA: telefona uygulama gibi kurulur, internetsizken de açılır.
     VitePWA({
       registerType: "autoUpdate", // yeni sürüm yayınlanınca kendiliğinden güncellenir
       injectRegister: false, // kayıt src/lib/pwa.js içinde: yeni sürüm gelince sayfa yenilenir
       includeAssets: ["favicon.svg", "icons/apple-touch-icon.png"],
       manifest: {
-        name: "SwipeVocab",
-        short_name: "SwipeVocab",
+        name: "Kelimanya",
+        short_name: "Kelimanya",
         description: "Kelimeleri kaydır, öğren: İngilizce, Almanca, İspanyolca ve Fransızca kelime pratiği.",
         lang: "tr",
         start_url: "/",
@@ -33,7 +59,7 @@ export default defineConfig({
         globPatterns: ["**/*.{js,css,html,svg,png}", "**/*-latin-*.woff2"],
         globIgnores: ["**/Talk-*.js", "audio/**"],
         navigateFallback: "/index.html",
-        navigateFallbackDenylist: [/^\/api\//, /^\/(gizlilik|hesap-silme)/],
+        navigateFallbackDenylist: [/^\/api\//, /^\/(gizlilik|hesap-silme)/, /^\/ads\.txt$/],
         runtimeCaching: [
           {
             urlPattern: ({ url }) => url.pathname.endsWith(".woff2"),
@@ -66,4 +92,4 @@ export default defineConfig({
       },
     },
   },
-});
+}));

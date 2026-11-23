@@ -1,9 +1,9 @@
 {
-  "name": "swipevocab",
+  "name": "kelimanya",
   "private": true,
   "version": "0.2.0",
   "type": "module",
-  "description": "SwipeVocab - Turkish English vocabulary learning app",
+  "description": "Kelimanya - Turkish vocabulary learning game",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",

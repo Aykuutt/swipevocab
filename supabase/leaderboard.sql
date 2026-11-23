@@ -1,4 +1,4 @@
--- SwipeVocab: herkesin göründüğü haftalık genel sıralama (friends.sql ve league-invite.sql'den SONRA çalıştır).
+-- Kelimanya: herkesin göründüğü haftalık genel sıralama (friends.sql ve league-invite.sql'den SONRA çalıştır).
 -- Supabase SQL Editor'da bir kez çalıştır. Tekrar çalıştırmak güvenlidir. Mevcut verilere dokunmaz.
 --
 -- Güvenlik:

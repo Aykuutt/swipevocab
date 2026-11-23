@@ -1,4 +1,4 @@
--- SwipeVocab: arkadaşlar ve köy ziyareti.
+-- Kelimanya: arkadaşlar ve köy ziyareti.
 -- Supabase SQL Editor'da bir kez çalıştır. Tekrar çalıştırmak güvenlidir.
 --
 -- Güvenlik modeli:

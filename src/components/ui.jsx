@@ -293,7 +293,7 @@ export function Avatar({ name, size = 48 }) {
 export function Brand({ large = false, as: Tag = "div", className }) {
   return (
     <Tag className={className ?? `brand ${large ? "brand-lg" : ""}`}>
-      Swipe<span>Vocab</span>
+      Keli<span>manya</span>
     </Tag>
   );
 }

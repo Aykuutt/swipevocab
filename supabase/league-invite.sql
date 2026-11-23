@@ -1,4 +1,4 @@
--- SwipeVocab: arkadaşlarla haftalık lig ve davet bağlantısı (supabase/friends.sql'den SONRA çalıştır).
+-- Kelimanya: arkadaşlarla haftalık lig ve davet bağlantısı (supabase/friends.sql'den SONRA çalıştır).
 -- Supabase SQL Editor'da bir kez çalıştır. Tekrar çalıştırmak güvenlidir. Mevcut verilere dokunmaz.
 --
 --  * Lig: herkesin bu takvim haftasında (Pazartesi başlangıçlı) kazandığı puan vitrinde tutulur; yalnızca

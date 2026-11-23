@@ -1,4 +1,4 @@
-# SwipeVocab
+# Kelimanya
 
 Türkçe konuşanlar için oyunlaştırılmış kelime ve konuşma pratiği uygulaması: İngilizce, Almanca, İspanyolca ve Fransızca (React + Vite + Supabase + LiveKit).
 

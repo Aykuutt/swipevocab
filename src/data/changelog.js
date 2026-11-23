@@ -2,6 +2,10 @@
 // Yeni sürüm yayınlarken buraya kısa, kullanıcının anlayacağı maddeler ekle. config.js'teki APP_VERSION ile aynı sürüm.
 export const CHANGELOG = [
   {
+    version: "0.25.0",
+    items: ["Yeni adımız Kelimanya! SwipeVocab artık Kelimanya. İlerlemen, köyün ve arkadaşların yerinde duruyor."],
+  },
+  {
     version: "0.24.0",
     items: ["Yeni: Sıralama! Profil'den aç, bu hafta uygulamadaki herkes arasında kaçıncı olduğunu gör. Arkadaşlar sekmesinde arkadaşlarınla sıran da orada.", "Sıralamada yalnızca adın ve haftalık puanın görünür, her Pazartesi sıfırlanır."],
   },

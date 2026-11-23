@@ -1,4 +1,4 @@
--- SwipeVocab: canlı sesli konuşma (eşleştirme, görüşmeler, engelleme, şikayet).
+-- Kelimanya: canlı sesli konuşma (eşleştirme, görüşmeler, engelleme, şikayet).
 -- Supabase SQL Editor'da bir kez çalıştır. Tekrar çalıştırmak güvenlidir.
 --
 -- Güvenlik modeli:
