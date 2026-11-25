@@ -279,10 +279,18 @@ function DeleteAccount({ guest }) {
   );
 }
 
-/** Gizlilik politikası ve hesap silme sayfalarının bağlantıları. */
+/** Hakkında, iletişim, gizlilik politikası ve hesap silme sayfalarının bağlantıları. */
 function PrivacyLinks() {
   return (
     <p className="legal-links">
+      <a href="/hakkinda.html" target="_blank" rel="noopener">
+        Hakkında
+      </a>
+      <span aria-hidden="true"> · </span>
+      <a href="/iletisim.html" target="_blank" rel="noopener">
+        İletişim
+      </a>
+      <span aria-hidden="true"> · </span>
       <a href="/gizlilik.html" target="_blank" rel="noopener">
         Gizlilik politikası
       </a>

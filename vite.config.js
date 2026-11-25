@@ -59,7 +59,7 @@ export default defineConfig(({ mode }) => ({
         globPatterns: ["**/*.{js,css,html,svg,png}", "**/*-latin-*.woff2"],
         globIgnores: ["**/Talk-*.js", "audio/**"],
         navigateFallback: "/index.html",
-        navigateFallbackDenylist: [/^\/api\//, /^\/(gizlilik|hesap-silme)/, /^\/ads\.txt$/],
+        navigateFallbackDenylist: [/^\/api\//, /^\/(gizlilik|hesap-silme|hakkinda|iletisim)/, /^\/(ads|robots)\.txt$/, /^\/sitemap\.xml$/],
         runtimeCaching: [
           {
             urlPattern: ({ url }) => url.pathname.endsWith(".woff2"),
